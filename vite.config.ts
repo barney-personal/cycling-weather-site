@@ -22,6 +22,7 @@ export default defineConfig({
         index: resolve(__dirname, "src/index.html"),
         history: resolve(__dirname, "src/history.html"),
         methodology: resolve(__dirname, "src/methodology.html"),
+        destination: resolve(__dirname, "src/destination.html"),
       },
     },
   },

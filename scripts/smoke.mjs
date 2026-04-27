@@ -74,6 +74,11 @@ const pages = [
     expect: ["Forecast pipeline", "Caveats"],
     expectScript: false,
   },
+  {
+    path: "/destination.html?slug=cyprus",
+    expect: ['id="dest-mount"', "data-slug="],
+    expectScript: true,
+  },
 ];
 
 let failures = 0;
