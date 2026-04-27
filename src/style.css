@@ -1,166 +1,218 @@
-:root {
-  --bg: #0e1116;
-  --bg-2: #161b22;
-  --bg-3: #1f242d;
-  --fg: #e6edf3;
-  --fg-2: #9ba6b3;
-  --fg-3: #6b7681;
-  --accent: #58a6ff;
-  --green: #3fb950;
-  --amber: #d29922;
-  --red: #f85149;
-  --neutral: #30363d;
-  --border: #30363d;
-  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-}
-* {
-  box-sizing: border-box;
-}
-html,
+/*
+ * Cycling Weather — component styles (post-M3 rewrite onto design tokens).
+ *
+ * All colour, type, and spacing values come from src/styles/{tokens,typography,base}.css.
+ * The legacy raw-colour tokens (--green / --amber / --red / --fg / --bg / --neutral / --mono)
+ * have been removed; consume the semantic tokens instead.
+ */
+
 body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--fg);
-  font-family: var(--sans);
-  -webkit-font-smoothing: antialiased;
+  font-family: var(--font-sans);
 }
-a {
-  color: var(--accent);
-  text-decoration: none;
-}
-a:hover {
-  text-decoration: underline;
-}
+
+/* ---------- header ----------------------------------------------------- */
 header.site {
   display: flex;
-  align-items: baseline;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: space-between;
-  padding: 20px 28px;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-6);
+  padding-top: calc(var(--space-4) + env(safe-area-inset-top, 0px));
   border-bottom: 1px solid var(--border);
-  background: var(--bg-2);
+  background: var(--surface-2);
 }
-header.site h1 {
+.site-brand {
   margin: 0;
-  font-size: 18px;
-  font-family: var(--mono);
-  letter-spacing: -0.3px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-3);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text);
 }
-header.site nav a {
-  margin-left: 18px;
-  font-size: 14px;
-  color: var(--fg-2);
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
 }
-header.site nav a.active,
-header.site nav a:hover {
-  color: var(--fg);
+.site-nav a {
+  font-size: var(--fs-2);
+  color: var(--text-3);
+  font-weight: 500;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-1);
+  transition: color var(--transition-fast), background var(--transition-fast);
 }
-.wrap {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px 28px 80px;
+.site-nav a:hover {
+  text-decoration: none;
+  color: var(--text);
+  background: var(--surface-3);
 }
-.hero {
-  background: var(--bg-2);
+.site-nav a.active {
+  color: var(--text);
+}
+
+/* ---------- theme toggle ---------------------------------------------- */
+.theme-toggle-mount {
+  display: inline-flex;
+  align-items: center;
+}
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: var(--radius-pill);
+  color: var(--text-2);
+  background: transparent;
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 22px 26px;
-  margin-bottom: 24px;
+  transition: color var(--transition-fast), background var(--transition-fast), border-color
+    var(--transition-fast);
+}
+.theme-toggle:hover {
+  color: var(--text);
+  background: var(--surface-3);
+  border-color: var(--border-strong);
+}
+
+/* ---------- layout ---------------------------------------------------- */
+.wrap {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-6) var(--space-10);
+  padding-bottom: calc(var(--space-10) + env(safe-area-inset-bottom, 0px));
+}
+
+/* ---------- hero ------------------------------------------------------ */
+.hero {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-3);
+  padding: var(--space-6) var(--space-6);
+  margin-bottom: var(--space-6);
+  box-shadow: var(--shadow-1);
 }
 .hero .verdict {
-  font-family: var(--mono);
-  font-size: 28px;
-  margin: 0 0 6px;
-  letter-spacing: -0.5px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-6);
+  margin: 0 0 var(--space-1);
+  letter-spacing: -0.01em;
+  color: var(--text);
 }
 .hero .outlook {
-  color: var(--fg-2);
-  font-size: 15px;
+  color: var(--text-2);
+  font-size: var(--fs-3);
   margin: 0;
+  line-height: var(--lh-snug);
 }
 .hero .meta {
-  color: var(--fg-3);
-  font-size: 12px;
-  font-family: var(--mono);
-  margin-top: 10px;
+  color: var(--text-3);
+  font-size: var(--fs-1);
+  font-family: var(--font-mono);
+  margin-top: var(--space-3);
 }
+
 .section-title {
-  font-family: var(--mono);
-  font-size: 12px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
   text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--fg-3);
-  margin: 28px 0 12px;
+  letter-spacing: 0.12em;
+  color: var(--text-3);
+  margin: var(--space-7) 0 var(--space-3);
 }
+
+/* ---------- filter chips ---------------------------------------------- */
 .filters {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 14px;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
 }
 .chip {
-  display: inline-block;
-  padding: 5px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  background: var(--bg-3);
-  color: var(--fg-2);
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-1);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  background: var(--surface-3);
+  color: var(--text-2);
   border: 1px solid var(--border);
   cursor: pointer;
   user-select: none;
+  transition: background var(--transition-fast), color var(--transition-fast), border-color
+    var(--transition-fast);
+}
+.chip:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
 }
 .chip.active {
   background: var(--accent);
-  color: #0c0c0c;
+  color: var(--text-on-accent);
   border-color: var(--accent);
 }
+
+/* ---------- ranking table -------------------------------------------- */
 .rank-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: var(--fs-2);
 }
 .rank-table th {
   text-align: left;
   font-weight: 500;
-  color: var(--fg-3);
-  font-family: var(--mono);
-  font-size: 11px;
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.12em;
   border-bottom: 1px solid var(--border);
-  padding: 10px 8px;
+  padding: var(--space-3) var(--space-2);
 }
 .rank-table td {
-  padding: 10px 8px;
+  padding: var(--space-3) var(--space-2);
   border-bottom: 1px solid var(--border);
   vertical-align: middle;
+  color: var(--text);
 }
-.rank-table tr:hover td {
-  background: var(--bg-2);
+.rank-table tbody tr {
+  transition: background var(--transition-fast);
+}
+.rank-table tbody tr:hover td {
+  background: var(--surface-2);
 }
 .rank {
-  font-family: var(--mono);
-  color: var(--fg-3);
-  width: 28px;
+  font-family: var(--font-mono);
+  color: var(--text-3);
+  width: 32px;
 }
 .dest {
   font-weight: 500;
+  color: var(--text);
 }
 .region {
   display: inline-block;
-  margin-left: 6px;
-  padding: 2px 7px;
-  border-radius: 4px;
-  font-size: 11px;
-  background: var(--bg-3);
-  color: var(--fg-2);
-  font-family: var(--mono);
+  margin-left: var(--space-2);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-1);
+  font-size: var(--fs-1);
+  background: var(--surface-3);
+  color: var(--text-2);
+  font-family: var(--font-mono);
 }
+
+/* ---------- temp bar -------------------------------------------------- */
 .temp-bar {
+  display: inline-block;
   width: 120px;
   height: 6px;
-  background: var(--bg-3);
-  border-radius: 3px;
+  background: var(--surface-3);
+  border-radius: var(--radius-1);
   position: relative;
 }
 .temp-bar > span {
@@ -169,21 +221,23 @@ header.site nav a:hover {
   top: 0;
   bottom: 0;
   background: var(--accent);
-  border-radius: 3px;
+  border-radius: var(--radius-1);
 }
 .temp-bar > .threshold {
   position: absolute;
   top: -3px;
   bottom: -3px;
   width: 1px;
-  background: var(--amber);
+  background: var(--edge);
 }
 .temp-label {
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--fg-2);
-  margin-left: 8px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+  color: var(--text-2);
+  margin-left: var(--space-2);
 }
+
+/* ---------- forecast strip ------------------------------------------- */
 .strip {
   display: inline-flex;
   gap: 2px;
@@ -191,122 +245,201 @@ header.site nav a:hover {
 .strip .cell {
   width: 14px;
   height: 18px;
-  border-radius: 3px;
-  background: var(--neutral);
+  border-radius: var(--radius-1);
+  background: var(--surface-3);
+  border: 1px solid var(--border);
   position: relative;
+  transition: outline var(--transition-fast);
 }
 .strip .cell.q {
-  background: var(--green);
+  background: var(--good);
+  border-color: var(--good);
 }
 .strip .cell.m {
-  background: var(--amber);
+  background: var(--edge);
+  border-color: var(--edge);
 }
 .strip .cell.x {
-  background: var(--red);
+  background: var(--no-go);
+  border-color: var(--no-go);
 }
 .strip .cell:hover {
-  outline: 1px solid var(--fg);
+  outline: 1px solid var(--text);
 }
+
+/* ---------- badges --------------------------------------------------- */
 .qualifier-badge {
-  background: var(--green);
-  color: #06210a;
-  padding: 3px 8px;
-  border-radius: 4px;
-  font-family: var(--mono);
-  font-size: 11px;
+  background: var(--good);
+  color: var(--good-fg);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-1);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
   font-weight: 600;
+  letter-spacing: 0.04em;
 }
 .blocker {
-  color: var(--fg-2);
-  font-size: 13px;
+  color: var(--text-2);
+  font-size: var(--fs-2);
 }
+
+/* ---------- tooltip --------------------------------------------------- */
 .tooltip {
   position: absolute;
   pointer-events: none;
-  background: #0a0d12;
-  border: 1px solid var(--border);
-  padding: 8px 10px;
-  border-radius: 6px;
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--fg);
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-strong);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+  color: var(--text);
   z-index: 100;
   opacity: 0;
-  transition: opacity 0.1s;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  transition: opacity var(--transition-fast);
+  box-shadow: var(--shadow-2);
+  max-width: min(80vw, 320px);
 }
+
+/* ---------- legend --------------------------------------------------- */
 .legend {
   display: flex;
-  gap: 14px;
+  flex-wrap: wrap;
+  gap: var(--space-4);
   align-items: center;
-  font-size: 12px;
-  color: var(--fg-3);
-  margin-top: 12px;
-  font-family: var(--mono);
+  font-size: var(--fs-1);
+  color: var(--text-3);
+  margin-top: var(--space-3);
+  font-family: var(--font-mono);
 }
 .legend .cell {
   width: 12px;
   height: 12px;
-  border-radius: 3px;
+  border-radius: var(--radius-1);
   display: inline-block;
-  margin-right: 5px;
+  margin-right: var(--space-1);
   vertical-align: -1px;
 }
+.legend-rule {
+  margin-left: auto;
+  color: var(--text-3);
+}
+
+/* ---------- card grid ------------------------------------------------- */
 .cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-4);
 }
 .card {
-  background: var(--bg-2);
+  background: var(--surface-2);
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 16px 18px;
+  border-radius: var(--radius-2);
+  padding: var(--space-4) var(--space-5);
+  box-shadow: var(--shadow-1);
 }
 .card h3 {
-  margin: 0 0 8px;
-  font-size: 14px;
-  font-family: var(--mono);
+  margin: 0 0 var(--space-2);
+  font-size: var(--fs-2);
+  font-family: var(--font-mono);
+  color: var(--text-2);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 .card .stat {
-  font-family: var(--mono);
-  font-size: 28px;
-  color: var(--fg);
-  margin: 4px 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-6);
+  color: var(--text);
+  margin: var(--space-1) 0;
+  font-weight: 500;
 }
 .card .sub {
-  color: var(--fg-3);
-  font-size: 12px;
+  color: var(--text-3);
+  font-size: var(--fs-1);
 }
+
+/* ---------- charts --------------------------------------------------- */
 .heatmap-svg,
 .scatter-svg,
 .ts-svg {
-  background: var(--bg-2);
+  background: var(--surface-2);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-2);
 }
 .axis text {
-  fill: var(--fg-3);
-  font-family: var(--mono);
+  fill: var(--text-3);
+  font-family: var(--font-mono);
   font-size: 10px;
 }
 .axis path,
 .axis line {
-  stroke: var(--neutral);
+  stroke: var(--border);
 }
+
+/* ---------- prose ---------------------------------------------------- */
+.prose {
+  line-height: var(--lh-loose);
+  color: var(--text-2);
+}
+.prose code {
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  padding: 1px 6px;
+  border-radius: var(--radius-1);
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  color: var(--text);
+}
+
+/* ---------- footer --------------------------------------------------- */
 footer {
-  color: var(--fg-3);
-  font-size: 12px;
-  padding: 30px 28px;
+  color: var(--text-3);
+  font-size: var(--fs-1);
+  padding: var(--space-7) var(--space-6);
+  padding-bottom: calc(var(--space-7) + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--border);
   text-align: center;
+  font-family: var(--font-mono);
 }
+
+/* ---------- alerts --------------------------------------------------- */
 .alert {
-  padding: 10px 14px;
-  border-radius: 6px;
-  background: var(--bg-3);
-  border: 1px solid var(--amber);
-  color: var(--fg-2);
-  font-size: 13px;
-  margin-bottom: 16px;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-2);
+  background: var(--edge-soft);
+  border: 1px solid var(--edge);
+  color: var(--edge-soft-fg);
+  font-size: var(--fs-2);
+  margin-bottom: var(--space-4);
+}
+
+/* ---------- responsive ----------------------------------------------- */
+@media (max-width: 640px) {
+  header.site {
+    padding: var(--space-3) var(--space-4);
+  }
+  .site-nav {
+    gap: var(--space-3);
+  }
+  .wrap {
+    padding: var(--space-4) var(--space-4) var(--space-9);
+  }
+  .hero {
+    padding: var(--space-5) var(--space-4);
+  }
+  .hero .verdict {
+    font-size: var(--fs-5);
+  }
+  .legend-rule {
+    margin-left: 0;
+    flex-basis: 100%;
+  }
+  .rank-table {
+    font-size: var(--fs-1);
+  }
+  .rank-table th,
+  .rank-table td {
+    padding: var(--space-2) var(--space-1);
+  }
 }

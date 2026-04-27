@@ -1,3 +1,8 @@
+import "./styles/tokens.css";
+import "./styles/typography.css";
+import "./styles/base.css";
+import "./style.css";
+
 import { extent, mean } from "d3-array";
 import { axisBottom, axisLeft } from "d3-axis";
 import { format } from "d3-format";
@@ -5,8 +10,11 @@ import { scaleBand, scaleLinear, scaleSequential } from "d3-scale";
 import { interpolateInferno, interpolateRdYlBu } from "d3-scale-chromatic";
 import { select } from "d3-selection";
 
+import { mountThemeToggle } from "./components/theme-toggle";
 import { loadSiteData } from "./lib/data";
 import type { ActualsTimelineRow, CalibrationRow } from "./lib/types";
+
+mountThemeToggle("#theme-toggle");
 
 const tt = select<HTMLDivElement, unknown>("#tt");
 
@@ -105,7 +113,7 @@ void loadSiteData().then((data) => {
       .attr("x2", x(hi))
       .attr("y1", y(lo))
       .attr("y2", y(hi))
-      .attr("stroke", "var(--neutral)")
+      .attr("stroke", "var(--border)")
       .attr("stroke-dasharray", "3 4");
     const colorByLead = scaleSequential(interpolateInferno).domain([0, 14]);
     svg
@@ -131,7 +139,7 @@ void loadSiteData().then((data) => {
       .attr("x", W / 2)
       .attr("y", H - 6)
       .attr("text-anchor", "middle")
-      .attr("fill", "var(--fg-3)")
+      .attr("fill", "var(--text-3)")
       .attr("font-size", 11)
       .text("Predicted high (°C)");
     svg
@@ -140,7 +148,7 @@ void loadSiteData().then((data) => {
       .attr("x", -H / 2)
       .attr("y", 14)
       .attr("text-anchor", "middle")
-      .attr("fill", "var(--fg-3)")
+      .attr("fill", "var(--text-3)")
       .attr("font-size", 11)
       .text("Actual high (°C)");
   }
@@ -216,9 +224,9 @@ void loadSiteData().then((data) => {
     .attr("x", (d) => (x2(d.label) ?? 0) + x2.bandwidth() / 2)
     .attr("y", (d) => (d.rate == null ? H2 - M2.b - 6 : y2(d.rate) - 6))
     .attr("text-anchor", "middle")
-    .attr("fill", "var(--fg-2)")
+    .attr("fill", "var(--text-2)")
     .attr("font-size", 11)
-    .attr("font-family", "var(--mono)")
+    .attr("font-family", "var(--font-mono)")
     .text((d) => (d.rate == null ? "no data yet" : `${(100 * d.rate).toFixed(0)}%`));
 
   // ---- Actuals heatmap
@@ -251,9 +259,9 @@ void loadSiteData().then((data) => {
       .attr("x", padL - 8)
       .attr("y", (_d, i) => padT + i * lh + lh * 0.7)
       .attr("text-anchor", "end")
-      .attr("fill", "var(--fg-2)")
+      .attr("fill", "var(--text-2)")
       .attr("font-size", 11)
-      .attr("font-family", "var(--mono)")
+      .attr("font-family", "var(--font-mono)")
       .text((d) => d);
     svg3
       .selectAll("text.col")
@@ -264,9 +272,9 @@ void loadSiteData().then((data) => {
       .attr("x", (_d, i) => padL + i * cell + cell / 2)
       .attr("y", padT - 10)
       .attr("text-anchor", "middle")
-      .attr("fill", "var(--fg-3)")
+      .attr("fill", "var(--text-3)")
       .attr("font-size", 9)
-      .attr("font-family", "var(--mono)")
+      .attr("font-family", "var(--font-mono)")
       .text((d, i) => (i % 3 === 0 ? d.slice(5) : ""));
     const byKey = new Map<string, ActualsTimelineRow>();
     actuals.forEach((a) => byKey.set(`${a.name}|${a.date}`, a));
@@ -295,7 +303,7 @@ void loadSiteData().then((data) => {
             .attr("cx", padL + ci * cell + cell / 2)
             .attr("cy", padT + ri * lh + lh / 2)
             .attr("r", 2)
-            .attr("fill", "var(--green)")
+            .attr("fill", "var(--good)")
             .attr("stroke", "#000")
             .attr("stroke-width", 0.4)
             .attr("pointer-events", "none");

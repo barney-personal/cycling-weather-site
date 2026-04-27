@@ -2,22 +2,44 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Cycling Weather — Where to Ride</title>
-  <script type="module" crossorigin src="./assets/index-CFfCy-2_.js"></script>
-  <link rel="modulepreload" crossorigin href="./assets/data-BmmgSAZg.js">
-  <link rel="stylesheet" crossorigin href="./assets/style-B3R9-DOT.css">
+  <meta name="description" content="Daily ranking of where on Earth the weather is best for road cycling in the next 14 days.">
+  <meta name="theme-color" content="#fafaf7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+  <script>
+    // FOUC prevention: resolve theme synchronously before first paint.
+    // Mirror of theme-toggle.ts logic; do not edit one without the other.
+    (function () {
+      try {
+        var stored = null;
+        try { stored = localStorage.getItem("cw-theme"); } catch (_) {}
+        var theme = (stored === "light" || stored === "dark")
+          ? stored
+          : (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.setAttribute("data-theme", theme);
+      } catch (e) {
+        document.documentElement.setAttribute("data-theme", "light");
+      }
+    })();
+  </script>
+  <script type="module" crossorigin src="./assets/index-CZwlE0bo.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/theme-toggle-FS58cnle.js">
+  <link rel="modulepreload" crossorigin href="./assets/data-BvM7selt.js">
+  <link rel="stylesheet" crossorigin href="./assets/theme-toggle-bHSzbwKi.css">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <header class="site">
-  <h1>🚴 Cycling Weather</h1>
-  <nav>
-    <a href="./index.html" class="active">Forward</a>
+  <h1 class="site-brand">🚴 Cycling Weather</h1>
+  <nav class="site-nav" aria-label="Primary">
+    <a href="./index.html" class="active" aria-current="page">Forward</a>
     <a href="./history.html">History</a>
     <a href="./methodology.html">Method</a>
   </nav>
+  <span id="theme-toggle" class="theme-toggle-mount"></span>
 </header>
-<div class="wrap">
+<main id="main" class="wrap">
   <section class="hero" id="hero">
     <p class="verdict" id="verdict">Loading…</p>
     <p class="outlook" id="outlook"></p>
@@ -43,13 +65,13 @@
   </table>
 
   <div class="legend">
-    <span><span class="cell" style="background:var(--green)"></span>Clean ride day</span>
-    <span><span class="cell" style="background:var(--amber)"></span>Marginal</span>
-    <span><span class="cell" style="background:var(--red)"></span>Blocked</span>
-    <span style="margin-left:auto">Threshold: &gt;25°C · 0mm rain · &lt;10% rain prob · sun-cloud · &lt;30 km/h wind</span>
+    <span><span class="cell" style="background:var(--good)"></span>Clean ride day</span>
+    <span><span class="cell" style="background:var(--edge)"></span>Marginal</span>
+    <span><span class="cell" style="background:var(--no-go)"></span>Blocked</span>
+    <span class="legend-rule">Threshold: &gt;25°C · 0mm rain · &lt;10% rain prob · sun-cloud · &lt;30 km/h wind</span>
   </div>
-</div>
-<div id="tt" class="tooltip"></div>
+</main>
+<div id="tt" class="tooltip" role="status" aria-live="polite"></div>
 <footer>Daily snapshot from Open-Meteo · 22 destinations · <a href="./methodology.html">methodology</a></footer>
 
 </body>

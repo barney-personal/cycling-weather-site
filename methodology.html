@@ -2,27 +2,48 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Cycling Weather — Methodology</title>
-  <link rel="stylesheet" crossorigin href="./assets/style-B3R9-DOT.css">
+  <meta name="description" content="How the daily ranking is built and how predictions are graded against reality.">
+  <meta name="theme-color" content="#fafaf7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0e1116" media="(prefers-color-scheme: dark)">
+  <script>
+    (function () {
+      try {
+        var stored = null;
+        try { stored = localStorage.getItem("cw-theme"); } catch (_) {}
+        var theme = (stored === "light" || stored === "dark")
+          ? stored
+          : (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.setAttribute("data-theme", theme);
+      } catch (e) {
+        document.documentElement.setAttribute("data-theme", "light");
+      }
+    })();
+  </script>
+  <script type="module" crossorigin src="./assets/methodology-yYsXq4-8.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/theme-toggle-FS58cnle.js">
+  <link rel="stylesheet" crossorigin href="./assets/theme-toggle-bHSzbwKi.css">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <header class="site">
-  <h1>🚴 Cycling Weather</h1>
-  <nav>
+  <h1 class="site-brand">🚴 Cycling Weather</h1>
+  <nav class="site-nav" aria-label="Primary">
     <a href="./index.html">Forward</a>
     <a href="./history.html">History</a>
-    <a href="./methodology.html" class="active">Method</a>
+    <a href="./methodology.html" class="active" aria-current="page">Method</a>
   </nav>
+  <span id="theme-toggle" class="theme-toggle-mount"></span>
 </header>
-<div class="wrap">
+<main id="main" class="wrap">
   <section class="hero">
     <p class="verdict">Methodology</p>
     <p class="outlook">How the daily ranking is built and how predictions are graded against reality.</p>
   </section>
 
   <h2 class="section-title">Forecast pipeline</h2>
-  <ul style="line-height:1.7;color:var(--fg-2)">
+  <ul class="prose">
     <li>Every day at <code>04:15 UTC</code> a Python job pulls a 14-day forecast for 22 destinations from <a href="https://open-meteo.com/">Open-Meteo</a> (with <code>wttr.in</code> as fallback).</li>
     <li>Each daily forecast row is graded as <b>ride-clean</b> if all of: max temp &gt; 25°C, precipitation 0 mm, max precip probability &lt; 10%, weather code in <code>{0,1,2,3}</code> (clear → partly cloudy), max wind &lt; 30 km/h.</li>
     <li>Each destination's score = <code>best_run × 100 + dry_days × 5 + median_high</code>. A destination is a <b>qualifier</b> if its longest clean run ≥ 7 consecutive days (UK destinations also need median high &gt; 20°C).</li>
@@ -30,14 +51,14 @@
   </ul>
 
   <h2 class="section-title">Actuals pipeline</h2>
-  <ul style="line-height:1.7;color:var(--fg-2)">
+  <ul class="prose">
     <li>A second daily job pulls the <a href="https://open-meteo.com/en/docs/historical-weather-api">Open-Meteo Historical Archive</a> for any forecast date now ≥ 2 days in the past (the archive trails real-time by ~1–2 days).</li>
     <li>Persisted to <code>data/cycling/actuals/YYYY-MM-DD.json</code>. Idempotent — re-runs only fill gaps.</li>
     <li>Actuals use a simplified ride-clean rule (no precip-probability series): max temp &gt; 25°C, precipitation 0 mm, weather code in <code>{0,1,2,3}</code>, max wind &lt; 30 km/h.</li>
   </ul>
 
   <h2 class="section-title">Predictions vs reality</h2>
-  <ul style="line-height:1.7;color:var(--fg-2)">
+  <ul class="prose">
     <li>For every (snapshot, target-date) pair where actuals exist, we record predicted and actual temp/precip/qualify and the lead time in days.</li>
     <li>Hit rate = of all days predicted ride-clean, what fraction were actually ride-clean. Bucketed by 1–3 / 4–7 / 8–14 day lead.</li>
     <li>Mean temp error = mean absolute difference between predicted and actual daily high.</li>
@@ -45,13 +66,14 @@
   </ul>
 
   <h2 class="section-title">Caveats</h2>
-  <ul style="line-height:1.7;color:var(--fg-2)">
+  <ul class="prose">
     <li>Single grid-point per destination — local microclimates not captured.</li>
     <li>Open-Meteo daily aggregates use the location's local timezone; we don't normalise across hemispheres.</li>
     <li>Wind threshold is a simple max-gust style rule; it doesn't differentiate headwind vs tailwind.</li>
     <li>The qualifier rule is a hard binary; close-misses (e.g. 6-day clean runs) aren't surfaced.</li>
   </ul>
-</div>
+</main>
 <footer>Sources: Open-Meteo · Open-Meteo Historical Archive · wttr.in</footer>
+
 </body>
 </html>

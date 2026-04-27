@@ -1,9 +1,17 @@
+import "./styles/tokens.css";
+import "./styles/typography.css";
+import "./styles/base.css";
+import "./style.css";
+
 import { max, min } from "d3-array";
 import { scaleLinear } from "d3-scale";
 import { select } from "d3-selection";
 
+import { mountThemeToggle } from "./components/theme-toggle";
 import { loadSiteData } from "./lib/data";
 import type { DailyForecast, DestinationResult } from "./lib/types";
+
+mountThemeToggle("#theme-toggle");
 
 const tt = select<HTMLDivElement, unknown>("#tt");
 
