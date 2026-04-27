@@ -4,139 +4,32 @@
 // no URL params are present). Emits a CustomEvent("cwthresholds:change") with
 // the resolved Thresholds + SunPref so consumers (the ranking component) can
 // recompute on the client without touching the dial implementation.
+//
+// URL parsing / storage / state-equality helpers live in `../lib/thresholds.ts`
+// so the same `?temp=&rain=&prob=&wind=&sun=` convention is shared across the
+// homepage, compare, and plan pages without copying the parser.
 
+import type { SunPref, Thresholds } from "../lib/qualify";
 import {
-  DEFAULT_THRESHOLDS,
-  type SunPref,
-  type Thresholds,
-  thresholdsFromSunPref,
-} from "../lib/qualify";
+  DEFAULT_DIAL_STATE,
+  type DialState,
+  dialStateEquals,
+  dialStateToThresholds,
+  isSunPref,
+  resolveInitialDialState,
+  writeDialStorage,
+  writeDialUrl,
+} from "../lib/thresholds";
 
-const STORAGE_KEY = "cw-thresholds";
-const URL_KEYS = ["temp", "rain", "prob", "wind", "sun"] as const;
+export type { DialState };
+export { DEFAULT_DIAL_STATE, dialStateToThresholds };
 
-export interface DialState {
-  tempMin: number;
-  rainMax: number;
-  probMax: number;
-  windMax: number;
-  sunPref: SunPref;
-}
-
-export const DEFAULT_DIAL_STATE: Readonly<DialState> = Object.freeze({
-  tempMin: DEFAULT_THRESHOLDS.tempMin,
-  rainMax: DEFAULT_THRESHOLDS.rainMax,
-  probMax: DEFAULT_THRESHOLDS.probMax,
-  windMax: DEFAULT_THRESHOLDS.windMax,
-  sunPref: "sun-cloud",
-});
-
-const SUN_PREFS: SunPref[] = ["sun", "sun-cloud", "all-but-rain"];
 const SUN_LABELS: Record<SunPref, string> = {
   sun: "Sun only",
   "sun-cloud": "Sun + cloud",
   "all-but-rain": "Anything but rain",
   any: "Any",
 };
-
-function clampNumber(v: unknown, lo: number, hi: number, fallback: number): number {
-  const n = typeof v === "number" ? v : Number(v);
-  if (!Number.isFinite(n)) return fallback;
-  return Math.min(hi, Math.max(lo, n));
-}
-
-function isSunPref(v: unknown): v is SunPref {
-  return v === "sun" || v === "sun-cloud" || v === "all-but-rain" || v === "any";
-}
-
-function safeReadStorage(): Partial<DialState> {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return {};
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== "object") return {};
-    return parsed as Partial<DialState>;
-  } catch {
-    return {};
-  }
-}
-
-function safeWriteStorage(state: DialState): void {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch {
-    // ignore (private mode, quota, etc.)
-  }
-}
-
-function readUrl(): Partial<DialState> {
-  const out: Partial<DialState> = {};
-  if (typeof location === "undefined") return out;
-  const params = new URLSearchParams(location.search);
-  if (params.has("temp")) out.tempMin = Number(params.get("temp"));
-  if (params.has("rain")) out.rainMax = Number(params.get("rain"));
-  if (params.has("prob")) out.probMax = Number(params.get("prob"));
-  if (params.has("wind")) out.windMax = Number(params.get("wind"));
-  const sun = params.get("sun");
-  if (sun && isSunPref(sun)) out.sunPref = sun;
-  return out;
-}
-
-function writeUrl(state: DialState): void {
-  if (typeof location === "undefined") return;
-  const params = new URLSearchParams(location.search);
-  const isDefault = stateEquals(state, DEFAULT_DIAL_STATE);
-  if (isDefault) {
-    for (const k of URL_KEYS) params.delete(k);
-  } else {
-    params.set("temp", String(state.tempMin));
-    params.set("rain", String(state.rainMax));
-    params.set("prob", String(state.probMax));
-    params.set("wind", String(state.windMax));
-    params.set("sun", state.sunPref);
-  }
-  const qs = params.toString();
-  const next = `${location.pathname}${qs ? `?${qs}` : ""}${location.hash}`;
-  history.replaceState(null, "", next);
-}
-
-function stateEquals(a: DialState, b: DialState): boolean {
-  return (
-    a.tempMin === b.tempMin &&
-    a.rainMax === b.rainMax &&
-    a.probMax === b.probMax &&
-    a.windMax === b.windMax &&
-    a.sunPref === b.sunPref
-  );
-}
-
-function resolveInitialState(): DialState {
-  const stored = safeReadStorage();
-  const url = readUrl();
-  // URL wins over localStorage.
-  return {
-    tempMin: clampNumber(url.tempMin ?? stored.tempMin, 0, 35, DEFAULT_DIAL_STATE.tempMin),
-    rainMax: clampNumber(url.rainMax ?? stored.rainMax, 0, 10, DEFAULT_DIAL_STATE.rainMax),
-    probMax: clampNumber(url.probMax ?? stored.probMax, 0, 100, DEFAULT_DIAL_STATE.probMax),
-    windMax: clampNumber(url.windMax ?? stored.windMax, 10, 60, DEFAULT_DIAL_STATE.windMax),
-    sunPref: isSunPref(url.sunPref ?? stored.sunPref)
-      ? (url.sunPref ?? stored.sunPref)!
-      : DEFAULT_DIAL_STATE.sunPref,
-  };
-}
-
-export function dialStateToThresholds(state: DialState): Thresholds {
-  return thresholdsFromSunPref(
-    {
-      tempMin: state.tempMin,
-      rainMax: state.rainMax,
-      probMax: state.probMax,
-      windMax: state.windMax,
-      codeIn: DEFAULT_THRESHOLDS.codeIn,
-    },
-    state.sunPref,
-  );
-}
 
 export interface DialChangeDetail {
   state: DialState;
@@ -233,7 +126,7 @@ export function mountThresholdDial(opts: MountThresholdDialOptions): ThresholdDi
 
   const emitter: EventTarget = opts.emitter ?? window;
 
-  let state: DialState = { ...resolveInitialState(), ...(opts.initial ?? {}) };
+  let state: DialState = resolveInitialDialState(opts.initial);
 
   const root = el<HTMLElement>(DIAL_HTML);
   surface.appendChild(root);
@@ -263,7 +156,7 @@ export function mountThresholdDial(opts: MountThresholdDialOptions): ThresholdDi
   }
 
   function updateTriggerLabel(): void {
-    const isDefault = stateEquals(state, DEFAULT_DIAL_STATE);
+    const isDefault = dialStateEquals(state, DEFAULT_DIAL_STATE);
     trigger.dataset.dirty = isDefault ? "0" : "1";
     const summary = isDefault
       ? "Defaults"
@@ -278,7 +171,7 @@ export function mountThresholdDial(opts: MountThresholdDialOptions): ThresholdDi
     const detail: DialChangeDetail = {
       state: { ...state },
       thresholds,
-      isDefault: stateEquals(state, DEFAULT_DIAL_STATE),
+      isDefault: dialStateEquals(state, DEFAULT_DIAL_STATE),
     };
     emitter.dispatchEvent(new CustomEvent<DialChangeDetail>("cwthresholds:change", { detail }));
   }
@@ -288,8 +181,8 @@ export function mountThresholdDial(opts: MountThresholdDialOptions): ThresholdDi
       ...state,
       ...next,
     };
-    safeWriteStorage(state);
-    writeUrl(state);
+    writeDialStorage(state);
+    writeDialUrl(state);
     reflectInputs();
     emit();
   }

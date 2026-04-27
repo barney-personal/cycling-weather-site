@@ -10,7 +10,7 @@
 
 import { mountThemeToggle } from "./theme-toggle";
 
-export type ActiveSection = "forward" | "history" | "methodology";
+export type ActiveSection = "forward" | "compare" | "plan" | "history" | "methodology";
 
 interface NavLink {
   section: ActiveSection;
@@ -20,6 +20,8 @@ interface NavLink {
 
 const LINKS: ReadonlyArray<NavLink> = [
   { section: "forward", href: "./index.html", label: "Forward" },
+  { section: "compare", href: "./compare.html", label: "Compare" },
+  { section: "plan", href: "./plan.html", label: "Plan" },
   { section: "history", href: "./history.html", label: "History" },
   { section: "methodology", href: "./methodology.html", label: "Method" },
 ];
