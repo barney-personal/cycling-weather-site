@@ -79,6 +79,11 @@ const pages = [
     expect: ['id="dest-mount"', "data-slug="],
     expectScript: true,
   },
+  {
+    path: "/plan.html",
+    expect: ['id="plan-form"', 'id="plan-results"', 'data-active="plan"'],
+    expectScript: true,
+  },
 ];
 
 let failures = 0;

@@ -18,9 +18,12 @@ interface NavLink {
   label: string;
 }
 
+// Compare ("compare") is reserved in `ActiveSection` for forward compatibility
+// (the M15 stretch milestone). It deliberately stays out of `LINKS` until that
+// page actually ships — we'd rather leave the door than bake dead nav links
+// into the deployed bundle.
 const LINKS: ReadonlyArray<NavLink> = [
   { section: "forward", href: "./index.html", label: "Forward" },
-  { section: "compare", href: "./compare.html", label: "Compare" },
   { section: "plan", href: "./plan.html", label: "Plan" },
   { section: "history", href: "./history.html", label: "History" },
   { section: "methodology", href: "./methodology.html", label: "Method" },
