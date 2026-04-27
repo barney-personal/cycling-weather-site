@@ -30,32 +30,45 @@
 <main id="main" class="wrap">
   <div id="hero-mount"></div>
 
-  <h2 class="section-title">Stack-ranked destinations · 14-day outlook</h2>
-  <div class="filters" id="filters"></div>
+  <section class="ranking-section" aria-labelledby="ranking-title">
+    <div class="ranking-toolbar">
+      <h2 id="ranking-title" class="section-title">Stack-ranked destinations · 14-day outlook</h2>
+      <button type="button" id="threshold-trigger" class="threshold-trigger" aria-haspopup="dialog">
+        <span class="threshold-trigger-icon" aria-hidden="true">⚙</span>
+        <span class="threshold-trigger-label">Thresholds</span>
+        <span class="threshold-trigger-summary">Defaults</span>
+      </button>
+    </div>
+    <div class="filters" id="filters" role="tablist" aria-label="Filter destinations"></div>
 
-  <table class="rank-table">
-    <thead>
-      <tr>
-        <th class="rank">#</th>
-        <th>Destination</th>
-        <th>Median high</th>
-        <th>14-day forecast</th>
-        <th>Best run</th>
-        <th>Dry days</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-    <tbody id="rank-body"></tbody>
-  </table>
+    <p id="rank-summary" class="visually-hidden" aria-live="polite"></p>
 
-  <div class="legend">
-    <span><span class="cell" style="background:var(--good)"></span>Clean ride day</span>
-    <span><span class="cell" style="background:var(--edge)"></span>Marginal</span>
-    <span><span class="cell" style="background:var(--no-go)"></span>Blocked</span>
-    <span class="legend-rule">Threshold: &gt;25°C · 0mm rain · &lt;10% rain prob · sun-cloud · &lt;30 km/h wind</span>
-  </div>
+    <ul id="rank-cards" class="rank-cards" aria-label="Destinations ranked"></ul>
+
+    <table class="rank-table" aria-describedby="rank-summary">
+      <thead>
+        <tr>
+          <th class="rank">#</th>
+          <th>Destination</th>
+          <th>Median high</th>
+          <th>14-day forecast</th>
+          <th>Best run</th>
+          <th>Dry days</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="rank-body"></tbody>
+    </table>
+
+    <div class="legend">
+      <span><span class="legend-swatch is-qualify"></span>Clean ride day</span>
+      <span><span class="legend-swatch rain-light"></span>Drizzle risk</span>
+      <span><span class="legend-swatch rain-wet"></span>Wet</span>
+      <span><span class="legend-swatch wind-blustery"></span>Blustery wind</span>
+      <span class="legend-rule">Defaults: &gt;25°C · 0mm rain · &lt;10% rain prob · sun-cloud · &lt;30 km/h wind</span>
+    </div>
+  </section>
 </main>
-<div id="tt" class="tooltip" role="status" aria-live="polite"></div>
 <footer>Daily snapshot from Open-Meteo · 22 destinations · <a href="./methodology.html">methodology</a></footer>
 
 <script type="module" src="./main.ts"></script>

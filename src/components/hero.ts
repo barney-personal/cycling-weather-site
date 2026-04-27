@@ -94,7 +94,7 @@ function renderChangelogChip(entry: ChangelogEntry): string {
 
 function renderEmpty(target: HTMLElement, message: string): void {
   target.innerHTML = `
-    <section class="hero hero-empty" id="hero" aria-live="polite">
+    <section class="hero hero-empty" aria-live="polite">
       <p class="hero-eyebrow">Cycling Weather</p>
       <p class="hero-empty-msg">${escapeHtml(message)}</p>
     </section>
@@ -153,7 +153,7 @@ export function mountHero(options: MountHeroOptions): void {
   } · ${latest.results.length} destinations · ${latest.forecast_days}-day window`;
 
   target.innerHTML = `
-    <section class="hero hero-${verdict}" id="hero" aria-live="polite">
+    <section class="hero hero-${verdict}" aria-live="polite">
       <div class="hero-header">
         <span class="hero-verdict-pill verdict-${verdict}" aria-label="${escapeHtml(VERDICT_DESCRIPTION[verdict])}">${VERDICT_LABEL[verdict]}</span>
         <p class="hero-eyebrow"><span class="visually-hidden">Today's </span>top pick</p>
@@ -162,11 +162,11 @@ export function mountHero(options: MountHeroOptions): void {
         <a class="hero-destination-link" href="./index.html#${escapeHtml(hero.top_slug)}">${escapeHtml(hero.top_name)}</a>
         ${region}
       </h1>
-      <p class="hero-editorial" id="verdict">${escapeHtml(editorial)}</p>
+      <p class="hero-editorial">${escapeHtml(editorial)}</p>
       <p class="hero-window">${escapeHtml(leadWindowLine(hero))}</p>
       <div class="hero-stats">${tempLine}${runLine}${goCountLine}</div>
       ${chipsBlock}
-      <p class="hero-meta" id="meta">${metaLine}</p>
+      <p class="hero-meta">${metaLine}</p>
     </section>
   `;
 }
