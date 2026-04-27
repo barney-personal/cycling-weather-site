@@ -1,4 +1,4 @@
-// Methodology page entry — bundles the design system + theme toggle.
+// Methodology page entry — bundles the design system + site header.
 // No data fetch; the page is fully static prose.
 
 import "./styles/tokens.css";
@@ -6,6 +6,6 @@ import "./styles/typography.css";
 import "./styles/base.css";
 import "./style.css";
 
-import { mountThemeToggle } from "./components/theme-toggle";
+import { mountHeader } from "./components/header";
 
-mountThemeToggle("#theme-toggle");
+mountHeader({ mount: "#site-header", active: "methodology" });

@@ -7,11 +7,12 @@ import { max, min } from "d3-array";
 import { scaleLinear } from "d3-scale";
 import { select } from "d3-selection";
 
-import { mountThemeToggle } from "./components/theme-toggle";
+import { mountHeader } from "./components/header";
+import { mountHero } from "./components/hero";
 import { loadSiteData } from "./lib/data";
 import type { DailyForecast, DestinationResult } from "./lib/types";
 
-mountThemeToggle("#theme-toggle");
+mountHeader({ mount: "#site-header", active: "forward" });
 
 const tt = select<HTMLDivElement, unknown>("#tt");
 
@@ -27,23 +28,10 @@ function hideTip(): void {
 }
 
 void loadSiteData().then((data) => {
+  mountHero({ mount: "#hero-mount", data });
+
   const latest = data.latest;
-  const verdictEl = document.getElementById("verdict");
-  if (!latest) {
-    if (verdictEl) verdictEl.textContent = "No snapshot yet";
-    return;
-  }
-  const verdict =
-    latest.verdict === "qualifier"
-      ? "🚴☀️ Cycling Weather Alert — go window detected"
-      : "🚴 No Go Yet";
-  if (verdictEl) verdictEl.textContent = verdict;
-  const outlookEl = document.getElementById("outlook");
-  if (outlookEl) outlookEl.textContent = latest.outlook || "";
-  const metaEl = document.getElementById("meta");
-  if (metaEl) {
-    metaEl.textContent = `Forecast date ${latest.forecast_date} · generated ${latest.generated_at} UTC · ${latest.results.length} destinations · ${latest.forecast_days}-day window`;
-  }
+  if (!latest) return;
 
   const regions = Array.from(
     new Set(latest.results.map((r) => r.region).filter((v): v is string => Boolean(v))),

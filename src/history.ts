@@ -10,11 +10,11 @@ import { scaleBand, scaleLinear, scaleSequential } from "d3-scale";
 import { interpolateInferno, interpolateRdYlBu } from "d3-scale-chromatic";
 import { select } from "d3-selection";
 
-import { mountThemeToggle } from "./components/theme-toggle";
+import { mountHeader } from "./components/header";
 import { loadSiteData } from "./lib/data";
 import type { ActualsTimelineRow, CalibrationRow } from "./lib/types";
 
-mountThemeToggle("#theme-toggle");
+mountHeader({ mount: "#site-header", active: "history" });
 
 const tt = select<HTMLDivElement, unknown>("#tt");
 

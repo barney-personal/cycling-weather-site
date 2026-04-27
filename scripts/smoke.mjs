@@ -61,7 +61,7 @@ const base = `http://127.0.0.1:${port}`;
 const pages = [
   {
     path: "/index.html",
-    expect: ['id="verdict"', 'id="rank-body"'],
+    expect: ['id="hero-mount"', 'id="rank-body"'],
     expectScript: true,
   },
   {
