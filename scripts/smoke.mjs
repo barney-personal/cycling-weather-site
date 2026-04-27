@@ -1,0 +1,143 @@
+#!/usr/bin/env node
+// Smoke test: serve the built site as a static directory and assert each page returns 200,
+// references the expected runtime fetch of data.json, and ships its entry script bundle.
+//
+// This is intentionally network-free — no headless browser. We GET each HTML file and verify
+// (a) HTTP 200, (b) the expected per-page tag is present (heading id), (c) a hashed
+// asset reference exists, and (d) data.json itself returns 200 (the daily cron's contract).
+//
+// Usage: node scripts/smoke.mjs
+//   Run after `npm run build`. Exits non-zero on any failure.
+
+import { createServer } from "node:http";
+import { readFile, stat } from "node:fs/promises";
+import { resolve, join, normalize } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const here = fileURLToPath(new URL(".", import.meta.url));
+const repoRoot = resolve(here, "..");
+
+const MIME = {
+  ".html": "text/html; charset=utf-8",
+  ".js": "text/javascript; charset=utf-8",
+  ".css": "text/css; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
+  ".svg": "image/svg+xml",
+  ".png": "image/png",
+  ".ico": "image/x-icon",
+};
+
+function mimeFor(p) {
+  const ext = p.slice(p.lastIndexOf("."));
+  return MIME[ext] || "application/octet-stream";
+}
+
+async function safeRead(urlPath) {
+  // Prevent path traversal; we resolve against repoRoot and ensure the result stays inside.
+  const cleaned = normalize(urlPath).replace(/^\/+/, "");
+  const target = join(repoRoot, cleaned);
+  if (!target.startsWith(repoRoot)) throw new Error("traversal");
+  const s = await stat(target);
+  if (s.isDirectory()) throw new Error("dir");
+  return { body: await readFile(target), path: target };
+}
+
+const server = createServer(async (req, res) => {
+  try {
+    const urlPath = req.url === "/" ? "/index.html" : req.url.split("?")[0];
+    const { body, path: p } = await safeRead(urlPath);
+    res.writeHead(200, { "content-type": mimeFor(p) });
+    res.end(body);
+  } catch (e) {
+    res.writeHead(404);
+    res.end(`not found: ${req.url}`);
+  }
+});
+
+await new Promise((r) => server.listen(0, "127.0.0.1", r));
+const port = server.address().port;
+const base = `http://127.0.0.1:${port}`;
+
+const pages = [
+  {
+    path: "/index.html",
+    expect: ['id="verdict"', 'id="rank-body"'],
+    expectScript: true,
+  },
+  {
+    path: "/history.html",
+    expect: ['id="cards"', 'id="actuals-heatmap"'],
+    expectScript: true,
+  },
+  {
+    path: "/methodology.html",
+    expect: ["Forecast pipeline", "Caveats"],
+    expectScript: false,
+  },
+];
+
+let failures = 0;
+function fail(msg) {
+  console.error(`  ✗ ${msg}`);
+  failures += 1;
+}
+
+for (const page of pages) {
+  console.log(`GET ${page.path}`);
+  const res = await fetch(`${base}${page.path}`);
+  if (res.status !== 200) {
+    fail(`expected 200, got ${res.status}`);
+    continue;
+  }
+  const html = await res.text();
+  for (const needle of page.expect) {
+    if (!html.includes(needle)) fail(`missing "${needle}"`);
+  }
+  if (page.expectScript) {
+    // Find the local module bundle (skip CDN d3, etc.) — module scripts pointing at assets/.
+    const localScripts = [
+      ...html.matchAll(/<script[^>]+src="((?:\.\/)?assets\/[^"]+\.js)"/g),
+    ].map((m) => m[1]);
+    if (localScripts.length === 0) {
+      fail("no built local JS bundle reference found (assets/*.js)");
+    } else {
+      // Test the entry bundle (the one referenced as a module from this page).
+      const entry = localScripts.find((s) => !s.includes("modulepreload-polyfill")) ?? localScripts[0];
+      const bundleUrl = `${base}/${entry.replace(/^\.?\/?/, "")}`;
+      const bres = await fetch(bundleUrl);
+      if (bres.status !== 200) fail(`bundle ${bundleUrl} returned ${bres.status}`);
+      const bjs = await bres.text();
+      if (!bjs.includes("data.json")) fail(`bundle ${bundleUrl} does not reference data.json`);
+    }
+  }
+  const cssMatch = html.match(/<link[^>]+href="([^"]+\.css)"/);
+  if (cssMatch) {
+    const cssUrl = `${base}/${cssMatch[1].replace(/^\.?\/?/, "")}`;
+    const cres = await fetch(cssUrl);
+    if (cres.status !== 200) fail(`CSS ${cssUrl} returned ${cres.status}`);
+  }
+}
+
+// data.json contract — must be at repo root, fetchable, and parse as JSON.
+console.log("GET /data.json");
+const dataRes = await fetch(`${base}/data.json`);
+if (dataRes.status !== 200) {
+  fail(`data.json returned ${dataRes.status}`);
+} else {
+  try {
+    const j = await dataRes.json();
+    if (!j || typeof j !== "object") fail("data.json did not parse to an object");
+    if (!j.latest) fail("data.json missing top-level `latest`");
+  } catch (e) {
+    fail(`data.json JSON parse failed: ${e.message}`);
+  }
+}
+
+server.close();
+
+if (failures > 0) {
+  console.error(`\n${failures} smoke check failure${failures > 1 ? "s" : ""}`);
+  process.exit(1);
+} else {
+  console.log("\n✓ smoke OK");
+}
