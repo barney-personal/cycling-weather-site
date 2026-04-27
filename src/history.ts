@@ -1,9 +1,14 @@
-// History page entry — calibration scatter, lead-time hit rate, 30-day actuals heatmap.
-// Logic preserved verbatim from the v0 inline script while we stand up the toolchain (M1).
-// M9 will refactor this to the new design system + reliability charts.
-export {};
+import { extent, mean } from "d3-array";
+import { axisBottom, axisLeft } from "d3-axis";
+import { format } from "d3-format";
+import { scaleBand, scaleLinear, scaleSequential } from "d3-scale";
+import { interpolateInferno, interpolateRdYlBu } from "d3-scale-chromatic";
+import { select } from "d3-selection";
 
-const tt = d3.select("#tt");
+import { loadSiteData } from "./lib/data";
+import type { ActualsTimelineRow, CalibrationRow } from "./lib/types";
+
+const tt = select<HTMLDivElement, unknown>("#tt");
 
 function showTip(html: string, ev: MouseEvent): void {
   tt.html(html)
@@ -16,15 +21,15 @@ function hideTip(): void {
   tt.style("opacity", 0);
 }
 
-d3.json("data.json").then((data: any) => {
+void loadSiteData().then((data) => {
   const heroMeta = document.getElementById("hero-meta");
   if (heroMeta) {
     heroMeta.textContent = `${data.forecasts_count} forecast snapshots · ${data.actuals_count} days of actuals · ${data.calibration.length} matched location-days`;
   }
 
   // ---- At-a-glance cards
-  const cards = d3.select("#cards");
-  const calib: any[] = data.calibration;
+  const cards = select<HTMLElement, unknown>("#cards");
+  const calib: CalibrationRow[] = data.calibration;
   function card(title: string, stat: string, sub: string): void {
     const c = cards.append("div").attr("class", "card");
     c.append("h3").text(title);
@@ -32,12 +37,11 @@ d3.json("data.json").then((data: any) => {
     c.append("div").attr("class", "sub").text(sub);
   }
   if (calib.length) {
-    const correct = calib.filter((r: any) => r.predicted_qualify === r.actual_qualify).length;
-    const tempErr = d3.mean(calib, (r: any) =>
-      Math.abs((r.predicted_temp ?? 0) - (r.actual_temp ?? 0)),
-    );
-    const goPred = calib.filter((r: any) => r.predicted_qualify);
-    const hitGo = goPred.filter((r: any) => r.actual_qualify).length;
+    const correct = calib.filter((r) => r.predicted_qualify === r.actual_qualify).length;
+    const tempErr =
+      mean(calib, (r) => Math.abs((r.predicted_temp ?? 0) - (r.actual_temp ?? 0))) ?? 0;
+    const goPred = calib.filter((r) => r.predicted_qualify);
+    const hitGo = goPred.filter((r) => r.actual_qualify).length;
     card(
       "Correct verdict",
       `${((100 * correct) / calib.length).toFixed(0)}%`,
@@ -57,7 +61,7 @@ d3.json("data.json").then((data: any) => {
   card("Actuals coverage", String(data.actuals_count), "days seeded from archive");
 
   // ---- Calibration scatter (predicted vs actual temp)
-  const scatterDiv = d3.select("#scatter");
+  const scatterDiv = select<HTMLElement, unknown>("#scatter");
   if (calib.length) {
     const status = document.getElementById("calib-status");
     if (status) status.style.display = "none";
@@ -69,52 +73,55 @@ d3.json("data.json").then((data: any) => {
       .attr("class", "scatter-svg")
       .attr("width", W)
       .attr("height", H);
-    const pts = calib.filter((r: any) => r.predicted_temp != null && r.actual_temp != null);
-    const ext = d3.extent(pts.flatMap((r: any) => [r.predicted_temp, r.actual_temp]));
-    const x = d3
-      .scaleLinear()
-      .domain(ext)
+    const pts = calib.filter(
+      (r): r is CalibrationRow & { predicted_temp: number; actual_temp: number } =>
+        r.predicted_temp != null && r.actual_temp != null,
+    );
+    const flat = pts.flatMap((r) => [r.predicted_temp, r.actual_temp]);
+    const ext = extent(flat);
+    const lo = ext[0] ?? 0;
+    const hi = ext[1] ?? 1;
+    const x = scaleLinear()
+      .domain([lo, hi])
       .nice()
       .range([M.l, W - M.r]);
-    const y = d3
-      .scaleLinear()
-      .domain(ext)
+    const y = scaleLinear()
+      .domain([lo, hi])
       .nice()
       .range([H - M.b, M.t]);
     svg
       .append("g")
       .attr("class", "axis")
       .attr("transform", `translate(0,${H - M.b})`)
-      .call(d3.axisBottom(x));
+      .call(axisBottom(x));
     svg
       .append("g")
       .attr("class", "axis")
       .attr("transform", `translate(${M.l},0)`)
-      .call(d3.axisLeft(y));
-    // y=x reference
+      .call(axisLeft(y));
     svg
       .append("line")
-      .attr("x1", x(ext[0]))
-      .attr("x2", x(ext[1]))
-      .attr("y1", y(ext[0]))
-      .attr("y2", y(ext[1]))
+      .attr("x1", x(lo))
+      .attr("x2", x(hi))
+      .attr("y1", y(lo))
+      .attr("y2", y(hi))
       .attr("stroke", "var(--neutral)")
       .attr("stroke-dasharray", "3 4");
-    const colorByLead = d3.scaleSequential(d3.interpolateInferno).domain([0, 14]);
+    const colorByLead = scaleSequential(interpolateInferno).domain([0, 14]);
     svg
       .append("g")
       .selectAll("circle")
       .data(pts)
       .enter()
       .append("circle")
-      .attr("cx", (d: any) => x(d.predicted_temp))
-      .attr("cy", (d: any) => y(d.actual_temp))
+      .attr("cx", (d) => x(d.predicted_temp))
+      .attr("cy", (d) => y(d.actual_temp))
       .attr("r", 3.5)
-      .attr("fill", (d: any) => colorByLead(d.lead_days))
+      .attr("fill", (d) => colorByLead(d.lead_days))
       .attr("opacity", 0.7)
-      .on("mousemove", (ev: MouseEvent, d: any) =>
+      .on("mousemove", (ev: MouseEvent, d) =>
         showTip(
-          `${d.name} · ${d.target_date}<br>predicted ${d.predicted_temp?.toFixed(1)}°C · actual ${d.actual_temp?.toFixed(1)}°C<br>lead ${d.lead_days}d`,
+          `${d.name} · ${d.target_date}<br>predicted ${d.predicted_temp.toFixed(1)}°C · actual ${d.actual_temp.toFixed(1)}°C<br>lead ${d.lead_days}d`,
           ev,
         ),
       )
@@ -139,16 +146,16 @@ d3.json("data.json").then((data: any) => {
   }
 
   // ---- Hit rate by lead time
-  const lbDiv = d3.select("#leadbar");
+  const lbDiv = select<HTMLElement, unknown>("#leadbar");
   const buckets = [
     { label: "1–3d", min: 1, max: 3 },
     { label: "4–7d", min: 4, max: 7 },
     { label: "8–14d", min: 8, max: 14 },
   ];
   const bucketStats = buckets.map((b) => {
-    const sub = calib.filter((r: any) => r.lead_days >= b.min && r.lead_days <= b.max);
-    const goPred = sub.filter((r: any) => r.predicted_qualify);
-    const hits = goPred.filter((r: any) => r.actual_qualify).length;
+    const sub = calib.filter((r) => r.lead_days >= b.min && r.lead_days <= b.max);
+    const goPred = sub.filter((r) => r.predicted_qualify);
+    const hits = goPred.filter((r) => r.actual_qualify).length;
     return {
       ...b,
       n: sub.length,
@@ -165,37 +172,35 @@ d3.json("data.json").then((data: any) => {
     .attr("class", "scatter-svg")
     .attr("width", W2)
     .attr("height", H2);
-  const x2 = d3
-    .scaleBand()
+  const x2 = scaleBand()
     .domain(bucketStats.map((b) => b.label))
     .range([M2.l, W2 - M2.r])
     .padding(0.3);
-  const y2 = d3
-    .scaleLinear()
+  const y2 = scaleLinear()
     .domain([0, 1])
     .range([H2 - M2.b, M2.t]);
   svg2
     .append("g")
     .attr("class", "axis")
     .attr("transform", `translate(0,${H2 - M2.b})`)
-    .call(d3.axisBottom(x2));
+    .call(axisBottom(x2));
   svg2
     .append("g")
     .attr("class", "axis")
     .attr("transform", `translate(${M2.l},0)`)
-    .call(d3.axisLeft(y2).tickFormat(d3.format(".0%")));
+    .call(axisLeft(y2).tickFormat(format(".0%")));
   svg2
     .selectAll("rect.bar")
     .data(bucketStats)
     .enter()
     .append("rect")
-    .attr("x", (d: any) => x2(d.label))
+    .attr("x", (d) => x2(d.label) ?? 0)
     .attr("width", x2.bandwidth())
-    .attr("y", (d: any) => (d.rate == null ? H2 - M2.b : y2(d.rate)))
-    .attr("height", (d: any) => (d.rate == null ? 0 : H2 - M2.b - y2(d.rate)))
+    .attr("y", (d) => (d.rate == null ? H2 - M2.b : y2(d.rate)))
+    .attr("height", (d) => (d.rate == null ? 0 : H2 - M2.b - y2(d.rate)))
     .attr("fill", "var(--accent)")
     .attr("opacity", 0.8)
-    .on("mousemove", (ev: MouseEvent, d: any) =>
+    .on("mousemove", (ev: MouseEvent, d) =>
       showTip(
         `${d.label}<br>predicted-go: ${d.predicted_go}<br>hits: ${d.hits}<br>rate: ${d.rate == null ? "—" : `${(100 * d.rate).toFixed(0)}%`}`,
         ev,
@@ -208,20 +213,20 @@ d3.json("data.json").then((data: any) => {
     .enter()
     .append("text")
     .attr("class", "lbl")
-    .attr("x", (d: any) => x2(d.label) + x2.bandwidth() / 2)
-    .attr("y", (d: any) => (d.rate == null ? H2 - M2.b - 6 : y2(d.rate) - 6))
+    .attr("x", (d) => (x2(d.label) ?? 0) + x2.bandwidth() / 2)
+    .attr("y", (d) => (d.rate == null ? H2 - M2.b - 6 : y2(d.rate) - 6))
     .attr("text-anchor", "middle")
     .attr("fill", "var(--fg-2)")
     .attr("font-size", 11)
     .attr("font-family", "var(--mono)")
-    .text((d: any) => (d.rate == null ? "no data yet" : `${(100 * d.rate).toFixed(0)}%`));
+    .text((d) => (d.rate == null ? "no data yet" : `${(100 * d.rate).toFixed(0)}%`));
 
   // ---- Actuals heatmap
-  const actuals: any[] = data.actuals_timeline;
-  const hmDiv = d3.select("#actuals-heatmap");
+  const actuals: ActualsTimelineRow[] = data.actuals_timeline;
+  const hmDiv = select<HTMLElement, unknown>("#actuals-heatmap");
   if (actuals.length) {
-    const names = Array.from(new Set(actuals.map((a: any) => a.name))) as string[];
-    const dates = (Array.from(new Set(actuals.map((a: any) => a.date))) as string[]).sort();
+    const names = Array.from(new Set(actuals.map((a) => a.name)));
+    const dates = Array.from(new Set(actuals.map((a) => a.date))).sort();
     const cell = 14;
     const lh = 22;
     const padL = 160;
@@ -233,9 +238,10 @@ d3.json("data.json").then((data: any) => {
       .attr("class", "scatter-svg")
       .attr("width", W3)
       .attr("height", H3);
-    const tempExt = d3.extent(actuals, (d: any) => d.temp_max);
-    const color = d3.scaleSequential(d3.interpolateRdYlBu).domain([tempExt[1], tempExt[0]]);
-    // y labels
+    const tempExt = extent(actuals, (d) => d.temp_max);
+    const tHi = tempExt[1] ?? 30;
+    const tLo = tempExt[0] ?? 0;
+    const color = scaleSequential(interpolateRdYlBu).domain([tHi, tLo]);
     svg3
       .selectAll("text.row")
       .data(names)
@@ -243,31 +249,29 @@ d3.json("data.json").then((data: any) => {
       .append("text")
       .attr("class", "row")
       .attr("x", padL - 8)
-      .attr("y", (_d: string, i: number) => padT + i * lh + lh * 0.7)
+      .attr("y", (_d, i) => padT + i * lh + lh * 0.7)
       .attr("text-anchor", "end")
       .attr("fill", "var(--fg-2)")
       .attr("font-size", 11)
       .attr("font-family", "var(--mono)")
-      .text((d: string) => d);
-    // x labels (every 3 days)
+      .text((d) => d);
     svg3
       .selectAll("text.col")
       .data(dates)
       .enter()
       .append("text")
       .attr("class", "col")
-      .attr("x", (_d: string, i: number) => padL + i * cell + cell / 2)
+      .attr("x", (_d, i) => padL + i * cell + cell / 2)
       .attr("y", padT - 10)
       .attr("text-anchor", "middle")
       .attr("fill", "var(--fg-3)")
       .attr("font-size", 9)
       .attr("font-family", "var(--mono)")
-      .text((d: string, i: number) => (i % 3 === 0 ? d.slice(5) : ""));
-    // cells
-    const byKey = new Map<string, any>();
-    actuals.forEach((a: any) => byKey.set(`${a.name}|${a.date}`, a));
-    names.forEach((n: string, ri: number) => {
-      dates.forEach((dt: string, ci: number) => {
+      .text((d, i) => (i % 3 === 0 ? d.slice(5) : ""));
+    const byKey = new Map<string, ActualsTimelineRow>();
+    actuals.forEach((a) => byKey.set(`${a.name}|${a.date}`, a));
+    names.forEach((n, ri) => {
+      dates.forEach((dt, ci) => {
         const a = byKey.get(`${n}|${dt}`);
         if (!a) return;
         svg3

@@ -94,20 +94,31 @@ for (const page of pages) {
     if (!html.includes(needle)) fail(`missing "${needle}"`);
   }
   if (page.expectScript) {
-    // Find the local module bundle (skip CDN d3, etc.) — module scripts pointing at assets/.
-    const localScripts = [
+    // Vite splits modules across chunks: the entry bundle (script src=) plus any
+    // preloaded chunks (link rel=modulepreload). The data.json reference may live
+    // in any of them — verify reachability across the whole graph.
+    const entryScripts = [
       ...html.matchAll(/<script[^>]+src="((?:\.\/)?assets\/[^"]+\.js)"/g),
     ].map((m) => m[1]);
+    const preloadScripts = [
+      ...html.matchAll(/<link[^>]+rel="modulepreload"[^>]+href="((?:\.\/)?assets\/[^"]+\.js)"/g),
+    ].map((m) => m[1]);
+    const localScripts = [...entryScripts, ...preloadScripts];
     if (localScripts.length === 0) {
       fail("no built local JS bundle reference found (assets/*.js)");
     } else {
-      // Test the entry bundle (the one referenced as a module from this page).
-      const entry = localScripts.find((s) => !s.includes("modulepreload-polyfill")) ?? localScripts[0];
-      const bundleUrl = `${base}/${entry.replace(/^\.?\/?/, "")}`;
-      const bres = await fetch(bundleUrl);
-      if (bres.status !== 200) fail(`bundle ${bundleUrl} returned ${bres.status}`);
-      const bjs = await bres.text();
-      if (!bjs.includes("data.json")) fail(`bundle ${bundleUrl} does not reference data.json`);
+      let dataRefSeen = false;
+      for (const entry of localScripts) {
+        const bundleUrl = `${base}/${entry.replace(/^\.?\/?/, "")}`;
+        const bres = await fetch(bundleUrl);
+        if (bres.status !== 200) {
+          fail(`bundle ${bundleUrl} returned ${bres.status}`);
+          continue;
+        }
+        const bjs = await bres.text();
+        if (bjs.includes("data.json")) dataRefSeen = true;
+      }
+      if (!dataRefSeen) fail(`no chunk in ${page.path} references data.json`);
     }
   }
   const cssMatch = html.match(/<link[^>]+href="([^"]+\.css)"/);

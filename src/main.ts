@@ -1,9 +1,11 @@
-// Homepage entry — boots the existing forward-looking ranking + 14-day strip view.
-// Logic preserved verbatim from the v0 inline script while we stand up the toolchain (M1).
-// M3-M5 will replace this with the design-system + threshold-dial implementation.
-export {};
+import { max, min } from "d3-array";
+import { scaleLinear } from "d3-scale";
+import { select } from "d3-selection";
 
-const tt = d3.select("#tt");
+import { loadSiteData } from "./lib/data";
+import type { DailyForecast, DestinationResult } from "./lib/types";
+
+const tt = select<HTMLDivElement, unknown>("#tt");
 
 function showTip(html: string, ev: MouseEvent): void {
   tt.html(html)
@@ -16,8 +18,8 @@ function hideTip(): void {
   tt.style("opacity", 0);
 }
 
-d3.json("data.json").then((data: any) => {
-  const latest = data?.latest;
+void loadSiteData().then((data) => {
+  const latest = data.latest;
   const verdictEl = document.getElementById("verdict");
   if (!latest) {
     if (verdictEl) verdictEl.textContent = "No snapshot yet";
@@ -35,13 +37,14 @@ d3.json("data.json").then((data: any) => {
     metaEl.textContent = `Forecast date ${latest.forecast_date} · generated ${latest.generated_at} UTC · ${latest.results.length} destinations · ${latest.forecast_days}-day window`;
   }
 
-  // Filters
-  const regions = Array.from(new Set(latest.results.map((r: any) => r.region))).sort();
-  const filterBar = d3.select("#filters");
+  const regions = Array.from(
+    new Set(latest.results.map((r) => r.region).filter((v): v is string => Boolean(v))),
+  ).sort();
+  const filterBar = select<HTMLElement, unknown>("#filters");
   let active = "all";
-  const chips = ["all", "qualifiers", ...regions];
+  const chips: string[] = ["all", "qualifiers", ...regions];
   filterBar
-    .selectAll(".chip")
+    .selectAll<HTMLSpanElement, string>(".chip")
     .data(chips)
     .enter()
     .append("span")
@@ -49,28 +52,27 @@ d3.json("data.json").then((data: any) => {
     .text((d: string) => d.charAt(0).toUpperCase() + d.slice(1))
     .on("click", function (this: HTMLElement, _ev: MouseEvent, d: string) {
       active = d;
-      filterBar.selectAll(".chip").classed("active", (c: string) => c === d);
+      filterBar.selectAll<HTMLSpanElement, string>(".chip").classed("active", (c) => c === d);
       render();
     });
 
-  // Temp scale for the bar
-  const allTemps = latest.results.map((r: any) => r.median_temp);
-  const tempScale = d3
-    .scaleLinear()
-    .domain([Math.min(0, d3.min(allTemps)), Math.max(30, d3.max(allTemps))])
+  const allTemps = latest.results.map((r) => r.median_temp);
+  const tempScale = scaleLinear()
+    .domain([Math.min(0, min(allTemps) ?? 0), Math.max(30, max(allTemps) ?? 30)])
     .range([0, 120]);
 
   function render(): void {
-    let rows = latest.results.slice();
+    if (!latest) return;
+    let rows: DestinationResult[] = latest.results.slice();
     if (active === "qualifiers") {
-      rows = rows.filter((r: any) => r.qualifier);
+      rows = rows.filter((r) => r.qualifier);
     } else if (active !== "all") {
-      rows = rows.filter((r: any) => r.region === active);
+      rows = rows.filter((r) => r.region === active);
     }
 
-    const tb = d3.select("#rank-body");
+    const tb = select<HTMLElement, unknown>("#rank-body");
     tb.selectAll("tr").remove();
-    rows.forEach((r: any, i: number) => {
+    rows.forEach((r, i) => {
       const tr = tb.append("tr");
       tr.append("td")
         .attr("class", "rank")
@@ -89,9 +91,8 @@ d3.json("data.json").then((data: any) => {
         .append("span")
         .attr("class", "temp-label")
         .text(`${r.median_temp.toFixed(1)}°C`);
-      // Forecast strip
       const strip = tr.append("td").append("div").attr("class", "strip");
-      r.daily.forEach((d: any) => {
+      r.daily.forEach((d: DailyForecast) => {
         const cls = d.qualify
           ? "q"
           : d.precip_sum > 1 || d.precip_prob_max >= 60 || d.wind_max >= 35
@@ -109,14 +110,17 @@ d3.json("data.json").then((data: any) => {
           .on("mouseleave", hideTip);
       });
       tr.append("td").text(
-        r.best_run + (r.best_start ? ` · ${r.best_start.slice(5)}–${r.best_end.slice(5)}` : ""),
+        `${r.best_run}${r.best_start ? ` · ${r.best_start.slice(5)}–${r.best_end?.slice(5) ?? ""}` : ""}`,
       );
       tr.append("td").text(r.dry_days);
       const status = tr.append("td");
       if (r.qualifier) {
         status.append("span").attr("class", "qualifier-badge").text("GO");
       } else {
-        status.append("span").attr("class", "blocker").text(r.blocker);
+        status
+          .append("span")
+          .attr("class", "blocker")
+          .text(r.blocker ?? "");
       }
     });
   }
