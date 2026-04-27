@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Cycling Weather — Where to Ride</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site">
+  <h1>🚴 Cycling Weather</h1>
+  <nav>
+    <a href="index.html" class="active">Forward</a>
+    <a href="history.html">History</a>
+    <a href="methodology.html">Method</a>
+  </nav>
+</header>
+<div class="wrap">
+  <section class="hero" id="hero">
+    <p class="verdict" id="verdict">Loading…</p>
+    <p class="outlook" id="outlook"></p>
+    <p class="meta" id="meta"></p>
+  </section>
+
+  <h2 class="section-title">Stack-ranked destinations · 14-day outlook</h2>
+  <div class="filters" id="filters"></div>
+
+  <table class="rank-table">
+    <thead>
+      <tr>
+        <th class="rank">#</th>
+        <th>Destination</th>
+        <th>Median high</th>
+        <th>14-day forecast</th>
+        <th>Best run</th>
+        <th>Dry days</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody id="rank-body"></tbody>
+  </table>
+
+  <div class="legend">
+    <span><span class="cell" style="background:var(--green)"></span>Clean ride day</span>
+    <span><span class="cell" style="background:var(--amber)"></span>Marginal</span>
+    <span><span class="cell" style="background:var(--red)"></span>Blocked</span>
+    <span style="margin-left:auto">Threshold: &gt;25°C · 0mm rain · &lt;10% rain prob · sun-cloud · &lt;30 km/h wind</span>
+  </div>
+</div>
+<div id="tt" class="tooltip"></div>
+<footer>Daily snapshot from Open-Meteo · 22 destinations · <a href="methodology.html">methodology</a></footer>
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+const tt = d3.select("#tt");
+function showTip(html, ev) {
+  tt.html(html).style("opacity", 1)
+    .style("left", (ev.pageX + 12) + "px")
+    .style("top",  (ev.pageY + 12) + "px");
+}
+function hideTip() { tt.style("opacity", 0); }
+
+d3.json("data.json").then(data => {
+  const latest = data.latest;
+  if (!latest) {
+    document.getElementById("verdict").textContent = "No snapshot yet";
+    return;
+  }
+  const verdict = latest.verdict === "qualifier"
+    ? "🚴☀️ Cycling Weather Alert — go window detected"
+    : "🚴 No Go Yet";
+  document.getElementById("verdict").textContent = verdict;
+  document.getElementById("outlook").textContent = latest.outlook || "";
+  document.getElementById("meta").textContent =
+    `Forecast date ${latest.forecast_date} · generated ${latest.generated_at} UTC · ${latest.results.length} destinations · ${latest.forecast_days}-day window`;
+
+  // Filters
+  const regions = Array.from(new Set(latest.results.map(r => r.region))).sort();
+  const filterBar = d3.select("#filters");
+  let active = "all";
+  const chips = ["all", "qualifiers", ...regions];
+  filterBar.selectAll(".chip").data(chips).enter().append("span")
+    .attr("class", d => "chip" + (d === "all" ? " active" : ""))
+    .text(d => d.charAt(0).toUpperCase() + d.slice(1))
+    .on("click", function(_, d) {
+      active = d;
+      filterBar.selectAll(".chip").classed("active", c => c === d);
+      render();
+    });
+
+  // Temp scale for the bar
+  const allTemps = latest.results.map(r => r.median_temp);
+  const tempScale = d3.scaleLinear().domain([Math.min(0, d3.min(allTemps)), Math.max(30, d3.max(allTemps))]).range([0, 120]);
+
+  function render() {
+    let rows = latest.results.slice();
+    if (active === "qualifiers") rows = rows.filter(r => r.qualifier);
+    else if (active !== "all") rows = rows.filter(r => r.region === active);
+
+    const tb = d3.select("#rank-body");
+    tb.selectAll("tr").remove();
+    rows.forEach((r, i) => {
+      const tr = tb.append("tr");
+      tr.append("td").attr("class", "rank").text(i + 1);
+      tr.append("td").html(`<span class="dest">${r.name}</span><span class="region">${r.region || ""}</span>`);
+      const tcell = tr.append("td");
+      const bar = tcell.append("div").attr("class", "temp-bar");
+      bar.append("span").style("width", Math.max(0, tempScale(r.median_temp)) + "px");
+      bar.append("div").attr("class", "threshold").style("left", tempScale(25) + "px");
+      tcell.append("span").attr("class", "temp-label").text(r.median_temp.toFixed(1) + "°C");
+      // Forecast strip
+      const strip = tr.append("td").append("div").attr("class", "strip");
+      r.daily.forEach(d => {
+        const cls = d.qualify ? "q"
+          : (d.precip_sum > 1 || d.precip_prob_max >= 60 || d.wind_max >= 35) ? "x"
+          : "m";
+        strip.append("span").attr("class", "cell " + cls)
+          .on("mousemove", (ev) => {
+            showTip(`${d.date}<br>${d.temp_max.toFixed(1)}°C · rain ${d.precip_sum.toFixed(1)}mm (${d.precip_prob_max}% prob) · wind ${d.wind_max.toFixed(0)}km/h`, ev);
+          })
+          .on("mouseleave", hideTip);
+      });
+      tr.append("td").text(r.best_run + (r.best_start ? ` · ${r.best_start.slice(5)}–${r.best_end.slice(5)}` : ""));
+      tr.append("td").text(r.dry_days);
+      const status = tr.append("td");
+      if (r.qualifier) status.append("span").attr("class", "qualifier-badge").text("GO");
+      else status.append("span").attr("class", "blocker").text(r.blocker);
+    });
+  }
+  render();
+});
+</script>
+</body>
+</html>
