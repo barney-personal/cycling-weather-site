@@ -138,12 +138,13 @@ export function mountPolar(options: MountPolarOptions): void {
       `<path d="${describeWedge(start, end, windInner, windRingOuter)}" fill="${windColour(d.wind_max)}" class="polar-wind"/>`,
     );
 
-    // Wedge separator line — subtle, helps eye count days
+    // Wedge separator line — subtle, helps eye count days.
+    // Coords are offsets relative to the outer <g translate(cx, cy)>.
     const ang = end - Math.PI / 2;
-    const x1 = cx + Math.cos(ang) * tempInner;
-    const y1 = cy + Math.sin(ang) * tempInner;
-    const x2 = cx + Math.cos(ang) * windOuter;
-    const y2 = cy + Math.sin(ang) * windOuter;
+    const x1 = Math.cos(ang) * tempInner;
+    const y1 = Math.sin(ang) * tempInner;
+    const x2 = Math.cos(ang) * windOuter;
+    const y2 = Math.sin(ang) * windOuter;
     wedges.push(
       `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" class="polar-sep"/>`,
     );
@@ -154,8 +155,8 @@ export function mountPolar(options: MountPolarOptions): void {
     .map((d, i) => {
       const ang = i * wedgeAngle - Math.PI / 2;
       const lr = windOuter + 14;
-      const x = cx + Math.cos(ang) * lr;
-      const y = cy + Math.sin(ang) * lr;
+      const x = Math.cos(ang) * lr;
+      const y = Math.sin(ang) * lr;
       const showFull = i === 0 || i === days.length - 1 || i % 2 === 0;
       if (!showFull) return "";
       return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" class="polar-label" text-anchor="middle" dominant-baseline="middle">${shortDay(d.date)}</text>`;
@@ -174,16 +175,14 @@ export function mountPolar(options: MountPolarOptions): void {
     })
     .join("");
 
-  // Centre label
+  // Centre label (coords are offsets relative to the outer <g translate(cx, cy)>)
   const centre = `
-    <text x="${cx}" y="${cy - 8}" class="polar-centre-eyebrow" text-anchor="middle">14-day</text>
-    <text x="${cx}" y="${cy + 12}" class="polar-centre-num" text-anchor="middle">${days.length}d</text>`;
+    <text x="0" y="-8" class="polar-centre-eyebrow" text-anchor="middle">14-day</text>
+    <text x="0" y="12" class="polar-centre-num" text-anchor="middle">${days.length}d</text>`;
 
   // Ring labels (small caps, just outside each ring)
   const ringLabel = (radius: number, text: string): string => {
-    const x = cx;
-    const y = cy + radius;
-    return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" class="polar-ring-label" text-anchor="middle">${text}</text>`;
+    return `<text x="0" y="${radius.toFixed(1)}" class="polar-ring-label" text-anchor="middle">${text}</text>`;
   };
 
   const ringLabels = `
@@ -200,13 +199,11 @@ export function mountPolar(options: MountPolarOptions): void {
     <figure class="polar" role="figure" aria-label="${desc.replace(/"/g, "&quot;")}">
       <svg viewBox="0 0 ${size} ${size}" class="polar-svg" preserveAspectRatio="xMidYMid meet">
         <g transform="translate(${cx}, ${cy})">
-          <g transform="translate(${-cx}, ${-cy})">
-            ${wedges.join("")}
-            ${ringLabels}
-            ${labels}
-            ${centre}
-            ${hoverHandles}
-          </g>
+          ${wedges.join("")}
+          ${ringLabels}
+          ${labels}
+          ${centre}
+          ${hoverHandles}
         </g>
       </svg>
       <figcaption class="polar-caption">
