@@ -17,11 +17,11 @@ function loadJson(rel: string): unknown {
   return JSON.parse(readFileSync(resolve(repoRoot, rel), "utf8"));
 }
 
-test("normaliseSiteData accepts the v2 schema with hourly data", () => {
+test("normaliseSiteData accepts the latest schema (v3 with climatology + hourly)", () => {
   const raw = loadJson("data.json") as Record<string, unknown>;
   const out = normaliseSiteData(raw);
 
-  assert.equal(out.version, 2);
+  assert.ok(out.version >= 2, `version >= 2 (got ${out.version})`);
   assert.ok(out.latest, "latest must be present");
   assert.equal(out.latest!.results.length, 22);
   assert.ok(
@@ -56,6 +56,17 @@ test("normaliseSiteData accepts the v2 schema with hourly data", () => {
   assert.equal(typeof h0.precip_prob, "number", "hourly.precip_prob is number");
   assert.equal(typeof h0.wind, "number", "hourly.wind is number");
   assert.equal(typeof h0.code, "number", "hourly.code is number");
+
+  // v3: climatology block (optional, but expected on the live data.json).
+  if (out.version >= 3) {
+    assert.ok(out.climatology, "climatology block present at v3");
+    assert.equal(typeof out.climatology!.window_label, "string");
+    assert.ok(out.climatology!.destinations.length >= 22, "≥22 destinations rolled up");
+    const sample = out.climatology!.destinations[0]!;
+    assert.equal(typeof sample.name, "string");
+    assert.ok(sample.median_temp_max === null || typeof sample.median_temp_max === "number");
+    assert.equal(typeof sample.sample_size, "number");
+  }
 });
 
 test("normaliseSiteData tolerates legacy pre-M2 schema (no version/hero/changelog)", () => {
@@ -93,6 +104,9 @@ test("normaliseSiteData tolerates legacy pre-M2 schema (no version/hero/changelo
       assert.equal(d.hourly.length, 0, `${r.name} ${d.date} hourly is empty for v1`);
     }
   }
+
+  // v1 has no climatology block — must surface as null (caller renders nothing).
+  assert.equal(out.climatology, null, "climatology is null on legacy v1 schema");
 });
 
 test("normaliseSiteData survives malformed input without throwing", () => {
@@ -105,6 +119,7 @@ test("normaliseSiteData survives malformed input without throwing", () => {
   assert.deepEqual(out.calibration, []);
   assert.deepEqual(out.actuals_timeline, []);
   assert.deepEqual(out.snapshots, []);
+  assert.equal(out.climatology, null);
 });
 
 test("slugify handles unicode + punctuation", () => {

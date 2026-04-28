@@ -8,6 +8,11 @@
 import { DEFAULT_THRESHOLDS, dayMatches, rankWithThresholds } from "../lib/qualify";
 import { rainBucket, tempColour, windBucket } from "../lib/strip";
 import type { ChangelogEntry, DestinationResult, HeroBlock, SiteData } from "../lib/types";
+import {
+  findClimatologyEntry,
+  formatClimatologyContext,
+  renderClimatologyLine,
+} from "./climatology-line";
 
 const VERDICT_LABEL: Record<HeroBlock["verdict"], string> = {
   go: "GO",
@@ -191,7 +196,7 @@ export function mountHero(options: MountHeroOptions): void {
       : options.mount;
   if (!target) return;
 
-  const { hero, latest, changelog } = options.data;
+  const { hero, latest, changelog, climatology } = options.data;
   if (!hero || !latest || latest.results.length === 0) {
     renderEmpty(target, "No snapshot yet — the daily forecast will appear here.");
     return;
@@ -226,6 +231,18 @@ export function mountHero(options: MountHeroOptions): void {
 
   const topGoBlock = renderTopGoRow(latest.results);
 
+  const climatologyEntry = findClimatologyEntry(climatology, hero.top_name);
+  const climatologyContext = formatClimatologyContext(
+    hero.top_median_temp,
+    climatologyEntry,
+    climatology,
+    hero.top_name,
+  );
+  const climatologyBlock = renderClimatologyLine(
+    climatologyContext,
+    `Climatology comparison for ${hero.top_name}`,
+  );
+
   const generated = hero.forecast_date || latest.forecast_date;
   const generatedHuman = generated ? shortDate(generated) : "";
   const metaLine = `Forecast ${escapeHtml(generated || "—")}${
@@ -245,6 +262,7 @@ export function mountHero(options: MountHeroOptions): void {
       <p class="hero-editorial">${escapeHtml(editorial)}</p>
       <p class="hero-window">${escapeHtml(leadWindowLine(hero))}</p>
       <div class="hero-stats">${tempLine}${runLine}${goCountLine}</div>
+      ${climatologyBlock}
       ${topGoBlock}
       ${chipsBlock}
       <p class="hero-meta">${metaLine}</p>

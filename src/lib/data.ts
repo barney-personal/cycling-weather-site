@@ -8,6 +8,8 @@ import { json } from "d3-fetch";
 
 import type {
   ChangelogEntry,
+  ClimatologyBlock,
+  ClimatologyEntry,
   DailyForecast,
   DestinationResult,
   HeroBlock,
@@ -217,6 +219,36 @@ function normaliseSnapshots(s: unknown): SnapshotLite[] {
   }));
 }
 
+function normaliseClimatologyEntry(e: any): ClimatologyEntry {
+  return {
+    name: asString(e?.name),
+    median_temp_max: asNullableNumber(e?.median_temp_max),
+    p10_temp_max: asNullableNumber(e?.p10_temp_max),
+    p90_temp_max: asNullableNumber(e?.p90_temp_max),
+    median_precip_sum: asNullableNumber(e?.median_precip_sum),
+    sample_size: asNumber(e?.sample_size),
+    years: asNumber(e?.years),
+  };
+}
+
+// Schema v3 introduced a top-level `climatology` block; v1/v2 snapshots don't
+// emit it, in which case we return null and the site renders no context line.
+function normaliseClimatology(c: unknown): ClimatologyBlock | null {
+  if (!c || typeof c !== "object") return null;
+  const o = c as any;
+  const dests = Array.isArray(o.destinations) ? o.destinations.map(normaliseClimatologyEntry) : [];
+  if (dests.length === 0) return null;
+  return {
+    generated_at: asString(o.generated_at),
+    anchor_date: asString(o.anchor_date),
+    window_start: asString(o.window_start),
+    window_end: asString(o.window_end),
+    window_label: asString(o.window_label),
+    years: asNumber(o.years),
+    destinations: dests,
+  };
+}
+
 export function normaliseSiteData(raw: unknown): SiteData {
   const r = (raw && typeof raw === "object" ? (raw as any) : {}) as Record<string, unknown>;
   const latest = normaliseLatest(r.latest);
@@ -233,6 +265,7 @@ export function normaliseSiteData(raw: unknown): SiteData {
     calibration: Array.isArray(r.calibration) ? (r.calibration as any) : [],
     actuals_timeline: Array.isArray(r.actuals_timeline) ? (r.actuals_timeline as any) : [],
     snapshots: normaliseSnapshots(r.snapshots),
+    climatology: normaliseClimatology(r.climatology),
   };
 }
 

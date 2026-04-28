@@ -1,0 +1,13 @@
+const E="modulepreload",w=function(e,t){return new URL(e,t).href},g={},_=function(t,n,d){let c=Promise.resolve();if(n&&n.length>0){const r=document.getElementsByTagName("link"),i=document.querySelector("meta[property=csp-nonce]"),h=i?.nonce||i?.getAttribute("nonce");c=Promise.allSettled(n.map(o=>{if(o=w(o,d),o in g)return;g[o]=!0;const a=o.endsWith(".css"),l=a?'[rel="stylesheet"]':"";if(!!d)for(let m=r.length-1;m>=0;m--){const y=r[m];if(y.href===o&&(!a||y.rel==="stylesheet"))return}else if(document.querySelector(`link[href="${o}"]${l}`))return;const s=document.createElement("link");if(s.rel=a?"stylesheet":E,a||(s.as="script"),s.crossOrigin="",s.href=o,h&&s.setAttribute("nonce",h),document.head.appendChild(s),a)return new Promise((m,y)=>{s.addEventListener("load",m),s.addEventListener("error",()=>y(new Error(`Unable to preload CSS for ${o}`)))})}))}function u(r){const i=new Event("vite:preloadError",{cancelable:!0});if(i.payload=r,window.dispatchEvent(i),!i.defaultPrevented)throw r}return c.then(r=>{for(const i of r||[])i.status==="rejected"&&u(i.reason);return t().catch(u)})};function $(e){return e.replace(/[&<>"']/g,t=>t==="&"?"&amp;":t==="<"?"&lt;":t===">"?"&gt;":t==='"'?"&quot;":"&#39;")}function C(e,t){return e?e.destinations.find(n=>n.name===t)??null:null}function p(e,t,n,d){if(!n||!t||t.sample_size<=0||t.median_temp_max===null||typeof e!="number"||!Number.isFinite(e))return null;const c=t.median_temp_max,u=e-c,r=Math.abs(u),i=n.window_label||"this week",h=n.years||t.years||5,o=d||"this destination";let a,l;if(r<.6)a="tracking",l=`${o} is tracking with the ${h}y median for ${i}.`;else{a=u>0?"warmer":"cooler";const f=r>=10?Math.round(r):Math.round(r*10)/10,s=Number.isInteger(f)?`${f.toFixed(0)}°C`:`${f.toFixed(1)}°C`;l=`${o} is ${s} ${a==="warmer"?"warmer":"cooler"} than the ${h}y median for ${i}.`}return l.length>120&&(l=`${l.slice(0,119)}…`),{headline:l,tone:a,delta:u,deltaAbs:r,windowLabel:i,years:h,median:c,current:e}}function b(e,t){if(!e)return"";const n=e.tone,d=$(e.headline);return`<aside class="climatology-line climatology-${n}" role="note" aria-live="polite">
+      <span class="climatology-icon" aria-hidden="true">${n==="warmer"?"▲":n==="cooler"?"▼":"≈"}</span>
+      <p class="climatology-text">${d}</p>
+      <table class="visually-hidden" aria-label="${$(t??"Climatology comparison")}">
+        <thead><tr><th>Window</th><th>${e.years}y median high</th><th>This week median high</th><th>Delta</th></tr></thead>
+        <tbody><tr>
+          <td>${$(e.windowLabel)}</td>
+          <td>${e.median.toFixed(1)}°C</td>
+          <td>${e.current.toFixed(1)}°C</td>
+          <td>${(e.delta>=0?"+":"")+e.delta.toFixed(1)}°C</td>
+        </tr></tbody>
+      </table>
+    </aside>`}export{_,p as a,C as f,b as r};
