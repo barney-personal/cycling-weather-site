@@ -81,13 +81,21 @@ test("history: every chart mount contains either an <svg> or a .chart-empty plac
       const id = m.id;
       const hasSvg = !!m.querySelector("svg");
       const hasEmpty = !!m.querySelector(".chart-empty");
-      return { id, ok: hasSvg || hasEmpty };
+      // dest-acc renders an HTML <table> instead of an SVG when calibration
+      // data is present — that's "rendered, not blank", which satisfies the
+      // contract.
+      const hasTable = !!m.querySelector("table");
+      return { id, ok: hasSvg || hasEmpty || hasTable };
     });
   });
 
   assert.ok(result.length >= 4, `expected ≥4 chart mounts, got ${result.length}`);
   for (const m of result) {
-    assert.equal(m.ok, true, `chart mount #${m.id} renders neither <svg> nor .chart-empty`);
+    assert.equal(
+      m.ok,
+      true,
+      `chart mount #${m.id} renders neither <svg> nor <table> nor .chart-empty`,
+    );
   }
   await ctx.close();
 });
