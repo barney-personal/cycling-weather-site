@@ -154,6 +154,13 @@ package.json, tsconfig.json, vite.config.ts, biome.json
   ```
   The `lighthouse-check.mjs` "All chunks total" gate sums every `assets/*.js` on disk
   regardless of whether it's referenced; orphaned bundles eat the 250 KB total-JS budget.
+- CSS undefined-token guard (M17): `npm run test:css-tokens` (also chained into `npm test`)
+  scans every `assets/*.css` file, builds the union of `--token-name:` declarations, and
+  fails the run if any `var(--token-name)` reference points at a token that isn't defined
+  anywhere. Catches the recurring class of regressions where a CSS edit references a
+  non-existent token — under the CSS spec the property silently becomes
+  invalid-at-computed-value-time and inherits the parent value, so visual baselines often
+  miss it. Run after `npm run build`; expects fresh bundles in `assets/`.
 
 ## PWA layer
 

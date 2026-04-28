@@ -15,7 +15,7 @@
     "format": "biome format --write src",
     "check": "npm run typecheck && npm run lint && npm run test:unit",
     "smoke": "node scripts/smoke.mjs",
-    "test": "npm run smoke && npm run test:unit && npm run test:e2e && npm run test:perf",
+    "test": "npm run smoke && npm run test:unit && npm run test:e2e && npm run test:css-tokens && npm run test:perf",
     "test:unit": "node --test --experimental-strip-types --no-warnings=ExperimentalWarning tests/data-loader.spec.ts tests/qualify.spec.ts tests/thresholds.spec.ts tests/stale-banner.spec.ts tests/climatology-line.spec.ts tests/confidence-chip.spec.ts tests/profile.spec.ts",
     "test:loader": "node --test --experimental-strip-types --no-warnings=ExperimentalWarning tests/data-loader.spec.ts",
     "test:qualify": "node --test --experimental-strip-types --no-warnings=ExperimentalWarning tests/qualify.spec.ts",
@@ -26,6 +26,7 @@
     "test:a11y": "node --test --no-warnings=ExperimentalWarning tests/a11y.spec.mjs",
     "test:visual": "node --test --no-warnings=ExperimentalWarning tests/visual.spec.mjs",
     "test:perf": "node scripts/lighthouse-check.mjs",
+    "test:css-tokens": "node scripts/css-token-check.mjs",
     "test:cron": "node scripts/cron-sim.mjs"
   },
   "devDependencies": {
