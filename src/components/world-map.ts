@@ -180,7 +180,7 @@ export function mountWorldMap(options: MountWorldMapOptions): void {
         <p class="world-map-subtitle">${escapeHtml(subtitle)}</p>
       </figcaption>
       <div class="world-map-frame">
-        <svg viewBox="0 0 ${VIEWBOX_W} ${VIEWBOX_H}" class="world-map-svg" preserveAspectRatio="xMidYMid meet" role="img" aria-label="World map of cycling destinations">
+        <svg viewBox="0 0 ${VIEWBOX_W} ${VIEWBOX_H}" class="world-map-svg" preserveAspectRatio="xMidYMid meet">
           <rect class="world-map-bg" x="0" y="0" width="${VIEWBOX_W}" height="${VIEWBOX_H}"></rect>
           <path class="world-map-land" d="${landPath}"></path>
           <g class="world-map-glyphs">${glyphMarkup}</g>

@@ -15,9 +15,18 @@
     "format": "biome format --write src",
     "check": "npm run typecheck && npm run lint && npm run test:unit",
     "smoke": "node scripts/smoke.mjs",
-    "test:unit": "node --test --experimental-strip-types --no-warnings=ExperimentalWarning tests/data-loader.spec.ts tests/qualify.spec.ts",
+    "test": "npm run smoke && npm run test:unit && npm run test:e2e && npm run test:perf",
+    "test:unit": "node --test --experimental-strip-types --no-warnings=ExperimentalWarning tests/data-loader.spec.ts tests/qualify.spec.ts tests/thresholds.spec.ts",
     "test:loader": "node --test --experimental-strip-types --no-warnings=ExperimentalWarning tests/data-loader.spec.ts",
-    "test:qualify": "node --test --experimental-strip-types --no-warnings=ExperimentalWarning tests/qualify.spec.ts"
+    "test:qualify": "node --test --experimental-strip-types --no-warnings=ExperimentalWarning tests/qualify.spec.ts",
+    "test:thresholds": "node --test --experimental-strip-types --no-warnings=ExperimentalWarning tests/thresholds.spec.ts",
+    "test:e2e": "node --test --no-warnings=ExperimentalWarning tests/smoke.spec.mjs tests/viz.spec.mjs tests/a11y.spec.mjs tests/visual.spec.mjs",
+    "test:smoke": "node --test --no-warnings=ExperimentalWarning tests/smoke.spec.mjs",
+    "test:viz": "node --test --no-warnings=ExperimentalWarning tests/viz.spec.mjs",
+    "test:a11y": "node --test --no-warnings=ExperimentalWarning tests/a11y.spec.mjs",
+    "test:visual": "node --test --no-warnings=ExperimentalWarning tests/visual.spec.mjs",
+    "test:perf": "node scripts/lighthouse-check.mjs",
+    "test:cron": "node scripts/cron-sim.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.2",

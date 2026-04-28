@@ -12,7 +12,7 @@ import {
   type SunPref,
   type Thresholds,
   thresholdsFromSunPref,
-} from "./qualify";
+} from "./qualify.ts";
 
 export const THRESHOLDS_STORAGE_KEY = "cw-thresholds";
 

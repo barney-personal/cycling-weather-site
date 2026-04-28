@@ -22,10 +22,26 @@ npm run dev          # vite dev server on http://localhost:5173
 npm run build        # vite build + post-build SW precache stamp (writes sw.js + assets/sw-precache.json)
 npm run preview      # serves the built output locally
 npm run smoke        # static-server smoke test against built output (HTML + data.json + PWA contracts)
-npm run check        # tsc --noEmit + biome check + unit tests
+npm run check        # tsc --noEmit + biome check + unit tests (loader + qualify + thresholds)
+npm run test         # full gate: smoke → unit → e2e (Playwright + axe + visual) → bundle budget
+npm run test:e2e     # Playwright suite alone (smoke / viz / a11y / visual snapshots)
+npm run test:perf    # bundle-size + Lighthouse availability check
+npm run test:cron    # simulate the daily cron path with SITE_DIR override (read-only)
 npm run format       # biome format --write
 npm run build:brand  # one-shot: regenerate icons/ and og-image.png from src/assets/brand/*.svg (needs ImageMagick)
 ```
+
+### Test suite reproducibility
+
+The Playwright e2e tests (`smoke.spec.mjs`, `viz.spec.mjs`, `a11y.spec.mjs`,
+`visual.spec.mjs`) launch headless chromium from the local Playwright cache
+(pinned to **chromium-1217** at `~/.cache/ms-playwright/`). Visual baselines
+in `tests/visual/` were captured at this revision; refresh them with
+`CW_UPDATE_VISUAL=1 npm run test:visual` after deliberate UI changes.
+
+The static server in `tests/_lib/server.mjs` binds to `127.0.0.1` (NOT
+`localhost`) because `register-sw.ts` skips localhost — testing the PWA
+layer requires a non-localhost loopback address.
 
 After running `npm run build` you can also serve with any static server:
 
