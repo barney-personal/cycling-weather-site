@@ -144,6 +144,16 @@ package.json, tsconfig.json, vite.config.ts, biome.json
   Keyboard: when focus is inside the grid, ArrowLeft/Right move within a row, ArrowUp/Down
   move within a column, Home/End jump to the row's first/last day, Ctrl+Home/Ctrl+End jump
   to the top-left/bottom-right cell.
+- Trip finder (M10): the plan page ships a "Trip finder" tab alongside the existing "Ranked"
+  view. Trip mode scores all (destination × start-date) combinations for a given trip length
+  (3/5/7/10 days) within the selected availability window, ranking by qualifying-day count
+  with median temperature as tiebreaker. Reuses `dayMatches` + `bestRun` from `src/lib/qualify.ts`
+  — no parallel scoring path. Users can save up to 5 trips to a shortlist; the shortlist is
+  encoded in the URL as `?trip=slug:YYYY-MM-DD:length,slug:YYYY-MM-DD:length` and `?mode=trip`
+  activates the trip finder view. A "Copy link" button copies the full shareable URL. The
+  trip-mode chunk ships in a separate `trip-mode-*.js` file loaded via
+  `await import("./components/trip-mode")`, so the plan page's initial-paint graph is
+  unaffected when the user stays on the ranked view.
 - Personal calibration profile (M6): the threshold dial exposes a "Calibrate from a profile"
   CTA that opens a 5-question modal (heat preference, rain tolerance, max wind, sky, stringency).
   Answers map deterministically to a `DialState` via `src/lib/profile.ts` (pure function,

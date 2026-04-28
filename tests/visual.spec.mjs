@@ -202,6 +202,28 @@ test("visual: index @ 1280px (?stale=1)", async () => {
   await ctx.close();
 });
 
+// ---- Trip finder mode (M10) ---------------------------------------------
+// `?mode=trip` boots the plan page with the trip finder instead of ranked
+// results. Capture at 1280 (full cards visible) and 320 (mobile stacked).
+for (const width of [1280, 320]) {
+  test(`visual: plan @ ${width}px (?mode=trip)`, async () => {
+    const ctx = await browser.newContext({
+      viewport: { width, height: 900 },
+      deviceScaleFactor: 1,
+      reducedMotion: "reduce",
+      colorScheme: "light",
+    });
+    const page = await loadPage(ctx, {
+      name: "plan-trip",
+      path: "/plan.html?mode=trip",
+      waitFor: ".trip-results, .trip-empty",
+    });
+    const buf = await page.screenshot({ type: "png", fullPage: true });
+    await compareOrUpdate(buf, `plan-${width}-trip`);
+    await ctx.close();
+  });
+}
+
 // ---- Calendar view (M9) ------------------------------------------------
 // `?view=calendar` boots the page with the calendar grid instead of the
 // table/cards. Capture at 1280 (full grid visible) and 320 (sticky-column

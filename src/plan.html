@@ -92,10 +92,17 @@
 
   <section class="plan-results-section" aria-labelledby="plan-results-title">
     <div class="plan-results-toolbar">
-      <h2 id="plan-results-title" class="section-title">Best destinations for this window</h2>
-      <p id="plan-results-summary" class="plan-results-summary" aria-live="polite"></p>
+      <h2 id="plan-results-title" class="section-title">Results</h2>
+      <div class="view-toggle" role="tablist" aria-label="Results view">
+        <button type="button" role="tab" id="plan-tab-ranked" aria-controls="plan-ranked-panel" aria-selected="true" class="view-toggle-btn is-active">Ranked</button>
+        <button type="button" role="tab" id="plan-tab-trip" aria-controls="plan-trip-panel" aria-selected="false" class="view-toggle-btn">Trip finder</button>
+      </div>
     </div>
-    <ul id="plan-results" class="plan-results" aria-label="Ranked destinations for selected window"></ul>
+    <div id="plan-ranked-panel" role="tabpanel" aria-labelledby="plan-tab-ranked">
+      <p id="plan-results-summary" class="plan-results-summary" aria-live="polite"></p>
+      <ul id="plan-results" class="plan-results" aria-label="Ranked destinations for selected window"></ul>
+    </div>
+    <div id="plan-trip-panel" role="tabpanel" aria-labelledby="plan-tab-trip" hidden></div>
   </section>
 
   <section class="plan-notify-section" aria-labelledby="plan-notify-title">

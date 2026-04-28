@@ -17,6 +17,7 @@ import { mountHeader } from "./components/header";
 import { mountProfilePicker } from "./components/profile-picker";
 import { registerServiceWorker } from "./components/register-sw";
 import { type DialChangeDetail, mountThresholdDial } from "./components/threshold-dial";
+import type { TripConstraints, TripItem, TripModeHandle } from "./components/trip-mode";
 import { loadSiteData } from "./lib/data";
 import { getDestinationMeta } from "./lib/destination-meta";
 import { type Thresholds, bestRun, dayMatches } from "./lib/qualify";
@@ -41,6 +42,8 @@ const REGIONS: ReadonlyArray<{ value: RegionFilter; label: string; hint: string 
 
 const NOTIFY_STORAGE_KEY = "cw-notify-alerts";
 const PLAN_STORAGE_KEY = "cw-plan-state";
+
+type PlanMode = "ranked" | "trip";
 
 interface PlanState {
   start: string;
@@ -177,6 +180,50 @@ function resolveInitialPlan(forecastStart: string, forecastEnd: string): PlanSta
   const end = clampDate(endRaw, start, forecastEnd);
   const region: RegionFilter = url.region ?? stored.region ?? "any";
   return { start, end, length, region };
+}
+
+// ---- trip mode URL helpers ------------------------------------------------
+
+function readPlanMode(): PlanMode {
+  try {
+    const params = new URLSearchParams(location.search);
+    if (params.get("mode") === "trip" || params.has("trip")) return "trip";
+  } catch {}
+  return "ranked";
+}
+
+function parseTripShortlist(): TripItem[] {
+  try {
+    const raw = new URLSearchParams(location.search).get("trip");
+    if (!raw) return [];
+    return raw
+      .split(",")
+      .map((s) => {
+        const parts = s.split(":");
+        if (parts.length < 3) return null;
+        const slug = parts[0]!;
+        const start = parts[1]!;
+        const len = Number(parts[2]);
+        if (!slug || !/^\d{4}-\d{2}-\d{2}$/.test(start) || !Number.isFinite(len) || len < 1)
+          return null;
+        return { slug, start, length: len } as TripItem;
+      })
+      .filter((x): x is TripItem => x !== null);
+  } catch {
+    return [];
+  }
+}
+
+function writeTripUrl(mode: PlanMode, shortlist: TripItem[]): void {
+  if (typeof location === "undefined") return;
+  const params = new URLSearchParams(location.search);
+  if (mode === "trip") params.set("mode", "trip");
+  else params.delete("mode");
+  if (shortlist.length > 0)
+    params.set("trip", shortlist.map((i) => `${i.slug}:${i.start}:${i.length}`).join(","));
+  else params.delete("trip");
+  const qs = params.toString();
+  history.replaceState(null, "", `${location.pathname}${qs ? `?${qs}` : ""}${location.hash}`);
 }
 
 // ---- ranking --------------------------------------------------------------
@@ -549,7 +596,84 @@ void loadSiteData()
     function rerender(): void {
       if (!thresholds) return;
       renderResults({ results, state, thresholds, forecastStart, forecastEnd });
+      tripHandle?.setConstraints({
+        start: state.start,
+        end: state.end,
+        length: state.length,
+        region: state.region,
+      });
     }
+
+    // ---- view toggle (ranked / trip finder) --------------------------------
+
+    let currentMode: PlanMode = readPlanMode();
+    let tripHandle: TripModeHandle | null = null;
+    let tripLoading: Promise<void> | null = null;
+
+    const rankedPanel = $<HTMLDivElement>("#plan-ranked-panel");
+    const tripPanel = $<HTMLDivElement>("#plan-trip-panel");
+    const rankedTab = $<HTMLButtonElement>("#plan-tab-ranked");
+    const tripTab = $<HTMLButtonElement>("#plan-tab-trip");
+
+    function syncModeAria(mode: PlanMode): void {
+      if (rankedTab) {
+        rankedTab.setAttribute("aria-selected", String(mode === "ranked"));
+        if (mode === "ranked") rankedTab.classList.add("is-active");
+        else rankedTab.classList.remove("is-active");
+      }
+      if (tripTab) {
+        tripTab.setAttribute("aria-selected", String(mode === "trip"));
+        if (mode === "trip") tripTab.classList.add("is-active");
+        else tripTab.classList.remove("is-active");
+      }
+    }
+
+    function loadTripChunk(): Promise<void> {
+      if (tripHandle || tripLoading) return tripLoading ?? Promise.resolve();
+      tripLoading = import("./components/trip-mode")
+        .then(({ mountTripMode }) => {
+          if (!tripPanel) return;
+          tripHandle = mountTripMode({
+            mount: tripPanel,
+            results,
+            initialShortlist: parseTripShortlist(),
+            onShortlistChange: (items) => {
+              writeTripUrl(currentMode, items);
+            },
+          });
+          if (thresholds) tripHandle.setThresholds(thresholds);
+          tripHandle.setConstraints({
+            start: state.start,
+            end: state.end,
+            length: state.length,
+            region: state.region,
+          });
+        })
+        .catch((err) => {
+          console.warn("trip-mode: import failed", err);
+          if (tripPanel) tripPanel.innerHTML = "<p>Trip finder unavailable.</p>";
+        })
+        .finally(() => {
+          tripLoading = null;
+        });
+      return tripLoading;
+    }
+
+    function applyMode(mode: PlanMode, opts: { pushUrl?: boolean } = {}): void {
+      currentMode = mode;
+      if (rankedPanel) rankedPanel.hidden = mode !== "ranked";
+      if (tripPanel) tripPanel.hidden = mode !== "trip";
+      syncModeAria(mode);
+      if (opts.pushUrl) {
+        writeTripUrl(mode, parseTripShortlist());
+      }
+      if (mode === "trip") void loadTripChunk();
+    }
+
+    rankedTab?.addEventListener("click", () => applyMode("ranked", { pushUrl: true }));
+    tripTab?.addEventListener("click", () => applyMode("trip", { pushUrl: true }));
+
+    applyMode(currentMode, { pushUrl: false });
 
     reflectDates(state, forecastStart, forecastEnd);
     populateNotifyDestinations(results);
@@ -612,6 +736,7 @@ void loadSiteData()
       const detail = (ev as CustomEvent<DialChangeDetail>).detail;
       thresholds = detail.thresholds;
       rerender();
+      tripHandle?.setThresholds(thresholds);
     });
   })
   .catch((err: unknown) => {
