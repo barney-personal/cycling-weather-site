@@ -20,7 +20,13 @@ import {
   hasDestinationMeta,
 } from "../lib/destination-meta";
 import { DEFAULT_THRESHOLDS, type Thresholds, bestRun, dayMatches } from "../lib/qualify";
-import type { ActualsTimelineRow, DailyForecast, DestinationResult, SiteData } from "../lib/types";
+import type {
+  ActualsTimelineRow,
+  DailyForecast,
+  DestinationResult,
+  HourlyEntry,
+  SiteData,
+} from "../lib/types";
 
 export interface MountDestinationOptions {
   mount: HTMLElement;
@@ -167,7 +173,112 @@ function renderRideTypeChips(types: DestinationMeta["rideTypes"]): string {
     .join("")}</ul>`;
 }
 
+interface RideWindow {
+  startIdx: number;
+  endIdx: number;
+  label: string;
+}
+
+function findBestRideWindow(hourly: HourlyEntry[], windowSize = 3): RideWindow | null {
+  if (hourly.length < windowSize) return null;
+  let bestScore = Number.NEGATIVE_INFINITY;
+  let bestStart = 0;
+  for (let i = 0; i <= hourly.length - windowSize; i++) {
+    let score = 0;
+    for (let j = i; j < i + windowSize; j++) {
+      const entry = hourly[j]!;
+      score += entry.temp - entry.precip * 10 - entry.wind * 0.3;
+    }
+    if (score > bestScore) {
+      bestScore = score;
+      bestStart = i;
+    }
+  }
+  const startTime = hourly[bestStart]!.time.replace(/^0/, "");
+  const endTime = hourly[bestStart + windowSize - 1]!.time.replace(/^0/, "");
+  const fmt = (t: string) => {
+    const h = Number.parseInt(t, 10);
+    return h < 12 ? `${h}am` : h === 12 ? "12pm" : `${h - 12}pm`;
+  };
+  return {
+    startIdx: bestStart,
+    endIdx: bestStart + windowSize - 1,
+    label: `Ride ${fmt(startTime)}–${fmt(endTime)}`,
+  };
+}
+
+function renderHourlySparkline(hourly: HourlyEntry[], rideWindow: RideWindow | null): string {
+  if (hourly.length === 0) return "";
+
+  const W = 180;
+  const H = 48;
+  const PAD_T = 4;
+  const PAD_B = 12;
+  const plotH = H - PAD_T - PAD_B;
+
+  const temps = hourly.map((h) => h.temp);
+  const tMin = Math.min(...temps);
+  const tMax = Math.max(...temps);
+  const tRange = tMax - tMin || 1;
+
+  const step = W / Math.max(hourly.length - 1, 1);
+  const yFor = (t: number) => PAD_T + plotH - ((t - tMin) / tRange) * plotH;
+
+  const points = hourly.map((h, i) => `${(i * step).toFixed(1)},${yFor(h.temp).toFixed(1)}`);
+  const polyline = points.join(" ");
+
+  const precipBars = hourly
+    .map((h, i) => {
+      if (h.precip <= 0) return "";
+      const barH = Math.min(plotH * 0.6, Math.max(2, (h.precip / 5) * plotH * 0.6));
+      const x = i * step;
+      return `<rect x="${(x - step * 0.2).toFixed(1)}" y="${(H - PAD_B - barH).toFixed(1)}" width="${(step * 0.4).toFixed(1)}" height="${barH.toFixed(1)}" class="spark-precip"/>`;
+    })
+    .join("");
+
+  let windowRect = "";
+  if (rideWindow) {
+    const x1 = rideWindow.startIdx * step;
+    const x2 = rideWindow.endIdx * step;
+    windowRect = `<rect x="${(x1 - step * 0.3).toFixed(1)}" y="${PAD_T}" width="${(x2 - x1 + step * 0.6).toFixed(1)}" height="${plotH}" class="spark-window" rx="3"/>`;
+  }
+
+  const startLabel = hourly[0]!.time.replace(/^0/, "");
+  const endLabel = hourly[hourly.length - 1]!.time.replace(/^0/, "");
+
+  const altRows = hourly
+    .map(
+      (h) =>
+        `<tr><td>${escapeHtml(h.time)}</td><td>${h.temp.toFixed(0)}°</td><td>${h.precip.toFixed(1)}mm</td><td>${h.wind.toFixed(0)}km/h</td></tr>`,
+    )
+    .join("");
+
+  return `<div class="dest-day-hourly">
+    <svg class="dest-day-spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">
+      ${windowRect}
+      ${precipBars}
+      <polyline points="${polyline}" class="spark-temp"/>
+    </svg>
+    <div class="spark-axis" aria-hidden="true">
+      <span>${escapeHtml(startLabel)}</span>
+      <span>${escapeHtml(endLabel)}</span>
+    </div>
+    <table class="visually-hidden" aria-label="Hourly forecast">
+      <thead><tr><th>Time</th><th>Temp</th><th>Precip</th><th>Wind</th></tr></thead>
+      <tbody>${altRows}</tbody>
+    </table>
+  </div>`;
+}
+
 function renderForecastDay(d: DailyForecast, qualifies: boolean, i: number): string {
+  const hourly = d.hourly ?? [];
+  const rideWindow = findBestRideWindow(hourly);
+  const sparkline = renderHourlySparkline(hourly, rideWindow);
+  const windowHint =
+    rideWindow && hourly.length > 0
+      ? `<p class="dest-day-window">${escapeHtml(rideWindow.label)}</p>`
+      : "";
+
   return `<li class="dest-day${qualifies ? " is-qualify" : ""}" aria-label="${escapeHtml(`Day ${i + 1}: ${fullDate(d.date)}`)}">
     <header class="dest-day-header">
       <span class="dest-day-date">${escapeHtml(fullDate(d.date))}</span>
@@ -179,6 +290,8 @@ function renderForecastDay(d: DailyForecast, qualifies: boolean, i: number): str
       <div><dt>Wind</dt><dd>${d.wind_max.toFixed(0)} km/h</dd></div>
       <div><dt>Sky</dt><dd>${escapeHtml(weatherLabel(d.weather_code))}</dd></div>
     </dl>
+    ${sparkline}
+    ${windowHint}
     ${qualifies ? '<p class="dest-day-badge">Qualifies</p>' : ""}
   </li>`;
 }

@@ -69,6 +69,7 @@ if (failures === 0) {
   // Validate schema.
   const json = JSON.parse(await readFile(dataPath, "utf8"));
   if (typeof json.version !== "number") fail("regenerated data.json missing version");
+  if (json.version < 2) fail(`regenerated data.json version is ${json.version}, expected >= 2`);
   if (!json.latest) fail("regenerated data.json missing top-level 'latest'");
   if (!Array.isArray(json.changelog)) fail("regenerated data.json missing 'changelog' array");
   if (!json.hero) fail("regenerated data.json missing 'hero' block");
@@ -79,6 +80,21 @@ if (failures === 0) {
       (r) => typeof r.slug === "string" && r.slug.length > 0,
     );
     if (!allHaveSlug) fail("regenerated data.json: some results missing slug");
+
+    // v2: verify hourly data passes through when present in snapshot.
+    const withHourly = json.latest.results.filter(
+      (r) => r.daily?.some((d) => Array.isArray(d.hourly) && d.hourly.length > 0),
+    );
+    if (withHourly.length > 0) {
+      const sample = withHourly[0].daily.find((d) => d.hourly?.length > 0);
+      const h = sample.hourly[0];
+      if (typeof h.time !== "string") fail("hourly entry missing time");
+      if (typeof h.temp !== "number") fail("hourly entry missing temp");
+      if (typeof h.precip !== "number") fail("hourly entry missing precip");
+      ok(`v2 hourly data present (${withHourly.length} destinations with hourly)`);
+    } else {
+      ok("v2 schema OK (hourly data will appear after next euro_cycling_weather.py run)");
+    }
   }
   const afterBytes = (await readFile(dataPath)).length;
   ok(`regenerated data.json (before=${beforeBytes} B, after=${afterBytes} B)`);

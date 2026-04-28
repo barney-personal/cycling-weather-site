@@ -39,9 +39,9 @@
       }
     })();
   </script>
-  <script type="module" crossorigin src="./assets/methodology-CJPvva2t.js"></script>
-  <link rel="modulepreload" crossorigin href="./assets/data-sWuzrN0H.js">
-  <link rel="stylesheet" crossorigin href="./assets/data-BfmetxgI.css">
+  <script type="module" crossorigin src="./assets/methodology-B4gD-vK_.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/data-By_xB9v0.js">
+  <link rel="stylesheet" crossorigin href="./assets/data-DSdY3Mtl.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -56,16 +56,17 @@
   <h2 class="section-title">Forecast pipeline</h2>
   <ul class="prose">
     <li>Every day at <code>04:15 UTC</code> a Python job pulls a 14-day forecast for 22 destinations from <a href="https://open-meteo.com/">Open-Meteo</a> (with <code>wttr.in</code> as fallback).</li>
-    <li>Each daily forecast row is graded as <b>ride-clean</b> if all of: max temp &gt; 25°C, precipitation 0 mm, max precip probability &lt; 10%, weather code in <code>{0,1,2,3}</code> (clear → partly cloudy), max wind &lt; 30 km/h.</li>
-    <li>Each destination's score = <code>best_run × 100 + dry_days × 5 + median_high</code>. A destination is a <b>qualifier</b> if its longest clean run ≥ 7 consecutive days (UK destinations also need median high &gt; 20°C).</li>
-    <li>The full structured snapshot (per-day arrays per destination) is persisted to <code>data/cycling/forecasts/YYYY-MM-DD.json</code>.</li>
+    <li>Each daily forecast row is graded as <b>ride-clean</b> if all of: max temp &gt; 18°C and &lt; 32°C, precipitation &lt; 2 mm, max precip probability &lt; 30%, weather code in <code>{0,1,2,3}</code> (clear → partly cloudy), max wind &lt; 30 km/h.</li>
+    <li>Each destination's score = <code>best_run × 100 + dry_days × 5 + median_high</code>. A destination is a <b>qualifier</b> if its longest clean run ≥ 4 consecutive days (UK destinations also need median high &gt; 20°C). Use the threshold dial to tighten or relax the bar.</li>
+    <li>The same Open-Meteo pull fetches hourly data (temperature, precipitation, wind, weather code) for every ride hour (06:00–20:00). This powers the per-day sparklines on destination pages (schema v2); the <code>data.json</code> loader supplies empty arrays when older v1 snapshots are served during the cron deploy window.</li>
+    <li>The full structured snapshot (daily + hourly arrays per destination) is persisted to <code>data/cycling/forecasts/YYYY-MM-DD.json</code>.</li>
   </ul>
 
   <h2 class="section-title">Actuals pipeline</h2>
   <ul class="prose">
     <li>A second daily job pulls the <a href="https://open-meteo.com/en/docs/historical-weather-api">Open-Meteo Historical Archive</a> for any forecast date now ≥ 2 days in the past (the archive trails real-time by ~1–2 days).</li>
     <li>Persisted to <code>data/cycling/actuals/YYYY-MM-DD.json</code>. Idempotent — re-runs only fill gaps.</li>
-    <li>Actuals use a simplified ride-clean rule (no precip-probability series): max temp &gt; 25°C, precipitation 0 mm, weather code in <code>{0,1,2,3}</code>, max wind &lt; 30 km/h.</li>
+    <li>Actuals use a simplified ride-clean rule (no precip-probability series): max temp &gt; 18°C and &lt; 32°C, precipitation &lt; 2 mm, weather code in <code>{0,1,2,3}</code>, max wind &lt; 30 km/h.</li>
   </ul>
 
   <h2 class="section-title">Predictions vs reality</h2>
@@ -89,7 +90,7 @@
     <li><b>Time zones not normalised.</b> Open-Meteo daily aggregates use the location's local timezone; we don't reconcile across hemispheres.</li>
     <li><b>Wind is gust-style.</b> A simple max-wind rule that doesn't differentiate a steady tailwind from punchy gusts, nor headwind direction relative to the typical loop.</li>
     <li><b>The qualifier rule is binary.</b> A clean run of 6 consecutive days (one short of qualifying) is treated identically to a clean run of zero — close-misses don't surface in the headline ranking.</li>
-    <li><b>"Ride-clean" is opinionated.</b> The default rule (&gt;25°C dry sun) suits a road cyclist on a training trip; gravel riders or cooler-weather cyclists should set their own thresholds via the dial.</li>
+    <li><b>"Ride-clean" is opinionated.</b> The default rule (cycling-comfort: &gt;18°C, &lt;2 mm rain, &lt;30% probability, code 0–3, &lt;30 km/h wind) suits most road cyclists; serious racers or dry-weather-only riders should tighten thresholds via the dial.</li>
     <li><b>Calibration view ripens slowly.</b> A fresh deploy or a fresh destination won't show meaningful calibration until at least 14 days of forecasts have matured against actuals.</li>
     <li><b>Forecast skill drifts with lead time.</b> Day-1 predictions are routinely within ~1°C; day-14 can be off by 3–5°C. The hit-rate and lead-time charts on the history page surface this directly.</li>
     <li><b>Free-tier API.</b> Open-Meteo is rate-limited; we keep total destinations ≤ ~40 so the daily pull stays well within the budget.</li>
@@ -100,7 +101,7 @@
   <ul class="method-source-list">
     <li>
       <span class="method-source-name">euro_cycling_weather.py</span>
-      <span class="method-source-desc">Daily 04:15 UTC — pulls a 14-day Open-Meteo forecast per destination and scores it against the ride-clean rule.</span>
+      <span class="method-source-desc">Daily 04:15 UTC — pulls a 14-day Open-Meteo forecast per destination (daily + hourly ride-window data) and scores it against the ride-clean rule.</span>
     </li>
     <li>
       <span class="method-source-name">cycling_weather_actuals.py</span>

@@ -7,6 +7,15 @@
 
 export type Verdict = "go" | "edge" | "no-go" | "qualifier" | string;
 
+export interface HourlyEntry {
+  time: string;
+  temp: number;
+  precip: number;
+  precip_prob: number;
+  wind: number;
+  code: number;
+}
+
 export interface DailyForecast {
   date: string;
   temp_max: number;
@@ -15,6 +24,7 @@ export interface DailyForecast {
   wind_max: number;
   weather_code: number;
   qualify: boolean;
+  hourly: HourlyEntry[];
 }
 
 export interface DestinationResult {

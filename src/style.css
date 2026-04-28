@@ -532,7 +532,7 @@ header.site {
   align-items: center;
   font-family: var(--font-mono);
   font-weight: 600;
-  font-size: var(--fs-0);
+  font-size: var(--fs-1);
   letter-spacing: 0.12em;
   padding: 2px var(--space-2);
   border-radius: var(--radius-pill);
@@ -559,7 +559,7 @@ header.site {
 }
 .top-go-region {
   font-family: var(--font-mono);
-  font-size: var(--fs-0);
+  font-size: var(--fs-1);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-3);
@@ -1902,6 +1902,50 @@ footer {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.dest-day-hourly {
+  margin-top: var(--space-2);
+}
+.dest-day-spark {
+  width: 100%;
+  height: 48px;
+  display: block;
+}
+.spark-temp {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.spark-precip {
+  fill: var(--accent);
+  opacity: 0.18;
+}
+.spark-window {
+  fill: var(--good);
+  opacity: 0.12;
+}
+.dest-day.is-qualify .spark-window {
+  opacity: 0.18;
+}
+.spark-axis {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-3);
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+.dest-day-window {
+  margin: 0;
+  margin-top: var(--space-1);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+  font-weight: 600;
+  color: var(--good-soft-fg);
+  letter-spacing: 0.04em;
+}
 .dest-day-badge {
   margin: 0;
   font-family: var(--font-mono);
@@ -2270,7 +2314,7 @@ footer {
 }
 .plan-label {
   font-family: var(--font-sans);
-  font-size: var(--fs-0, 0.75rem);
+  font-size: var(--fs-1);
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--text-3);
@@ -2446,7 +2490,7 @@ footer {
 }
 .plan-card-stats dt {
   font-family: var(--font-sans);
-  font-size: var(--fs-0, 0.7rem);
+  font-size: var(--fs-1);
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--text-3);

@@ -17,11 +17,11 @@ function loadJson(rel: string): unknown {
   return JSON.parse(readFileSync(resolve(repoRoot, rel), "utf8"));
 }
 
-test("normaliseSiteData accepts the post-M2 schema verbatim", () => {
+test("normaliseSiteData accepts the v2 schema with hourly data", () => {
   const raw = loadJson("data.json") as Record<string, unknown>;
   const out = normaliseSiteData(raw);
 
-  assert.equal(out.version, 1);
+  assert.equal(out.version, 2);
   assert.ok(out.latest, "latest must be present");
   assert.equal(out.latest!.results.length, 22);
   assert.ok(
@@ -44,6 +44,18 @@ test("normaliseSiteData accepts the post-M2 schema verbatim", () => {
   );
 
   assert.ok(Array.isArray(out.narratives), "narratives is an array");
+
+  const firstResult = out.latest!.results[0]!;
+  const firstDay = firstResult.daily[0]!;
+  assert.ok(Array.isArray(firstDay.hourly), "daily entry has hourly array");
+  assert.ok(firstDay.hourly.length > 0, "hourly array is populated");
+  const h0 = firstDay.hourly[0]!;
+  assert.equal(typeof h0.time, "string", "hourly.time is string");
+  assert.equal(typeof h0.temp, "number", "hourly.temp is number");
+  assert.equal(typeof h0.precip, "number", "hourly.precip is number");
+  assert.equal(typeof h0.precip_prob, "number", "hourly.precip_prob is number");
+  assert.equal(typeof h0.wind, "number", "hourly.wind is number");
+  assert.equal(typeof h0.code, "number", "hourly.code is number");
 });
 
 test("normaliseSiteData tolerates legacy pre-M2 schema (no version/hero/changelog)", () => {
@@ -73,6 +85,14 @@ test("normaliseSiteData tolerates legacy pre-M2 schema (no version/hero/changelo
   // Missing optional collections become empty arrays, not undefined.
   assert.ok(Array.isArray(out.changelog) && out.changelog.length === 0);
   assert.ok(Array.isArray(out.narratives) && out.narratives.length === 0);
+
+  // v1 data has no hourly → normaliser supplies empty arrays (v1 fallback).
+  for (const r of out.latest!.results) {
+    for (const d of r.daily) {
+      assert.ok(Array.isArray(d.hourly), `${r.name} ${d.date} hourly is array`);
+      assert.equal(d.hourly.length, 0, `${r.name} ${d.date} hourly is empty for v1`);
+    }
+  }
 });
 
 test("normaliseSiteData survives malformed input without throwing", () => {
