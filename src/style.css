@@ -1557,7 +1557,7 @@ html.threshold-dial-open {
 }
 .profile-question-hint {
   margin: 0;
-  font-size: var(--fs-0);
+  font-size: var(--fs-1);
   color: var(--text-3);
 }
 .profile-options {
@@ -1595,7 +1595,7 @@ html.threshold-dial-open {
 }
 .profile-option-detail {
   font-family: var(--font-mono);
-  font-size: var(--fs-0);
+  font-size: var(--fs-1);
   color: var(--text-3);
   letter-spacing: 0.02em;
 }
