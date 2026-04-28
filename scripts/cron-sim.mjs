@@ -8,12 +8,18 @@
 // with SITE_DIR overridden to THIS orchestrator worktree, capture the
 // regenerated data.json, and validate the schema is still M2-compatible.
 //
+// Validation is delegated to scripts/cron-validate.mjs — a pure function
+// that's also exercised by tests/cron-validate.spec.ts with deliberately
+// bad fixtures, so the gate is proven to have teeth.
+//
 // Run from the worktree root. Exits non-zero on any failure.
 
 import { spawnSync } from "node:child_process";
-import { copyFile, readFile, stat } from "node:fs/promises";
+import { copyFile, readFile, stat, unlink } from "node:fs/promises";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+
+import { validateCronOutput } from "./cron-validate.mjs";
 
 const here = fileURLToPath(new URL(".", import.meta.url));
 const repoRoot = resolve(here, "..");
@@ -46,7 +52,6 @@ if (!(await exists(PIPELINE))) {
   process.exit(0);
 }
 
-// Backup current data.json so the rebuild doesn't dirty the working tree.
 await copyFile(dataPath, backupPath);
 const beforeBytes = (await readFile(dataPath)).length;
 
@@ -66,96 +71,19 @@ if (proc.status !== 0) {
 }
 
 if (failures === 0) {
-  // Validate schema.
   const json = JSON.parse(await readFile(dataPath, "utf8"));
-  if (typeof json.version !== "number") fail("regenerated data.json missing version");
-  if (json.version < 2) fail(`regenerated data.json version is ${json.version}, expected >= 2`);
-  if (json.version < 4) {
-    // After M7 the cron-side build emits v4. If cron-sim ever sees a regen
-    // below v4 it means the build script regressed — fail loudly so we catch
-    // it next CI run rather than next deploy.
-    fail(`regenerated data.json version is ${json.version}, expected >= 4 post-M7`);
-  }
-  if (!json.latest) fail("regenerated data.json missing top-level 'latest'");
-  if (!Array.isArray(json.changelog)) fail("regenerated data.json missing 'changelog' array");
-  if (!json.hero) fail("regenerated data.json missing 'hero' block");
-  if (!Array.isArray(json.latest?.results) || json.latest.results.length < 22) {
-    fail(`regenerated data.json has <22 destinations (${json.latest?.results?.length ?? 0})`);
+  const v = validateCronOutput(json);
+  if (!v.ok) {
+    for (const m of v.failures) fail(m);
   } else {
-    const allHaveSlug = json.latest.results.every(
-      (r) => typeof r.slug === "string" && r.slug.length > 0,
-    );
-    if (!allHaveSlug) fail("regenerated data.json: some results missing slug");
-
-    // v2: verify hourly data passes through when present in snapshot.
-    const withHourly = json.latest.results.filter(
-      (r) => r.daily?.some((d) => Array.isArray(d.hourly) && d.hourly.length > 0),
-    );
-    if (withHourly.length > 0) {
-      const sample = withHourly[0].daily.find((d) => d.hourly?.length > 0);
-      const h = sample.hourly[0];
-      if (typeof h.time !== "string") fail("hourly entry missing time");
-      if (typeof h.temp !== "number") fail("hourly entry missing temp");
-      if (typeof h.precip !== "number") fail("hourly entry missing precip");
-      ok(`v2 hourly data present (${withHourly.length} destinations with hourly)`);
-    } else {
-      ok("v2 schema OK (hourly data will appear after next euro_cycling_weather.py run)");
-    }
-
-    // v3: verify climatology block passes through when present (optional;
-    // absent if cycling_weather_climatology.py hasn't yet populated the cache).
+    ok(`schema OK at version ${json.version} (${json.latest.results.length} destinations)`);
     if (json.climatology) {
-      if (typeof json.climatology.window_label !== "string") {
-        fail("climatology missing window_label");
-      }
-      if (!Array.isArray(json.climatology.destinations)) {
-        fail("climatology missing destinations array");
-      } else if (json.climatology.destinations.length === 0) {
-        fail("climatology destinations array is empty");
-      } else {
-        const sample = json.climatology.destinations[0];
-        if (typeof sample.name !== "string") fail("climatology entry missing name");
-        if (
-          sample.median_temp_max !== null &&
-          typeof sample.median_temp_max !== "number"
-        ) {
-          fail("climatology entry has malformed median_temp_max");
-        }
-        ok(`v3 climatology block present (${json.climatology.destinations.length} destinations, window "${json.climatology.window_label}")`);
-      }
+      ok(`v3 climatology block present (${json.climatology.destinations.length} dests, "${json.climatology.window_label}")`);
     } else {
       ok("v3 schema OK (climatology block absent — cache not yet populated)");
     }
-
-    // v4: verify model_spread block passes through when present (optional;
-    // absent if cycling_weather_model_spread.py hasn't yet populated the cache).
     if (json.model_spread) {
-      if (!Array.isArray(json.model_spread.models) || json.model_spread.models.length === 0) {
-        fail("model_spread missing models array");
-      }
-      if (!Array.isArray(json.model_spread.destinations)) {
-        fail("model_spread missing destinations array");
-      } else if (json.model_spread.destinations.length === 0) {
-        fail("model_spread destinations array is empty");
-      } else {
-        const sample = json.model_spread.destinations[0];
-        if (typeof sample.name !== "string") fail("model_spread entry missing name");
-        if (!Array.isArray(sample.days)) fail("model_spread entry missing days array");
-        if (sample.days.length > 0) {
-          const d0 = sample.days[0];
-          if (typeof d0.date !== "string") fail("model_spread day missing date");
-          if (
-            d0.temp_spread_c !== null &&
-            typeof d0.temp_spread_c !== "number"
-          ) {
-            fail("model_spread day has malformed temp_spread_c");
-          }
-          if (typeof d0.models_count !== "number") {
-            fail("model_spread day missing models_count");
-          }
-        }
-        ok(`v4 model_spread block present (${json.model_spread.destinations.length} destinations, ${json.model_spread.models.length} models)`);
-      }
+      ok(`v4 model_spread block present (${json.model_spread.destinations.length} dests, ${json.model_spread.models.length} models)`);
     } else {
       ok("v4 schema OK (model_spread block absent — cache not yet populated)");
     }
@@ -164,9 +92,8 @@ if (failures === 0) {
   ok(`regenerated data.json (before=${beforeBytes} B, after=${afterBytes} B)`);
 }
 
-// Always restore the backup to leave the working tree clean.
 await copyFile(backupPath, dataPath);
-await (await import("node:fs/promises")).unlink(backupPath);
+await unlink(backupPath);
 ok("restored original data.json from backup");
 
 if (failures > 0) {

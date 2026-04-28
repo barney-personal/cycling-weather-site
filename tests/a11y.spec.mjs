@@ -3,25 +3,34 @@
 // Practices, AA contrast, ARIA, keyboard reachability, and document-level
 // landmark rules are all in scope.
 //
+// Cross-browser: loops over `selectedBrowsers()` (chromium-only by
+// default, all three under `CW_BROWSERS=all`). axe-core runs identically
+// in each engine; cross-browser coverage catches engine-specific
+// rendering regressions (e.g. webkit-only contrast bugs).
+//
 // Run via `node --test --no-warnings`. Requires a prior `npm run build`.
 
 import { strict as assert } from "node:assert";
 import { after, before, test } from "node:test";
-import { chromium } from "playwright";
 import { default as AxeBuilder } from "@axe-core/playwright";
 
+import { selectedBrowsers } from "./_lib/browsers.mjs";
 import { startTestServer } from "./_lib/server.mjs";
 
+const BROWSERS = selectedBrowsers();
+
 let server;
-let browser;
+const browsers = new Map();
 
 before(async () => {
   server = await startTestServer();
-  browser = await chromium.launch({ headless: true });
+  for (const b of BROWSERS) {
+    browsers.set(b.name, await b.launcher.launch({ headless: true }));
+  }
 });
 
 after(async () => {
-  await browser?.close();
+  for (const b of browsers.values()) await b?.close();
   await server?.close();
 });
 
@@ -43,55 +52,58 @@ function newAxe(page) {
     .disableRules([]);
 }
 
-for (const p of PAGES) {
-  for (const theme of THEMES) {
-    test(`a11y: ${p.name} (${theme}) — 0 serious/critical axe violations`, async () => {
-      const ctx = await browser.newContext({
-        viewport: { width: 1280, height: 900 },
-        colorScheme: theme,
-      });
-      const page = await ctx.newPage();
-      // Pre-seed the explicit theme so the FOUC script picks it up before
-      // first paint — works in both directions regardless of OS scheme.
-      await page.addInitScript((t) => {
-        try {
-          localStorage.setItem("cw-theme", t);
-        } catch {}
-      }, theme);
-      await page.goto(`${server.base}${p.path}`, { waitUntil: "networkidle" });
-      // The wait selector may match elements that are display:none under the
-      // current viewport (cards vs. table). Use `state: "attached"` because
-      // we only need the DOM to be populated before scanning.
-      await page.waitForSelector(p.waitFor, { timeout: 8_000, state: "attached" });
+for (const b of BROWSERS) {
+  for (const p of PAGES) {
+    for (const theme of THEMES) {
+      test(`a11y: ${p.name} (${theme}) — 0 serious/critical axe violations [${b.name}]`, async () => {
+        const browser = browsers.get(b.name);
+        const ctx = await browser.newContext({
+          viewport: { width: 1280, height: 900 },
+          colorScheme: theme,
+        });
+        const page = await ctx.newPage();
+        // Pre-seed the explicit theme so the FOUC script picks it up before
+        // first paint — works in both directions regardless of OS scheme.
+        await page.addInitScript((t) => {
+          try {
+            localStorage.setItem("cw-theme", t);
+          } catch {}
+        }, theme);
+        await page.goto(`${server.base}${p.path}`, { waitUntil: "networkidle" });
+        // The wait selector may match elements that are display:none under the
+        // current viewport (cards vs. table). Use `state: "attached"` because
+        // we only need the DOM to be populated before scanning.
+        await page.waitForSelector(p.waitFor, { timeout: 8_000, state: "attached" });
 
-      // Confirm the data-theme attribute resolved as expected before scanning.
-      const resolved = await page.evaluate(() => document.documentElement.getAttribute("data-theme"));
-      assert.equal(resolved, theme, `${p.name}/${theme}: data-theme must be "${theme}", got "${resolved}"`);
+        // Confirm the data-theme attribute resolved as expected before scanning.
+        const resolved = await page.evaluate(() => document.documentElement.getAttribute("data-theme"));
+        assert.equal(resolved, theme, `${p.name}/${theme}: data-theme must be "${theme}", got "${resolved}"`);
 
-      const results = await newAxe(page).analyze();
-      const blocking = results.violations.filter(
-        (v) => v.impact === "serious" || v.impact === "critical",
-      );
-      if (blocking.length > 0) {
-        console.error(
-          `${p.name}/${theme} blocking violations:\n` +
-            blocking
-              .map(
-                (v) =>
-                  `  • ${v.id} [${v.impact}] — ${v.help}\n    nodes: ${v.nodes
-                    .slice(0, 3)
-                    .map((n) => n.target.join(" "))
-                    .join(" | ")}`,
-              )
-              .join("\n"),
+        const results = await newAxe(page).analyze();
+        const blocking = results.violations.filter(
+          (v) => v.impact === "serious" || v.impact === "critical",
         );
-      }
-      assert.equal(
-        blocking.length,
-        0,
-        `${p.name}/${theme}: ${blocking.length} serious/critical axe issues`,
-      );
-      await ctx.close();
-    });
+        if (blocking.length > 0) {
+          console.error(
+            `${p.name}/${theme} blocking violations:\n` +
+              blocking
+                .map(
+                  (v) =>
+                    `  • ${v.id} [${v.impact}] — ${v.help}\n    nodes: ${v.nodes
+                      .slice(0, 3)
+                      .map((n) => n.target.join(" "))
+                      .join(" | ")}`,
+                )
+                .join("\n"),
+          );
+        }
+        assert.equal(
+          blocking.length,
+          0,
+          `${p.name}/${theme}: ${blocking.length} serious/critical axe issues`,
+        );
+        await ctx.close();
+      });
+    }
   }
 }
