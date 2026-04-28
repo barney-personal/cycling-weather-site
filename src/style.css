@@ -660,7 +660,7 @@ header.site {
   font-family: var(--font-sans);
   font-size: var(--fs-1);
   font-weight: 600;
-  color: color-mix(in srgb, var(--edge) 80%, var(--text-1));
+  color: color-mix(in srgb, var(--edge) 80%, var(--text));
   letter-spacing: 0.02em;
   cursor: help;
   white-space: nowrap;
@@ -675,7 +675,7 @@ header.site {
 }
 [data-theme="dark"] .confidence-chip {
   background: color-mix(in srgb, var(--edge-soft) 22%, transparent);
-  color: color-mix(in srgb, var(--edge) 92%, var(--text-1));
+  color: color-mix(in srgb, var(--edge) 92%, var(--text));
   border-color: color-mix(in srgb, var(--edge) 55%, transparent);
 }
 @media (prefers-contrast: more) {
