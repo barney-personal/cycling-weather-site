@@ -6,6 +6,7 @@ import "./style.css";
 import { mountFooterFreshness } from "./components/footer-freshness";
 import { mountHeader } from "./components/header";
 import { mountHero } from "./components/hero";
+import { mountProfilePicker } from "./components/profile-picker";
 import { mountRanking } from "./components/ranking";
 import { registerServiceWorker } from "./components/register-sw";
 import { mountStaleBanner } from "./components/stale-banner";
@@ -50,6 +51,8 @@ void loadSiteData()
     mountThresholdDial({
       trigger: "#threshold-trigger",
     });
+
+    mountProfilePicker();
 
     window.addEventListener("cwthresholds:change", (ev) => {
       const detail = (ev as CustomEvent<DialChangeDetail>).detail;

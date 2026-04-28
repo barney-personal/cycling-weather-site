@@ -73,6 +73,13 @@ const DIAL_HTML = `
       <button type="button" class="threshold-dial-close" aria-label="Close threshold dial">×</button>
     </header>
     <p class="threshold-dial-help">Tweak any of these and the rankings recompute live.</p>
+    <div class="threshold-dial-cta">
+      <span class="threshold-dial-cta-label">New here?</span>
+      <button type="button" class="threshold-dial-cta-button" data-action="open-profile" aria-label="Open the profile picker — answer five quick questions to set the dial automatically">
+        Calibrate from a profile
+        <span class="threshold-dial-cta-arrow" aria-hidden="true">→</span>
+      </button>
+    </div>
     <div class="threshold-dial-row" data-row="temp">
       <label for="th-temp">Min daily high</label>
       <input id="th-temp" type="range" min="0" max="35" step="1" />
@@ -244,11 +251,26 @@ export function mountThresholdDial(opts: MountThresholdDialOptions): ThresholdDi
   function onRootClick(ev: Event): void {
     const target = ev.target as HTMLElement | null;
     if (!target) return;
-    if (target.dataset.dismiss === "1" || target.dataset.action === "done") close();
-    if (target.dataset.action === "reset") commit({ ...DEFAULT_DIAL_STATE });
+    const button = target.closest<HTMLElement>("[data-action]");
+    if (target.dataset.dismiss === "1" || button?.dataset.action === "done") close();
+    if (button?.dataset.action === "reset") commit({ ...DEFAULT_DIAL_STATE });
+    if (button?.dataset.action === "open-profile") {
+      // Close the dial first so the picker takes the focus + scroll lock cleanly.
+      close();
+      window.dispatchEvent(new CustomEvent("cwprofile:open"));
+    }
     if (target.classList.contains("threshold-dial-close")) close();
   }
   root.addEventListener("click", onRootClick);
+
+  // Apply profile → run through commit() so storage + URL + the standard
+  // `cwthresholds:change` event all update through the existing pipeline.
+  function onProfileApply(ev: Event): void {
+    const detail = (ev as CustomEvent<{ state: DialState }>).detail;
+    if (!detail?.state) return;
+    commit({ ...detail.state });
+  }
+  window.addEventListener("cwprofile:apply", onProfileApply as EventListener);
 
   function onKey(ev: KeyboardEvent): void {
     if (ev.key === "Escape" && !root.hidden) {
@@ -273,6 +295,7 @@ export function mountThresholdDial(opts: MountThresholdDialOptions): ThresholdDi
       trigger.removeEventListener("click", onTriggerClick);
       root.removeEventListener("click", onRootClick);
       document.removeEventListener("keydown", onKey);
+      window.removeEventListener("cwprofile:apply", onProfileApply as EventListener);
       root.remove();
     },
     open,
