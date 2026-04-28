@@ -224,6 +224,10 @@ export function normaliseSiteData(raw: unknown): SiteData {
 }
 
 export async function loadSiteData(url = "data.json"): Promise<SiteData> {
-  const raw = await json<unknown>(url);
+  // cache: "no-store" defeats both the browser HTTP cache AND any future
+  // mis-installed service worker — the SW also has a hard exclusion for
+  // /data.json (see scripts/sw-source.js). Together this guarantees a
+  // freshly-deployed cron rebuild is never masked by stale data.
+  const raw = await json<unknown>(url, { cache: "no-store" });
   return normaliseSiteData(raw);
 }

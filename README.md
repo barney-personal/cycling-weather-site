@@ -18,12 +18,13 @@ TypeScript, served by GitHub Pages from `master`.
 
 ```bash
 npm install
-npm run dev      # vite dev server on http://localhost:5173
-npm run build    # emits index.html / history.html / methodology.html / assets/* into repo root
-npm run preview  # serves the built output locally
-npm run smoke    # static-server smoke test against built output
-npm run check    # tsc --noEmit + biome check
-npm run format   # biome format --write
+npm run dev          # vite dev server on http://localhost:5173
+npm run build        # vite build + post-build SW precache stamp (writes sw.js + assets/sw-precache.json)
+npm run preview      # serves the built output locally
+npm run smoke        # static-server smoke test against built output (HTML + data.json + PWA contracts)
+npm run check        # tsc --noEmit + biome check + unit tests
+npm run format       # biome format --write
+npm run build:brand  # one-shot: regenerate icons/ and og-image.png from src/assets/brand/*.svg (needs ImageMagick)
 ```
 
 After running `npm run build` you can also serve with any static server:
@@ -40,22 +41,63 @@ src/
   index.html         entry — Forward: stack-ranked 14-day outlook
   history.html       entry — predictions vs reality
   methodology.html   entry — methodology copy
+  destination.html   entry — per-destination depth page
+  plan.html          entry — trip planner
   main.ts            homepage logic
   history.ts         history page logic
   style.css          shared stylesheet
   types.d.ts         ambient TS declarations
+  assets/brand/      hand-built icon + OG SVGs (rasterised by scripts/generate-brand.mjs)
+  components/        UI components (header, hero, ranking, threshold-dial, register-sw, …)
+  lib/               data + qualify + thresholds libraries
+  styles/            tokens.css + typography.css + base.css
 scripts/
-  smoke.mjs          static-server smoke test
+  smoke.mjs              static-server smoke test (HTML + data.json + PWA contracts)
+  generate-brand.mjs     one-shot: SVG → PNG icons + OG image (uses ImageMagick `convert`)
+  sw-source.js           service-worker template (build-sw-precache.mjs stamps the version)
+  build-sw-precache.mjs  post-build: writes sw.js + assets/sw-precache.json
 data.json            daily-regenerated data (committed by cron, never hashed)
-index.html, history.html, methodology.html, assets/   built artefacts (committed)
+manifest.webmanifest PWA manifest (root)
+sw.js                service worker (rebuilt every npm run build)
+unregister-sw.html   escape hatch — unregister SW + clear caches
+icons/, og-image.png brand assets (regenerate via npm run build:brand)
+index.html, history.html, methodology.html, destination.html, plan.html, assets/   built artefacts (committed)
 package.json, tsconfig.json, vite.config.ts, biome.json
 ```
 
 ## Conventions
 
 - Do not commit `node_modules/`. Do commit built artefacts at the repo root.
-- `data.json` schema can evolve, but loaders must default missing fields gracefully — see
-  `M2` of the implementation plan: there is a ~24h window where new code will load yesterday's
-  `data.json`.
-- d3 v7 is currently loaded from a CDN script tag in each HTML head. M2/M5 will migrate to
-  pinned ESM sub-packages.
+- `data.json` schema can evolve, but loaders must default missing fields gracefully — there is
+  a ~24h window where new code will load yesterday's `data.json`.
+- d3 v7 ships as ESM sub-packages, bundled by Vite — no CDN.
+
+## PWA layer
+
+The site installs as a standalone app on iOS/Android.
+
+- `manifest.webmanifest` (root) advertises icons (`./icons/icon-{192,512}.png`,
+  `icon-maskable-512.png`, `icon-monochrome-512.png`) and `start_url`.
+- `sw.js` (root) is generated each build by `scripts/build-sw-precache.mjs` from
+  `scripts/sw-source.js`. The post-build step also writes `assets/sw-precache.json` listing
+  every shell asset referenced by the just-built HTMLs (no glob — globbing would pin every
+  superseded hashed bundle).
+- The SW uses `skipWaiting()` + `clientsClaim()` so a new deploy activates immediately.
+- `data.json` is **never** intercepted by the SW or precached. The page fetches it with
+  `cache: "no-store"`, so a stuck SW can never serve yesterday's data.
+- Brand source SVGs live in `src/assets/brand/`. Run `npm run build:brand` to regenerate
+  the committed PNGs after editing them (requires `convert` from ImageMagick on PATH).
+
+### Escape hatch
+
+If a stuck SW shows stale content, navigate to `/unregister-sw.html` and click the button.
+That unregisters all SWs for this origin and clears their caches. The page is committed at
+the repo root and excluded from the web manifest's start_url.
+
+### Updating brand assets
+
+```bash
+# edit src/assets/brand/{icon,icon-maskable,icon-monochrome,og-image}.svg
+npm run build:brand   # rasterises into icons/ + og-image.png
+git add icons og-image.png src/assets/brand
+```

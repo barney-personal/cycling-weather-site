@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Cycling Weather">
+  <title>Cycling Weather</title>
+  <rect x="0" y="0" width="512" height="512" fill="#0c3d1a"/>
+  <g transform="translate(256 256) scale(0.78) translate(-256 -256)">
+    <g stroke="#f9e7c1" stroke-width="16" stroke-linecap="round" fill="none">
+      <line x1="256" y1="80"  x2="256" y2="124"/>
+      <line x1="358" y1="106" x2="338" y2="146"/>
+      <line x1="438" y1="172" x2="402" y2="200"/>
+      <line x1="74"  y1="172" x2="110" y2="200"/>
+      <line x1="154" y1="106" x2="174" y2="146"/>
+    </g>
+    <circle cx="256" cy="296" r="124" fill="none" stroke="#fafaf7" stroke-width="22"/>
+    <circle cx="256" cy="296" r="24" fill="#fafaf7"/>
+    <g stroke="#fafaf7" stroke-width="7" stroke-linecap="round">
+      <line x1="256" y1="172" x2="256" y2="420"/>
+      <line x1="132" y1="296" x2="380" y2="296"/>
+      <line x1="168" y1="208" x2="344" y2="384"/>
+      <line x1="344" y1="208" x2="168" y2="384"/>
+    </g>
+    <circle cx="256" cy="296" r="124" fill="none" stroke="#1f7a36" stroke-width="9" stroke-dasharray="6 14"/>
+  </g>
+</svg>

@@ -9,9 +9,11 @@ import "./style.css";
 
 import { mountFooterFreshness } from "./components/footer-freshness";
 import { mountHeader } from "./components/header";
+import { registerServiceWorker } from "./components/register-sw";
 import { loadSiteData } from "./lib/data";
 
 mountHeader({ mount: "#site-header", active: "methodology" });
+registerServiceWorker();
 
 void loadSiteData()
   .then((data) => {
@@ -19,5 +21,5 @@ void loadSiteData()
   })
   .catch(() => {
     const el = document.getElementById("footer-freshness");
-    if (el) el.textContent = "Data freshness unavailable.";
+    if (el) el.textContent = "data.json offline — try again when reconnected.";
   });

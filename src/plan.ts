@@ -14,6 +14,7 @@ import "./style.css";
 
 import { mountFooterFreshness } from "./components/footer-freshness";
 import { mountHeader } from "./components/header";
+import { registerServiceWorker } from "./components/register-sw";
 import { type DialChangeDetail, mountThresholdDial } from "./components/threshold-dial";
 import { loadSiteData } from "./lib/data";
 import { getDestinationMeta } from "./lib/destination-meta";
@@ -21,6 +22,7 @@ import { type Thresholds, bestRun, dayMatches } from "./lib/qualify";
 import type { DailyForecast, DestinationResult, SiteData } from "./lib/types";
 
 mountHeader({ mount: "#site-header", active: "plan" });
+registerServiceWorker();
 
 // ---- types & constants ----------------------------------------------------
 
@@ -511,97 +513,108 @@ function renderEmptyData(): void {
 
 // ---- boot -----------------------------------------------------------------
 
-void loadSiteData().then((data: SiteData) => {
-  mountFooterFreshness("#footer-freshness", data);
-  const latest = data.latest;
-  if (!latest || latest.results.length === 0) {
+void loadSiteData()
+  .then((data: SiteData) => {
+    mountFooterFreshness("#footer-freshness", data);
+    const latest = data.latest;
+    if (!latest || latest.results.length === 0) {
+      renderEmptyData();
+      return;
+    }
+
+    const results = latest.results;
+    const forecastStart = results[0]?.daily[0]?.date ?? isoToday();
+    const lastDaily = results[0]?.daily;
+    const forecastEnd = lastDaily?.[lastDaily.length - 1]?.date ?? addDays(forecastStart, 13);
+
+    let state: PlanState = resolveInitialPlan(forecastStart, forecastEnd);
+    let thresholds: Thresholds | null = null;
+    const defaults: PlanState = {
+      start: clampDate(isoToday(), forecastStart, forecastEnd),
+      end: clampDate(
+        addDays(clampDate(isoToday(), forecastStart, forecastEnd), 6),
+        forecastStart,
+        forecastEnd,
+      ),
+      length: 7,
+      region: "any",
+    };
+
+    function persist(): void {
+      writePlanStorage(state);
+      writePlanUrl(state, defaults);
+    }
+
+    function rerender(): void {
+      if (!thresholds) return;
+      renderResults({ results, state, thresholds, forecastStart, forecastEnd });
+    }
+
+    reflectDates(state, forecastStart, forecastEnd);
+    populateNotifyDestinations(results);
+    bindNotifyForm();
+
+    renderTripLengthChips(state, (n) => {
+      state = {
+        ...state,
+        length: n,
+        end: clampDate(addDays(state.start, n - 1), state.start, forecastEnd),
+      };
+      reflectDates(state, forecastStart, forecastEnd);
+      persist();
+      rerender();
+    });
+
+    renderRegionChips(state, (r) => {
+      state = { ...state, region: r };
+      persist();
+      rerender();
+    });
+
+    const startInput = $<HTMLInputElement>("#plan-start");
+    const endInput = $<HTMLInputElement>("#plan-end");
+    startInput?.addEventListener("change", () => {
+      if (!startInput.value) return;
+      const newStart = clampDate(startInput.value, forecastStart, forecastEnd);
+      const newEnd =
+        newStart > state.end
+          ? clampDate(addDays(newStart, state.length - 1), newStart, forecastEnd)
+          : state.end;
+      state = {
+        ...state,
+        start: newStart,
+        end: newEnd,
+        length: closestTripLength(diffDays(newStart, newEnd) + 1),
+      };
+      reflectDates(state, forecastStart, forecastEnd);
+      reflectChips(state);
+      persist();
+      rerender();
+    });
+    endInput?.addEventListener("change", () => {
+      if (!endInput.value) return;
+      const newEnd = clampDate(endInput.value, state.start, forecastEnd);
+      state = {
+        ...state,
+        end: newEnd,
+        length: closestTripLength(diffDays(state.start, newEnd) + 1),
+      };
+      reflectDates(state, forecastStart, forecastEnd);
+      reflectChips(state);
+      persist();
+      rerender();
+    });
+
+    mountThresholdDial({ trigger: "#threshold-trigger" });
+    window.addEventListener("cwthresholds:change", (ev) => {
+      const detail = (ev as CustomEvent<DialChangeDetail>).detail;
+      thresholds = detail.thresholds;
+      rerender();
+    });
+  })
+  .catch((err: unknown) => {
+    console.warn("plan: data.json fetch failed", err);
+    const footer = document.getElementById("footer-freshness");
+    if (footer) footer.textContent = "data.json offline — try again when reconnected.";
     renderEmptyData();
-    return;
-  }
-
-  const results = latest.results;
-  const forecastStart = results[0]?.daily[0]?.date ?? isoToday();
-  const lastDaily = results[0]?.daily;
-  const forecastEnd = lastDaily?.[lastDaily.length - 1]?.date ?? addDays(forecastStart, 13);
-
-  let state: PlanState = resolveInitialPlan(forecastStart, forecastEnd);
-  let thresholds: Thresholds | null = null;
-  const defaults: PlanState = {
-    start: clampDate(isoToday(), forecastStart, forecastEnd),
-    end: clampDate(
-      addDays(clampDate(isoToday(), forecastStart, forecastEnd), 6),
-      forecastStart,
-      forecastEnd,
-    ),
-    length: 7,
-    region: "any",
-  };
-
-  function persist(): void {
-    writePlanStorage(state);
-    writePlanUrl(state, defaults);
-  }
-
-  function rerender(): void {
-    if (!thresholds) return;
-    renderResults({ results, state, thresholds, forecastStart, forecastEnd });
-  }
-
-  reflectDates(state, forecastStart, forecastEnd);
-  populateNotifyDestinations(results);
-  bindNotifyForm();
-
-  renderTripLengthChips(state, (n) => {
-    state = {
-      ...state,
-      length: n,
-      end: clampDate(addDays(state.start, n - 1), state.start, forecastEnd),
-    };
-    reflectDates(state, forecastStart, forecastEnd);
-    persist();
-    rerender();
   });
-
-  renderRegionChips(state, (r) => {
-    state = { ...state, region: r };
-    persist();
-    rerender();
-  });
-
-  const startInput = $<HTMLInputElement>("#plan-start");
-  const endInput = $<HTMLInputElement>("#plan-end");
-  startInput?.addEventListener("change", () => {
-    if (!startInput.value) return;
-    const newStart = clampDate(startInput.value, forecastStart, forecastEnd);
-    const newEnd =
-      newStart > state.end
-        ? clampDate(addDays(newStart, state.length - 1), newStart, forecastEnd)
-        : state.end;
-    state = {
-      ...state,
-      start: newStart,
-      end: newEnd,
-      length: closestTripLength(diffDays(newStart, newEnd) + 1),
-    };
-    reflectDates(state, forecastStart, forecastEnd);
-    reflectChips(state);
-    persist();
-    rerender();
-  });
-  endInput?.addEventListener("change", () => {
-    if (!endInput.value) return;
-    const newEnd = clampDate(endInput.value, state.start, forecastEnd);
-    state = { ...state, end: newEnd, length: closestTripLength(diffDays(state.start, newEnd) + 1) };
-    reflectDates(state, forecastStart, forecastEnd);
-    reflectChips(state);
-    persist();
-    rerender();
-  });
-
-  mountThresholdDial({ trigger: "#threshold-trigger" });
-  window.addEventListener("cwthresholds:change", (ev) => {
-    const detail = (ev as CustomEvent<DialChangeDetail>).detail;
-    thresholds = detail.thresholds;
-    rerender();
-  });
-});

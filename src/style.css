@@ -1342,6 +1342,12 @@ footer {
   margin: 0;
   font-family: inherit;
 }
+/* Axe AA: footer paragraphs mix link + non-link text, so colour alone isn't
+ * a reliable distinguisher. Underline mirrors the .prose a fix from M9+M10. */
+.footer-line a {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
 .footer-meta {
   font-feature-settings: "tnum";
   letter-spacing: 0.02em;

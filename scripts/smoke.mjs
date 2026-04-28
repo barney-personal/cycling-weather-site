@@ -61,27 +61,38 @@ const base = `http://127.0.0.1:${port}`;
 const pages = [
   {
     path: "/index.html",
-    expect: ['id="hero-mount"', 'id="rank-body"'],
+    expect: [
+      'id="hero-mount"',
+      'id="rank-body"',
+      'rel="manifest"',
+      'rel="apple-touch-icon"',
+      'property="og:image"',
+    ],
     expectScript: true,
   },
   {
     path: "/history.html",
-    expect: ['id="cards"', 'id="actuals-heatmap"'],
+    expect: ['id="cards"', 'id="actuals-heatmap"', 'rel="manifest"'],
     expectScript: true,
   },
   {
     path: "/methodology.html",
-    expect: ["Forecast pipeline", "Caveats"],
+    expect: ["Forecast pipeline", "Caveats", 'rel="manifest"'],
     expectScript: false,
   },
   {
     path: "/destination.html?slug=cyprus",
-    expect: ['id="dest-mount"', "data-slug="],
+    expect: ['id="dest-mount"', "data-slug=", 'rel="manifest"'],
     expectScript: true,
   },
   {
     path: "/plan.html",
-    expect: ['id="plan-form"', 'id="plan-results"', 'data-active="plan"'],
+    expect: [
+      'id="plan-form"',
+      'id="plan-results"',
+      'data-active="plan"',
+      'rel="manifest"',
+    ],
     expectScript: true,
   },
 ];
@@ -152,6 +163,53 @@ if (dataRes.status !== 200) {
   } catch (e) {
     fail(`data.json JSON parse failed: ${e.message}`);
   }
+}
+
+// PWA contract — manifest, SW, precache JSON, escape hatch, top icons.
+const pwaResources = [
+  { path: "/manifest.webmanifest", validate: async (r) => {
+    const j = await r.json();
+    if (!j.name || !j.icons || !Array.isArray(j.icons) || j.icons.length === 0) {
+      fail("manifest missing name/icons");
+    }
+    if (!j.icons.some((i) => i.purpose && i.purpose.includes("maskable"))) {
+      fail("manifest missing a maskable icon");
+    }
+    if (!j.start_url) fail("manifest missing start_url");
+  } },
+  { path: "/sw.js", validate: async (r) => {
+    const text = await r.text();
+    if (text.includes("__BUILD_VERSION__")) fail("sw.js still has __BUILD_VERSION__ placeholder");
+    if (!text.includes("skipWaiting")) fail("sw.js missing skipWaiting");
+    if (!text.includes("clientsClaim")) fail("sw.js missing clientsClaim");
+    // Hard exclusion check
+    if (!text.includes("data.json")) fail("sw.js doesn't reference data.json (no exclusion?)");
+  } },
+  { path: "/assets/sw-precache.json", validate: async (r) => {
+    const j = await r.json();
+    if (!Array.isArray(j.urls) || j.urls.length === 0) fail("sw-precache.json has no urls");
+    if (j.urls.some((u) => u.endsWith("/data.json") || u === "data.json")) {
+      fail("sw-precache.json contains data.json (must NEVER be precached)");
+    }
+  } },
+  { path: "/unregister-sw.html", validate: async (r) => {
+    const text = await r.text();
+    if (!text.includes("unregister")) fail("unregister-sw.html missing unregister keyword");
+  } },
+  { path: "/icons/icon-192.png" },
+  { path: "/icons/icon-512.png" },
+  { path: "/icons/icon-maskable-512.png" },
+  { path: "/icons/apple-touch-icon-180.png" },
+  { path: "/og-image.png" },
+];
+for (const r of pwaResources) {
+  console.log(`GET ${r.path}`);
+  const res = await fetch(`${base}${r.path}`);
+  if (res.status !== 200) {
+    fail(`${r.path} returned ${res.status}`);
+    continue;
+  }
+  if (r.validate) await r.validate(res);
 }
 
 server.close();

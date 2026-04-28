@@ -13,10 +13,12 @@ import { line } from "d3-shape";
 
 import { mountFooterFreshness } from "./components/footer-freshness";
 import { mountHeader } from "./components/header";
+import { registerServiceWorker } from "./components/register-sw";
 import { loadSiteData } from "./lib/data";
 import type { ActualsTimelineRow, CalibrationRow, SiteData } from "./lib/types";
 
 mountHeader({ mount: "#site-header", active: "history" });
+registerServiceWorker();
 
 const tt = select<HTMLDivElement, unknown>("#tt");
 
@@ -91,6 +93,8 @@ void loadSiteData()
       "Actuals heatmap needs a successful data.json fetch.",
     );
     document.getElementById("cards")?.setAttribute("aria-busy", "false");
+    const footer = document.getElementById("footer-freshness");
+    if (footer) footer.textContent = "data.json offline — try again when reconnected.";
   });
 
 // ---------------------------------------------------------------------------
