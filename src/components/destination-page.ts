@@ -27,6 +27,11 @@ import type {
   HourlyEntry,
   SiteData,
 } from "../lib/types";
+import {
+  findClimatologyEntry,
+  formatClimatologyContext,
+  renderClimatologyLine,
+} from "./climatology-line";
 
 export interface MountDestinationOptions {
   mount: HTMLElement;
@@ -408,6 +413,18 @@ export function mountDestinationPage(opts: MountDestinationOptions): void {
   const forecastDate = data.latest?.forecast_date ?? null;
   const climatology = climatologyFor(data.actuals_timeline, result.name);
 
+  const climatologyEntry = findClimatologyEntry(data.climatology, result.name);
+  const climatologyContext = formatClimatologyContext(
+    result.median_temp,
+    climatologyEntry,
+    data.climatology,
+    result.name,
+  );
+  const climatologyContextBlock = renderClimatologyLine(
+    climatologyContext,
+    `Climatology comparison for ${result.name}`,
+  );
+
   const region = result.region
     ? `<span class="dest-region">${escapeHtml(result.region)}</span>`
     : "";
@@ -450,6 +467,7 @@ export function mountDestinationPage(opts: MountDestinationOptions): void {
           <span class="hero-stat"><span class="hero-stat-num">${run.length}</span><span class="hero-stat-label">best clean run</span></span>
         </div>
         ${blocker}
+        ${climatologyContextBlock}
         ${renderRideTypeChips(meta.rideTypes)}
       </header>
 

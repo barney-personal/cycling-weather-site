@@ -603,6 +603,51 @@ header.site {
   line-height: var(--lh-snug);
 }
 
+/* ---------- climatology context line (M5) ---------------------------- */
+.climatology-line {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  padding: var(--space-2) var(--space-3);
+  border-left: 3px solid color-mix(in srgb, var(--accent) 50%, transparent);
+  background: color-mix(in srgb, var(--accent-soft) 35%, transparent);
+  border-radius: var(--radius-1);
+  font-family: var(--font-sans);
+  font-size: var(--fs-2);
+  color: var(--text-2);
+  line-height: var(--lh-snug);
+}
+.climatology-icon {
+  font-size: var(--fs-3);
+  line-height: 1;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+.climatology-text {
+  margin: 0;
+}
+.climatology-warmer {
+  border-left-color: color-mix(in srgb, var(--edge) 55%, transparent);
+  background: color-mix(in srgb, var(--edge-soft) 30%, transparent);
+}
+.climatology-warmer .climatology-icon {
+  color: var(--edge);
+}
+.climatology-cooler {
+  border-left-color: color-mix(in srgb, var(--accent-2) 55%, transparent);
+  background: color-mix(in srgb, var(--accent-soft) 30%, transparent);
+}
+.climatology-cooler .climatology-icon {
+  color: var(--accent-2);
+}
+.climatology-tracking .climatology-icon {
+  color: var(--text-2);
+}
+[data-theme="dark"] .climatology-line {
+  background: color-mix(in srgb, var(--accent-soft) 18%, transparent);
+}
+
 .hero-empty .hero-empty-msg {
   font-family: var(--font-serif);
   font-size: var(--fs-4);

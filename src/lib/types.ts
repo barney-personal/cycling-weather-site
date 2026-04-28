@@ -144,6 +144,26 @@ export interface SnapshotLite {
   results: SnapshotResultLite[];
 }
 
+export interface ClimatologyEntry {
+  name: string;
+  median_temp_max: number | null;
+  p10_temp_max: number | null;
+  p90_temp_max: number | null;
+  median_precip_sum: number | null;
+  sample_size: number;
+  years: number;
+}
+
+export interface ClimatologyBlock {
+  generated_at: string;
+  anchor_date: string;
+  window_start: string;
+  window_end: string;
+  window_label: string;
+  years: number;
+  destinations: ClimatologyEntry[];
+}
+
 export interface SiteData {
   version: number;
   generated_at: string;
@@ -156,4 +176,5 @@ export interface SiteData {
   calibration: CalibrationRow[];
   actuals_timeline: ActualsTimelineRow[];
   snapshots: SnapshotLite[];
+  climatology: ClimatologyBlock | null;
 }

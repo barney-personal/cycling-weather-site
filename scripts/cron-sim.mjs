@@ -95,6 +95,31 @@ if (failures === 0) {
     } else {
       ok("v2 schema OK (hourly data will appear after next euro_cycling_weather.py run)");
     }
+
+    // v3: verify climatology block passes through when present (optional;
+    // absent if cycling_weather_climatology.py hasn't yet populated the cache).
+    if (json.climatology) {
+      if (typeof json.climatology.window_label !== "string") {
+        fail("climatology missing window_label");
+      }
+      if (!Array.isArray(json.climatology.destinations)) {
+        fail("climatology missing destinations array");
+      } else if (json.climatology.destinations.length === 0) {
+        fail("climatology destinations array is empty");
+      } else {
+        const sample = json.climatology.destinations[0];
+        if (typeof sample.name !== "string") fail("climatology entry missing name");
+        if (
+          sample.median_temp_max !== null &&
+          typeof sample.median_temp_max !== "number"
+        ) {
+          fail("climatology entry has malformed median_temp_max");
+        }
+        ok(`v3 climatology block present (${json.climatology.destinations.length} destinations, window "${json.climatology.window_label}")`);
+      }
+    } else {
+      ok("v3 schema OK (climatology block absent — cache not yet populated)");
+    }
   }
   const afterBytes = (await readFile(dataPath)).length;
   ok(`regenerated data.json (before=${beforeBytes} B, after=${afterBytes} B)`);

@@ -16,7 +16,7 @@
     "check": "npm run typecheck && npm run lint && npm run test:unit",
     "smoke": "node scripts/smoke.mjs",
     "test": "npm run smoke && npm run test:unit && npm run test:e2e && npm run test:perf",
-    "test:unit": "node --test --experimental-strip-types --no-warnings=ExperimentalWarning tests/data-loader.spec.ts tests/qualify.spec.ts tests/thresholds.spec.ts tests/stale-banner.spec.ts",
+    "test:unit": "node --test --experimental-strip-types --no-warnings=ExperimentalWarning tests/data-loader.spec.ts tests/qualify.spec.ts tests/thresholds.spec.ts tests/stale-banner.spec.ts tests/climatology-line.spec.ts",
     "test:loader": "node --test --experimental-strip-types --no-warnings=ExperimentalWarning tests/data-loader.spec.ts",
     "test:qualify": "node --test --experimental-strip-types --no-warnings=ExperimentalWarning tests/qualify.spec.ts",
     "test:thresholds": "node --test --experimental-strip-types --no-warnings=ExperimentalWarning tests/thresholds.spec.ts",
