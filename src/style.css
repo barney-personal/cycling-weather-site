@@ -2447,31 +2447,36 @@ footer {
 }
 
 @media (max-width: 480px) {
+  /* The grid-template-areas referenced head/reason/stats which live inside
+     .plan-card-body, not as direct grid items of .plan-card-link. The unmapped
+     body would auto-place and collide with the named areas, producing severe
+     overlap on small screens. Use a simpler 2-area grid against the actual
+     direct children (rank, body, verdict) and let .plan-card-body keep its own
+     intrinsic vertical stack of head/reason/stats. */
   .plan-card-link {
     grid-template-columns: auto 1fr;
     grid-template-areas:
-      "rank head"
-      "rank reason"
-      "stats stats"
+      "rank body"
       "verdict verdict";
+    row-gap: var(--space-3);
+    padding: var(--space-3);
   }
   .plan-card-rank {
     grid-area: rank;
     align-self: start;
   }
-  .plan-card-head {
-    grid-area: head;
-  }
-  .plan-card-reason {
-    grid-area: reason;
-  }
-  .plan-card-stats {
-    grid-area: stats;
-    margin-top: var(--space-2);
+  .plan-card-body {
+    grid-area: body;
   }
   .plan-card-verdict {
     grid-area: verdict;
     justify-self: start;
+  }
+  /* Three stat columns crowd at 360px and force "CLEAN WINDOW" / "MEDIAN HIGH"
+     labels to wrap awkwardly into one another. Two columns + auto rows reads
+     cleanly down to 320px. */
+  .plan-card-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
