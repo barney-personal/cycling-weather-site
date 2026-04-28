@@ -39,6 +39,20 @@ The Playwright e2e tests (`smoke.spec.mjs`, `viz.spec.mjs`, `a11y.spec.mjs`,
 in `tests/visual/` were captured at this revision; refresh them with
 `CW_UPDATE_VISUAL=1 npm run test:visual` after deliberate UI changes.
 
+The visual baseline matrix covers each of the five entry pages at:
+
+- portrait widths **320 / 360 / 768 / 1280 / 1440 / 1920**,
+- a mobile-landscape viewport **812 × 375** (typical iPhone landscape),
+- two desktop variants at 1280 — **reduced-motion** (`-rmotion.png`) and
+  **prefers-contrast: more** (`-hcontrast.png`).
+
+Comparison uses a 5% deflated-byte budget which absorbs daily timestamp
+drift in hero copy + sub-pixel font shifts within the same chromium
+revision; deliberate visual changes blow the budget and need
+`CW_UPDATE_VISUAL=1 npm run test:visual` to refresh. Commit the refreshed
+PNGs in the same change as the visual edit so reviewers can see what
+moved.
+
 The static server in `tests/_lib/server.mjs` binds to `127.0.0.1` (NOT
 `localhost`) because `register-sw.ts` skips localhost — testing the PWA
 layer requires a non-localhost loopback address.

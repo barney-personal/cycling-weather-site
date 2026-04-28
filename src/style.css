@@ -2559,6 +2559,7 @@ footer {
   fill-opacity: 0.7;
   stroke: var(--border);
   stroke-width: 0.4;
+  pointer-events: none;
 }
 .world-glyph-dot {
   stroke: var(--surface-2);
