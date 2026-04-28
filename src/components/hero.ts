@@ -196,6 +196,8 @@ export function mountHero(options: MountHeroOptions): void {
       : options.mount;
   if (!target) return;
 
+  target.dataset.loaded = "1";
+
   const { hero, latest, changelog, climatology } = options.data;
   if (!hero || !latest || latest.results.length === 0) {
     renderEmpty(target, "No snapshot yet — the daily forecast will appear here.");

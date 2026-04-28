@@ -1,18 +1,47 @@
 /*
  * Cycling Weather — typography.
  *
- * Self-hosted variable fonts via @fontsource-variable (no CDN, no FOIT).
- *   - Fraunces Variable: editorial serif for headlines + hero verdict.
- *   - Inter Variable: workhorse sans for body, nav, buttons.
- *   - JetBrains Mono Variable: tabular figures, codes, meta lines.
- *
- * Vertical rhythm is the 4px baseline from tokens.css.
- * Numbers default to tabular figures so columns of stats line up.
+ * Self-hosted variable fonts (latin subset only, font-display: optional).
+ * Using optional eliminates CLS from font-swap on slow connections; fonts
+ * are preloaded in each HTML <head> so they arrive within the ~100ms block
+ * window on most connections. Repeat visitors get cached fonts instantly.
  */
 
-@import "@fontsource-variable/fraunces/wght.css";
-@import "@fontsource-variable/inter/wght.css";
-@import "@fontsource-variable/jetbrains-mono/wght.css";
+/* fraunces — latin */
+@font-face {
+  font-family: "Fraunces Variable";
+  font-style: normal;
+  font-display: optional;
+  font-weight: 100 900;
+  src: url("@fontsource-variable/fraunces/files/fraunces-latin-wght-normal.woff2")
+    format("woff2-variations");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* inter — latin */
+@font-face {
+  font-family: "Inter Variable";
+  font-style: normal;
+  font-display: optional;
+  font-weight: 100 900;
+  src: url("@fontsource-variable/inter/files/inter-latin-wght-normal.woff2")
+    format("woff2-variations");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* jetbrains mono — latin */
+@font-face {
+  font-family: "JetBrains Mono Variable";
+  font-style: normal;
+  font-display: optional;
+  font-weight: 100 800;
+  src: url("@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2")
+    format("woff2-variations");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
 
 :root {
   --font-serif: "Fraunces Variable", Georgia, "Times New Roman", serif;
