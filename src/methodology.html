@@ -29,7 +29,7 @@
   <section class="hero hero-page-header">
     <p class="hero-eyebrow">Cycling Weather</p>
     <h1 class="hero-destination"><span class="hero-destination-link">Methodology</span></h1>
-    <p class="hero-editorial">How the daily ranking is built and how predictions are graded against reality.</p>
+    <p class="hero-editorial">How the daily ranking is built, how predictions are graded against reality, and where to look if you want to read or rerun the code yourself.</p>
   </section>
 
   <h2 class="section-title">Forecast pipeline</h2>
@@ -50,20 +50,55 @@
   <h2 class="section-title">Predictions vs reality</h2>
   <ul class="prose">
     <li>For every (snapshot, target-date) pair where actuals exist, we record predicted and actual temp/precip/qualify and the lead time in days.</li>
-    <li>Hit rate = of all days predicted ride-clean, what fraction were actually ride-clean. Bucketed by 1–3 / 4–7 / 8–14 day lead.</li>
-    <li>Mean temp error = mean absolute difference between predicted and actual daily high.</li>
-    <li>Calibration view will populate as more snapshots mature; today the site is seeded with 30 days of actuals and zero matured forecasts.</li>
+    <li><b>Hit rate</b> = of all days predicted ride-clean, what fraction were actually ride-clean. Bucketed by 1–3 / 4–7 / 8–14 day lead.</li>
+    <li><b>Mean temp error</b> = mean absolute difference between predicted and actual daily high.</li>
+    <li><b>Calibration scatter</b> plots predicted vs actual daily highs with a ±1σ residual band — closer to the diagonal means a better-calibrated forecast.</li>
+    <li>The <a href="./history.html">history page</a> ripens organically: it stays in an empty "still ripening" state until the daily cron has accumulated ≥14 days of matured forecasts.</li>
+  </ul>
+
+  <h2 class="section-title">Personalisation</h2>
+  <ul class="prose">
+    <li>The threshold dial on the <a href="./index.html">homepage</a> and <a href="./plan.html">plan</a> page lets you change what "ride-clean" means: minimum temp, max wind, rain tolerance, sun preference. State is persisted to URL search params and localStorage; URL wins on conflict so a shared link reproduces exactly what a friend was looking at.</li>
+    <li>Personalised thresholds re-grade the forecast client-side using a TypeScript port of the Python qualifier — exact parity is asserted by a unit-test suite that checks every (destination, day) tuple.</li>
   </ul>
 
   <h2 class="section-title">Caveats</h2>
   <ul class="prose">
-    <li>Single grid-point per destination — local microclimates not captured.</li>
-    <li>Open-Meteo daily aggregates use the location's local timezone; we don't normalise across hemispheres.</li>
-    <li>Wind threshold is a simple max-gust style rule; it doesn't differentiate headwind vs tailwind.</li>
-    <li>The qualifier rule is a hard binary; close-misses (e.g. 6-day clean runs) aren't surfaced.</li>
+    <li><b>Single grid-point per destination.</b> Local microclimates are not captured — Mallorca's Tramuntana coast and Palma can disagree on a windy day.</li>
+    <li><b>Time zones not normalised.</b> Open-Meteo daily aggregates use the location's local timezone; we don't reconcile across hemispheres.</li>
+    <li><b>Wind is gust-style.</b> A simple max-wind rule that doesn't differentiate a steady tailwind from punchy gusts, nor headwind direction relative to the typical loop.</li>
+    <li><b>The qualifier rule is binary.</b> A clean run of 6 consecutive days (one short of qualifying) is treated identically to a clean run of zero — close-misses don't surface in the headline ranking.</li>
+    <li><b>"Ride-clean" is opinionated.</b> The default rule (&gt;25°C dry sun) suits a road cyclist on a training trip; gravel riders or cooler-weather cyclists should set their own thresholds via the dial.</li>
+    <li><b>Calibration view ripens slowly.</b> A fresh deploy or a fresh destination won't show meaningful calibration until at least 14 days of forecasts have matured against actuals.</li>
+    <li><b>Forecast skill drifts with lead time.</b> Day-1 predictions are routinely within ~1°C; day-14 can be off by 3–5°C. The hit-rate and lead-time charts on the history page surface this directly.</li>
+    <li><b>Free-tier API.</b> Open-Meteo is rate-limited; we keep total destinations ≤ ~40 so the daily pull stays well within the budget.</li>
+  </ul>
+
+  <h2 class="section-title">Source</h2>
+  <p class="prose">Everything that powers this site is in the public <a href="https://github.com/barney-personal/cycling-weather-site">cycling-weather-site</a> repo. The pipeline scripts live alongside it and run on a small cron host.</p>
+  <ul class="method-source-list">
+    <li>
+      <span class="method-source-name">euro_cycling_weather.py</span>
+      <span class="method-source-desc">Daily 04:15 UTC — pulls a 14-day Open-Meteo forecast per destination and scores it against the ride-clean rule.</span>
+    </li>
+    <li>
+      <span class="method-source-name">cycling_weather_actuals.py</span>
+      <span class="method-source-desc">Backfills the Open-Meteo Historical Archive (lag ≈ 2 days) so we can grade matured forecasts.</span>
+    </li>
+    <li>
+      <span class="method-source-name">cycling_weather_data_build.py</span>
+      <span class="method-source-desc">Aggregates forecasts + actuals into the single <code>data.json</code> the static site fetches at runtime.</span>
+    </li>
+    <li>
+      <span class="method-source-name">cycling_weather_site_refresh.sh</span>
+      <span class="method-source-desc">Cron 04:45 UTC — runs the build script, commits any change to <code>data.json</code>, pushes to <code>master</code>; GitHub Pages serves the result.</span>
+    </li>
   </ul>
 </main>
-<footer>Sources: Open-Meteo · Open-Meteo Historical Archive · wttr.in</footer>
+<footer class="site-footer">
+  <p class="footer-line"><span class="footer-meta" id="footer-freshness">Data freshness loading…</span></p>
+  <p class="footer-line">Sources: <a href="https://open-meteo.com/">Open-Meteo</a> · <a href="https://open-meteo.com/en/docs/historical-weather-api">Open-Meteo Historical Archive</a> · <a href="https://wttr.in/">wttr.in</a></p>
+</footer>
 
 <script type="module" src="./methodology.ts"></script>
 </body>

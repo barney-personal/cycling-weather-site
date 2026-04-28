@@ -21,10 +21,10 @@
       }
     })();
   </script>
-  <script type="module" crossorigin src="./assets/history-CtnlmS9P.js"></script>
-  <link rel="modulepreload" crossorigin href="./assets/header-pbtJ5vNN.js">
-  <link rel="modulepreload" crossorigin href="./assets/data-DO2zHL4L.js">
-  <link rel="stylesheet" crossorigin href="./assets/header-BDo_1Nau.css">
+  <script type="module" crossorigin src="./assets/history-VWagg8cG.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/data-vp_J0-em.js">
+  <link rel="modulepreload" crossorigin href="./assets/path-CXeFd1JH.js">
+  <link rel="stylesheet" crossorigin href="./assets/data-BOwrweGL.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -34,27 +34,55 @@
     <p class="hero-eyebrow">Cycling Weather</p>
     <h1 class="hero-destination"><span class="hero-destination-link">Predictions vs Reality</span></h1>
     <p class="hero-editorial" id="hero-sub">How well our 14-day cycling forecasts hold up against what actually happened.</p>
-    <p class="hero-meta" id="hero-meta"></p>
+    <p class="hero-meta" id="hero-meta"><span class="skel skel-line skel-w-50" aria-hidden="true"></span><span class="visually-hidden">Loading data freshness…</span></p>
   </section>
 
-  <h2 class="section-title">At a glance</h2>
-  <div class="cards-grid" id="cards"></div>
+  <h2 class="section-title" id="glance-title">At a glance</h2>
+  <div class="cards-grid" id="cards" aria-labelledby="glance-title" aria-busy="true">
+    <div class="card skel-card" aria-hidden="true"><span class="skel skel-line skel-w-40"></span><span class="skel skel-stat"></span><span class="skel skel-line skel-w-60"></span></div>
+    <div class="card skel-card" aria-hidden="true"><span class="skel skel-line skel-w-40"></span><span class="skel skel-stat"></span><span class="skel skel-line skel-w-60"></span></div>
+    <div class="card skel-card" aria-hidden="true"><span class="skel skel-line skel-w-40"></span><span class="skel skel-stat"></span><span class="skel skel-line skel-w-60"></span></div>
+    <div class="card skel-card" aria-hidden="true"><span class="skel skel-line skel-w-40"></span><span class="skel skel-stat"></span><span class="skel skel-line skel-w-60"></span></div>
+  </div>
 
-  <h2 class="section-title">Calibration · predicted vs actual daily high</h2>
-  <p class="meta" id="calib-status">Will populate as forecast snapshots accumulate (need at least 2-day-old predictions).</p>
-  <div id="scatter"></div>
+  <h2 class="section-title" id="calib-title">Calibration · predicted vs actual daily high</h2>
+  <p class="meta" id="calib-status">Each dot is a (destination, day) pair. Closer to the diagonal means a more accurate forecast; the shaded band is ±1σ residual.</p>
+  <figure class="chart-figure" aria-labelledby="calib-title" aria-describedby="calib-sr">
+    <div id="scatter" class="chart-mount"></div>
+    <p id="calib-sr" class="visually-hidden">Calibration chart will populate once forecasts mature against actuals.</p>
+  </figure>
 
-  <h2 class="section-title">Hit rate by lead time</h2>
-  <p class="meta">Of days predicted as ride-clean, how many actually were? Bucketed by how far ahead the forecast was made.</p>
-  <div id="leadbar"></div>
+  <h2 class="section-title" id="hit-title">Hit rate by lead time</h2>
+  <p class="meta">Of the days we predicted as ride-clean, how many actually delivered? Bucketed by how far ahead the forecast was made.</p>
+  <figure class="chart-figure" aria-labelledby="hit-title" aria-describedby="hit-sr">
+    <div id="leadbar" class="chart-mount"></div>
+    <p id="hit-sr" class="visually-hidden">Hit rate chart will populate once predictions mature.</p>
+  </figure>
 
-  <h2 class="section-title">Actual conditions · last 30 days</h2>
-  <p class="meta">Heatmap of observed daily high temperature. Hot+dry days marked with a green dot.</p>
-  <div id="actuals-heatmap"></div>
+  <h2 class="section-title" id="err-title">Mean temp error by lead time</h2>
+  <p class="meta">Average absolute difference between predicted and actual daily high, plotted across the 14-day forecast horizon.</p>
+  <figure class="chart-figure" aria-labelledby="err-title" aria-describedby="err-sr">
+    <div id="errtrend" class="chart-mount"></div>
+    <p id="err-sr" class="visually-hidden">Temperature error chart will populate once predictions mature.</p>
+  </figure>
+
+  <h2 class="section-title" id="dest-title">Per-destination accuracy</h2>
+  <p class="meta">A scoreboard of forecast quality, one row per destination. Sample size grows with every day of matured forecasts.</p>
+  <div id="dest-acc" class="chart-mount" aria-labelledby="dest-title"></div>
+
+  <h2 class="section-title" id="hm-title">Actual conditions · last 30 days</h2>
+  <p class="meta">Heatmap of observed daily high temperature. Green dot = actually rideable.</p>
+  <figure class="chart-figure" aria-labelledby="hm-title" aria-describedby="hm-sr">
+    <div id="actuals-heatmap" class="chart-mount chart-mount-scroll"></div>
+    <p id="hm-sr" class="visually-hidden">Loading heatmap…</p>
+  </figure>
 </main>
 
 <div id="tt" class="tooltip" role="status" aria-live="polite"></div>
-<footer>Open-Meteo Historical Archive · 22 destinations · <a href="./methodology.html">methodology</a></footer>
+<footer class="site-footer">
+  <p class="footer-line"><span class="footer-meta" id="footer-freshness">Data freshness loading…</span></p>
+  <p class="footer-line"><a href="https://open-meteo.com/en/docs/historical-weather-api">Open-Meteo Historical Archive</a> · 22 destinations · <a href="./methodology.html">methodology</a></p>
+</footer>
 
 </body>
 </html>

@@ -8,6 +8,7 @@ import "./styles/base.css";
 import "./style.css";
 
 import { mountDestinationPage } from "./components/destination-page";
+import { mountFooterFreshness } from "./components/footer-freshness";
 import { mountHeader } from "./components/header";
 import { loadSiteData } from "./lib/data";
 
@@ -21,6 +22,7 @@ if (mount) {
   mount.dataset.slug = slug;
   void loadSiteData().then((data) => {
     mountDestinationPage({ mount, data, slug });
+    mountFooterFreshness("#footer-freshness", data);
     const result = data.latest?.results.find((r) => r.slug === slug);
     if (result) {
       document.title = `${result.name} · Cycling Weather`;

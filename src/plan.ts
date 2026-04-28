@@ -12,6 +12,7 @@ import "./styles/typography.css";
 import "./styles/base.css";
 import "./style.css";
 
+import { mountFooterFreshness } from "./components/footer-freshness";
 import { mountHeader } from "./components/header";
 import { type DialChangeDetail, mountThresholdDial } from "./components/threshold-dial";
 import { loadSiteData } from "./lib/data";
@@ -511,6 +512,7 @@ function renderEmptyData(): void {
 // ---- boot -----------------------------------------------------------------
 
 void loadSiteData().then((data: SiteData) => {
+  mountFooterFreshness("#footer-freshness", data);
   const latest = data.latest;
   if (!latest || latest.results.length === 0) {
     renderEmptyData();

@@ -1327,6 +1327,211 @@ footer {
   text-align: center;
   font-family: var(--font-mono);
 }
+.site-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+.footer-line {
+  margin: 0;
+  font-family: inherit;
+}
+.footer-meta {
+  font-feature-settings: "tnum";
+  letter-spacing: 0.02em;
+}
+.footer-meta b {
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+/* ---------- history chart frames + empty states ---------------------- */
+.chart-figure {
+  margin: 0 0 var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.chart-mount {
+  position: relative;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-3);
+  box-shadow: var(--shadow-1);
+  padding: var(--space-3);
+  overflow: hidden;
+}
+.chart-mount .scatter-svg {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  display: block;
+  max-width: 100%;
+}
+.chart-mount-scroll {
+  overflow-x: auto;
+}
+.chart-empty {
+  padding: var(--space-6) var(--space-5);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-2);
+}
+.chart-empty-title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: var(--fs-4);
+  font-weight: 500;
+  color: var(--text);
+}
+.chart-empty-msg {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-2);
+  color: var(--text-2);
+  max-width: 56ch;
+  line-height: var(--lh-snug);
+}
+
+/* ---------- per-destination accuracy table -------------------------- */
+.acc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-1);
+  background: transparent;
+}
+.acc-table caption {
+  caption-side: top;
+  text-align: left;
+  margin-bottom: var(--space-2);
+}
+.acc-table th,
+.acc-table td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: middle;
+}
+.acc-table thead th {
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-3);
+  font-weight: 500;
+  border-bottom-color: var(--border-strong);
+}
+.acc-table tbody th {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: var(--fs-2);
+  color: var(--text);
+}
+.acc-table tbody td.cell-num {
+  font-family: var(--font-mono);
+  font-feature-settings: "tnum";
+  color: var(--text);
+}
+.acc-table tbody tr:hover td,
+.acc-table tbody tr:hover th {
+  background: var(--surface-2);
+}
+.acc-substat {
+  color: var(--text-3);
+  font-size: 0.9em;
+}
+
+/* ---------- skeletons (loading shimmer) ------------------------------ */
+.skel {
+  display: inline-block;
+  background: linear-gradient(
+    90deg,
+    var(--surface-3) 0%,
+    color-mix(in srgb, var(--surface-3) 65%, var(--border-strong)) 50%,
+    var(--surface-3) 100%
+  );
+  background-size: 200% 100%;
+  border-radius: var(--radius-1);
+  animation: skel-shimmer 1.4s ease-in-out infinite;
+  vertical-align: middle;
+}
+.skel-line {
+  height: 0.85em;
+  width: 8em;
+  margin: 0.25em 0;
+}
+.skel-stat {
+  display: block;
+  height: 1.6em;
+  width: 4em;
+  margin: var(--space-2) 0;
+}
+.skel-w-40 {
+  width: 40%;
+}
+.skel-w-50 {
+  width: 50%;
+}
+.skel-w-60 {
+  width: 60%;
+}
+.skel-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  background: var(--surface-2);
+  border: 1px dashed var(--border);
+}
+@keyframes skel-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skel {
+    animation: none;
+    background: var(--surface-3);
+  }
+}
+
+/* ---------- methodology source list --------------------------------- */
+.method-source-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+.method-source-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-2);
+}
+.method-source-name {
+  font-family: var(--font-mono);
+  font-size: var(--fs-2);
+  color: var(--text);
+  font-weight: 500;
+}
+.method-source-desc {
+  font-family: var(--font-sans);
+  font-size: var(--fs-1);
+  color: var(--text-2);
+  flex: 1 1 auto;
+  min-width: 0;
+}
 
 /* ---------- alerts --------------------------------------------------- */
 .alert {
