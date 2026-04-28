@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="Cycling Weather — where on Earth to ride next">
+  <title>Cycling Weather — where on Earth to ride next</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#14130d"/>
+      <stop offset="1" stop-color="#0c3d1a"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <g transform="translate(120 130)">
+    <g transform="scale(0.7)">
+      <rect x="0" y="0" width="512" height="512" rx="96" ry="96" fill="#0c3d1a" stroke="#1f7a36" stroke-width="3"/>
+      <g stroke="#f9e7c1" stroke-width="14" stroke-linecap="round" fill="none">
+        <line x1="256" y1="80"  x2="256" y2="124"/>
+        <line x1="358" y1="106" x2="338" y2="146"/>
+        <line x1="438" y1="172" x2="402" y2="200"/>
+        <line x1="74"  y1="172" x2="110" y2="200"/>
+        <line x1="154" y1="106" x2="174" y2="146"/>
+      </g>
+      <circle cx="256" cy="296" r="124" fill="none" stroke="#fafaf7" stroke-width="20"/>
+      <circle cx="256" cy="296" r="22" fill="#fafaf7"/>
+      <g stroke="#fafaf7" stroke-width="6" stroke-linecap="round">
+        <line x1="256" y1="172" x2="256" y2="420"/>
+        <line x1="132" y1="296" x2="380" y2="296"/>
+        <line x1="168" y1="208" x2="344" y2="384"/>
+        <line x1="344" y1="208" x2="168" y2="384"/>
+      </g>
+      <circle cx="256" cy="296" r="124" fill="none" stroke="#1f7a36" stroke-width="8" stroke-dasharray="6 14"/>
+    </g>
+  </g>
+  <g transform="translate(550 220)">
+    <text x="0" y="0" fill="#fafaf7" font-family="DejaVu Serif" font-weight="bold" font-size="92">Cycling Weather</text>
+    <text x="0" y="62" fill="#c8c1ad" font-family="DejaVu Serif" font-style="italic" font-size="36">Where on Earth to ride next.</text>
+    <g transform="translate(0 110)">
+      <rect x="0"   y="0" width="34" height="34" rx="6" fill="#7AC74F"/>
+      <rect x="40"  y="0" width="34" height="34" rx="6" fill="#7AC74F"/>
+      <rect x="80"  y="0" width="34" height="34" rx="6" fill="#9CC065"/>
+      <rect x="120" y="0" width="34" height="34" rx="6" fill="#D6C36A"/>
+      <rect x="160" y="0" width="34" height="34" rx="6" fill="#E5A85A"/>
+      <rect x="200" y="0" width="34" height="34" rx="6" fill="#E0784E"/>
+      <rect x="240" y="0" width="34" height="34" rx="6" fill="#9C9C9C"/>
+      <rect x="280" y="0" width="34" height="34" rx="6" fill="#7BB6D6"/>
+      <rect x="320" y="0" width="34" height="34" rx="6" fill="#6FA9D6"/>
+      <rect x="360" y="0" width="34" height="34" rx="6" fill="#7AC74F"/>
+      <rect x="400" y="0" width="34" height="34" rx="6" fill="#7AC74F"/>
+      <rect x="440" y="0" width="34" height="34" rx="6" fill="#7AC74F"/>
+      <rect x="480" y="0" width="34" height="34" rx="6" fill="#9CC065"/>
+      <rect x="520" y="0" width="34" height="34" rx="6" fill="#7AC74F"/>
+    </g>
+    <text x="0" y="184" fill="#999382" font-family="DejaVu Sans Mono" font-size="22">14-day outlook · 22 destinations · daily rebuild</text>
+  </g>
+</svg>

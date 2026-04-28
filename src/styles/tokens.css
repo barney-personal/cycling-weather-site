@@ -1,0 +1,177 @@
+/*
+ * Cycling Weather — design tokens.
+ *
+ * Token model. Two themes (`[data-theme="light"]` and `[data-theme="dark"]`) are
+ * the source of truth. The FOUC-prevention head script in each HTML page reads
+ * `localStorage.cw-theme` (or falls back to `prefers-color-scheme`) and writes
+ * the chosen theme onto `<html>` synchronously, before first paint.
+ *
+ * Layers:
+ *   - palette ramps (raw values, do not consume in components)
+ *   - surfaces, text, borders, accent (semantic UI tokens)
+ *   - good / edge / no-go (semantic verdict tokens — replace the legacy
+ *     --green / --amber / --red raw colours; M3 deletes those)
+ *   - radii, spacing, shadows, transitions
+ *
+ * WCAG AA contrast notes are in docs/design-tokens.md.
+ */
+
+:root,
+[data-theme="light"] {
+  /* ----- palette (raw — do not consume directly in components) ---------- */
+  --c-stone-50: #fafaf7;
+  --c-stone-100: #f3f0e9;
+  --c-stone-200: #e3dfd5;
+  --c-stone-300: #c8c1ad;
+  --c-stone-400: #999382;
+  --c-stone-500: #6c6757;
+  --c-stone-600: #4a4738;
+  --c-stone-700: #2d2b21;
+  --c-stone-800: #1c1a13;
+  --c-stone-900: #14130d;
+
+  --c-blue-300: #97baff;
+  --c-blue-500: #2557d6;
+  --c-blue-600: #1c46b3;
+  --c-blue-700: #163c95;
+
+  --c-green-100: #dcedd6;
+  --c-green-500: #1f7a36;
+  --c-green-600: #135a26;
+  --c-green-700: #0c3d1a;
+
+  --c-amber-100: #f9e7c1;
+  --c-amber-500: #a25a00;
+  --c-amber-600: #80450a;
+  --c-amber-700: #5a3008;
+
+  --c-red-100: #f4d3cf;
+  --c-red-500: #b1271a;
+  --c-red-600: #8c1d12;
+  --c-red-700: #66150d;
+
+  /* ----- semantic UI tokens — light --------------------------------------- */
+  --surface: #fafaf7;
+  --surface-2: #ffffff;
+  --surface-3: #f0ede5;
+  --surface-elevated: #ffffff;
+  --border: #e2ded4;
+  --border-strong: #c1bbab;
+
+  --text: #14130d;
+  --text-2: #4a4738;
+  --text-3: #6c6757;
+  --text-on-accent: #ffffff;
+
+  --accent: #2557d6;
+  --accent-2: #1c46b3;
+  --accent-soft: #e2ecff;
+  --focus-ring: #2557d6;
+
+  /* ----- semantic verdict tokens (replace legacy --green / --amber / --red) */
+  --good: #1f7a36;
+  --good-fg: #ffffff;
+  --good-soft: #dcedd6;
+  --good-soft-fg: #0c3d1a;
+
+  --edge: #a25a00;
+  --edge-fg: #ffffff;
+  --edge-soft: #f9e7c1;
+  --edge-soft-fg: #5a3008;
+
+  --no-go: #b1271a;
+  --no-go-fg: #ffffff;
+  --no-go-soft: #f4d3cf;
+  --no-go-soft-fg: #66150d;
+
+  /* shadows tuned for light theme */
+  --shadow-1: 0 1px 2px rgba(28, 26, 19, 0.04), 0 2px 4px rgba(28, 26, 19, 0.04);
+  --shadow-2: 0 4px 12px rgba(28, 26, 19, 0.08), 0 8px 24px rgba(28, 26, 19, 0.06);
+  --shadow-focus: 0 0 0 3px rgba(37, 87, 214, 0.35);
+
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --surface: #0e1116;
+  --surface-2: #161b22;
+  --surface-3: #1f242d;
+  --surface-elevated: #1c222b;
+  --border: #2a3038;
+  --border-strong: #4b5563;
+
+  --text: #e8eef5;
+  --text-2: #b6c0cc;
+  --text-3: #8493a3;
+  --text-on-accent: #06101e;
+
+  --accent: #7aa9ff;
+  --accent-2: #4f87f0;
+  --accent-soft: #1a253b;
+  --focus-ring: #7aa9ff;
+
+  --good: #5fd07b;
+  --good-fg: #062813;
+  --good-soft: #15291a;
+  --good-soft-fg: #b9e6c4;
+
+  --edge: #efb547;
+  --edge-fg: #2a1c00;
+  --edge-soft: #2c2210;
+  --edge-soft-fg: #f4d68b;
+
+  --no-go: #f37b73;
+  --no-go-fg: #2a0a08;
+  --no-go-soft: #2e1715;
+  --no-go-soft-fg: #f5c4c0;
+
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-2: 0 4px 16px rgba(0, 0, 0, 0.5), 0 12px 36px rgba(0, 0, 0, 0.4);
+  --shadow-focus: 0 0 0 3px rgba(122, 169, 255, 0.45);
+
+  color-scheme: dark;
+}
+
+/*
+ * Geometry, spacing, motion — theme-independent.
+ * Spacing scale is a 4px baseline. Avoid arbitrary px in components.
+ */
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+  --space-9: 56px;
+  --space-10: 80px;
+
+  --radius-1: 4px;
+  --radius-2: 8px;
+  --radius-3: 12px;
+  --radius-4: 16px;
+  --radius-pill: 999px;
+
+  --transition-fast: 120ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  --transition-mid: 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  --container-max: 1200px;
+}
+
+/*
+ * Reduce-motion sentinel. Components consult `var(--motion)` when toggling
+ * transition durations so the choice is centralised. JS may also branch on
+ * matchMedia('(prefers-reduced-motion: reduce)').
+ */
+:root {
+  --motion: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion: 0;
+    --transition-fast: 0ms;
+    --transition-mid: 0ms;
+  }
+}

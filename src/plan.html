@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Cycling Weather — Trip planner</title>
+  <meta name="description" content="Plan a cycling trip — find the best destination for a date window in the next 14 days.">
+  <meta name="theme-color" content="#fafaf7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0c3d1a" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="./icons/favicon.ico" sizes="any">
+  <link rel="icon" href="./icons/icon-192.png" type="image/png" sizes="192x192">
+  <link rel="icon" href="./icons/icon-512.png" type="image/png" sizes="512x512">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon-180.png" sizes="180x180">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon-167.png" sizes="167x167">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon-152.png" sizes="152x152">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Cycling Wx">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta property="og:title" content="Cycling Weather — Trip planner">
+  <meta property="og:description" content="Plan a cycling trip — find the best destination for a date window in the next 14 days.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="./og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <script>
+    // FOUC prevention: resolve theme synchronously before first paint.
+    // Mirror of theme-toggle.ts logic; do not edit one without the other.
+    (function () {
+      try {
+        var stored = null;
+        try { stored = localStorage.getItem("cw-theme"); } catch (_) {}
+        var theme = (stored === "light" || stored === "dark")
+          ? stored
+          : (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.setAttribute("data-theme", theme);
+      } catch (e) {
+        document.documentElement.setAttribute("data-theme", "light");
+      }
+    })();
+  </script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<div id="site-header" class="site-header-mount" data-active="plan"></div>
+<main id="main" class="wrap">
+  <section class="hero hero-page-header" aria-label="Trip planner intro">
+    <p class="hero-eyebrow">Trip planner</p>
+    <h1 class="hero-destination"><span class="hero-destination-link">When &amp; where to ride</span></h1>
+    <p class="hero-editorial">Pick a window in the next 14 days. We&rsquo;ll rank destinations by their best clean run inside that window — filterable by departure region and your ride-clean thresholds.</p>
+  </section>
+
+  <section class="plan-section" aria-labelledby="plan-controls-title">
+    <div class="ranking-toolbar">
+      <h2 id="plan-controls-title" class="section-title">Plan a window</h2>
+      <button type="button" id="threshold-trigger" class="threshold-trigger" aria-haspopup="dialog">
+        <span class="threshold-trigger-icon" aria-hidden="true">⚙</span>
+        <span class="threshold-trigger-label">Thresholds</span>
+        <span class="threshold-trigger-summary">Defaults</span>
+      </button>
+    </div>
+
+    <form id="plan-form" class="plan-form" aria-label="Trip window controls">
+      <fieldset class="plan-field">
+        <legend>Date window</legend>
+        <div class="plan-dates">
+          <label>
+            <span class="plan-label">From</span>
+            <input id="plan-start" name="start" type="date" required>
+          </label>
+          <label>
+            <span class="plan-label">To</span>
+            <input id="plan-end" name="end" type="date" required>
+          </label>
+        </div>
+        <p id="plan-window-summary" class="plan-window-summary" aria-live="polite"></p>
+      </fieldset>
+
+      <fieldset class="plan-field">
+        <legend>Trip length</legend>
+        <div id="plan-length" class="chip-row" role="radiogroup" aria-label="Trip length"></div>
+      </fieldset>
+
+      <fieldset class="plan-field">
+        <legend>Departure region</legend>
+        <div id="plan-region" class="chip-row" role="radiogroup" aria-label="Departure region"></div>
+      </fieldset>
+    </form>
+  </section>
+
+  <section class="plan-results-section" aria-labelledby="plan-results-title">
+    <div class="plan-results-toolbar">
+      <h2 id="plan-results-title" class="section-title">Best destinations for this window</h2>
+      <p id="plan-results-summary" class="plan-results-summary" aria-live="polite"></p>
+    </div>
+    <ul id="plan-results" class="plan-results" aria-label="Ranked destinations for selected window"></ul>
+  </section>
+
+  <section class="plan-notify-section" aria-labelledby="plan-notify-title">
+    <h2 id="plan-notify-title" class="section-title">Email me when a clean window opens</h2>
+    <form id="plan-notify-form" class="plan-notify-form" aria-describedby="plan-notify-help">
+      <p id="plan-notify-help" class="plan-notify-help">A non-functional UI stub for now — your address is saved to this device only. We&rsquo;ll wire real notifications later.</p>
+      <label class="plan-notify-row">
+        <span class="plan-label">Email</span>
+        <input id="plan-notify-email" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" required>
+      </label>
+      <label class="plan-notify-row">
+        <span class="plan-label">Destination</span>
+        <select id="plan-notify-dest"></select>
+      </label>
+      <button type="submit" class="plan-notify-submit">Save alert</button>
+      <p id="plan-notify-status" class="plan-notify-status" role="status" aria-live="polite"></p>
+    </form>
+  </section>
+</main>
+<footer class="site-footer">
+  <p class="footer-line"><span class="footer-meta" id="footer-freshness">Data freshness loading…</span></p>
+  <p class="footer-line">Daily snapshot from <a href="https://open-meteo.com/">Open-Meteo</a> · 22 destinations · <a href="./methodology.html">methodology</a></p>
+</footer>
+
+<script type="module" src="./plan.ts"></script>
+</body>
+</html>

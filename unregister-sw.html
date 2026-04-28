@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Cycling Weather — unregister service worker</title>
+  <meta name="description" content="Escape hatch: unregister the Cycling Weather service worker and clear its caches.">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#fafaf7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0c3d1a" media="(prefers-color-scheme: dark)">
+  <style>
+    :root { color-scheme: light dark; }
+    body {
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      max-width: 38rem;
+      margin: 4rem auto;
+      padding: 0 1.25rem;
+      line-height: 1.55;
+      color: #14130d;
+      background: #fafaf7;
+    }
+    @media (prefers-color-scheme: dark) {
+      body { color: #f3f0e9; background: #0e1116; }
+      a { color: #97baff; }
+    }
+    h1 { font-size: 1.4rem; margin-bottom: 0.5rem; }
+    code { background: rgba(127,127,127,0.12); padding: 0.05em 0.35em; border-radius: 4px; }
+    #status {
+      margin-top: 1.25rem;
+      padding: 0.85rem 1rem;
+      border-radius: 8px;
+      background: rgba(127,127,127,0.08);
+      border: 1px solid rgba(127,127,127,0.18);
+      font-family: ui-monospace, "JetBrains Mono", "SFMono-Regular", Menlo, monospace;
+      white-space: pre-wrap;
+    }
+    button {
+      margin-top: 1rem;
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      border: 1px solid currentColor;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      cursor: pointer;
+    }
+    button:hover { background: rgba(127,127,127,0.1); }
+  </style>
+</head>
+<body>
+  <h1>Unregister service worker</h1>
+  <p>This page unregisters the Cycling Weather service worker on this device and deletes its caches. Useful if a stuck install is showing a stale page.</p>
+  <p>Run this only on <code>cycling-weather-site</code>. It does not touch SWs from other origins.</p>
+  <div id="status" role="status" aria-live="polite">Idle.</div>
+  <button id="run" type="button">Unregister + clear caches</button>
+  <p style="margin-top:1.5rem;"><a href="./index.html">← Back to Cycling Weather</a></p>
+  <script>
+    const status = document.getElementById("status");
+    const btn = document.getElementById("run");
+    function log(line) {
+      status.textContent += "\n" + line;
+    }
+    async function run() {
+      btn.disabled = true;
+      status.textContent = "Working…";
+      let unregCount = 0;
+      let cacheCount = 0;
+      try {
+        if ("serviceWorker" in navigator) {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          for (const r of regs) {
+            const ok = await r.unregister();
+            if (ok) unregCount += 1;
+          }
+          log("service worker registrations unregistered: " + unregCount);
+        } else {
+          log("serviceWorker API not available");
+        }
+        if ("caches" in self) {
+          const keys = await caches.keys();
+          for (const k of keys) {
+            const ok = await caches.delete(k);
+            if (ok) cacheCount += 1;
+          }
+          log("cache stores deleted: " + cacheCount + " (of " + keys.length + ")");
+        } else {
+          log("caches API not available");
+        }
+        log("done — reload index.html to confirm a fresh fetch.");
+      } catch (err) {
+        log("error: " + (err && err.message ? err.message : String(err)));
+      } finally {
+        btn.disabled = false;
+      }
+    }
+    btn.addEventListener("click", run);
+  </script>
+</body>
+</html>

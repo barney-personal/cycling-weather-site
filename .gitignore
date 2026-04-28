@@ -1,0 +1,11 @@
+node_modules/
+.vite/
+.cache/
+.DS_Store
+*.log
+.env
+.env.local
+
+# Built artefacts (index.html, history.html, methodology.html, assets/)
+# ARE committed so GitHub Pages can serve them — the daily cron has no node runtime.
+# Do NOT add /assets, /index.html etc. here.

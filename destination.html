@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>Cycling Weather — Where to Ride</title>
-  <meta name="description" content="Daily ranking of where on Earth the weather is best for road cycling in the next 14 days.">
+  <title>Destination · Cycling Weather</title>
+  <meta name="description" content="14-day outlook, climatology, and signature routes for a single cycling destination.">
   <meta name="theme-color" content="#fafaf7" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#0c3d1a" media="(prefers-color-scheme: dark)">
   <link rel="icon" href="./icons/favicon.ico" sizes="any">
@@ -18,8 +18,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Cycling Wx">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta property="og:title" content="Cycling Weather">
-  <meta property="og:description" content="Where on Earth the weather is best for road cycling — daily 14-day outlook for 22 destinations.">
+  <meta property="og:title" content="Cycling Weather — Destination">
+  <meta property="og:description" content="14-day outlook, climatology, and signature routes for a single cycling destination.">
   <meta property="og:type" content="website">
   <meta property="og:image" content="./og-image.png">
   <meta property="og:image:width" content="1200">
@@ -41,63 +41,22 @@
       }
     })();
   </script>
-  <script type="module" crossorigin src="./assets/index-DqBDJEJJ.js"></script>
+  <script type="module" crossorigin src="./assets/destination-B4-HGdnm.js"></script>
   <link rel="modulepreload" crossorigin href="./assets/data-BGr5sIsN.js">
   <link rel="modulepreload" crossorigin href="./assets/preload-helper-CmsKOCeN.js">
+  <link rel="modulepreload" crossorigin href="./assets/destination-meta-xTBeTcjo.js">
   <link rel="modulepreload" crossorigin href="./assets/qualify-CS5O-wsU.js">
-  <link rel="modulepreload" crossorigin href="./assets/threshold-dial-CLOXjtU8.js">
   <link rel="stylesheet" crossorigin href="./assets/data-C6JkiwwN.css">
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 <div id="site-header" class="site-header-mount" data-active="forward"></div>
 <main id="main" class="wrap">
-  <div id="hero-mount"></div>
-
-  <section id="world-map-mount" class="world-map-section" aria-busy="true" aria-label="World map of cycling destinations"></section>
-
-  <section class="ranking-section" aria-labelledby="ranking-title">
-    <div class="ranking-toolbar">
-      <h2 id="ranking-title" class="section-title">Stack-ranked destinations · 14-day outlook</h2>
-      <button type="button" id="threshold-trigger" class="threshold-trigger" aria-haspopup="dialog">
-        <span class="threshold-trigger-icon" aria-hidden="true">⚙</span>
-        <span class="threshold-trigger-label">Thresholds</span>
-        <span class="threshold-trigger-summary">Defaults</span>
-      </button>
-    </div>
-    <div class="filters" id="filters" role="tablist" aria-label="Filter destinations"></div>
-
-    <p id="rank-summary" class="visually-hidden" aria-live="polite"></p>
-
-    <ul id="rank-cards" class="rank-cards" aria-label="Destinations ranked"></ul>
-
-    <table class="rank-table" aria-describedby="rank-summary">
-      <thead>
-        <tr>
-          <th class="rank">#</th>
-          <th>Destination</th>
-          <th>Median high</th>
-          <th>14-day forecast</th>
-          <th>Best run</th>
-          <th>Dry days</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody id="rank-body"></tbody>
-    </table>
-
-    <div class="legend">
-      <span><span class="legend-swatch is-qualify"></span>Clean ride day</span>
-      <span><span class="legend-swatch rain-light"></span>Drizzle risk</span>
-      <span><span class="legend-swatch rain-wet"></span>Wet</span>
-      <span><span class="legend-swatch wind-blustery"></span>Blustery wind</span>
-      <span class="legend-rule">Defaults: &gt;25°C · 0mm rain · &lt;10% rain prob · sun-cloud · &lt;30 km/h wind</span>
-    </div>
-  </section>
+  <div id="dest-mount" data-slug=""></div>
 </main>
 <footer class="site-footer">
   <p class="footer-line"><span class="footer-meta" id="footer-freshness">Data freshness loading…</span></p>
-  <p class="footer-line">Daily snapshot from <a href="https://open-meteo.com/">Open-Meteo</a> · 22 destinations · <a href="./methodology.html">methodology</a></p>
+  <p class="footer-line">Daily snapshot from <a href="https://open-meteo.com/">Open-Meteo</a> · <a href="./index.html">all destinations</a> · <a href="./methodology.html">methodology</a></p>
 </footer>
 
 </body>

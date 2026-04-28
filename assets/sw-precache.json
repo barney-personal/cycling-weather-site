@@ -1,0 +1,33 @@
+{
+  "version": "2026-04-28T01-32-17-779Z",
+  "urls": [
+    "./",
+    "./assets/data-BGr5sIsN.js",
+    "./assets/data-C6JkiwwN.css",
+    "./assets/destination-B4-HGdnm.js",
+    "./assets/destination-meta-xTBeTcjo.js",
+    "./assets/history-DGm0f8YW.js",
+    "./assets/index-DqBDJEJJ.js",
+    "./assets/methodology-6nRcCFxA.js",
+    "./assets/path-CXeFd1JH.js",
+    "./assets/plan-BCqeyE29.js",
+    "./assets/preload-helper-CmsKOCeN.js",
+    "./assets/qualify-CS5O-wsU.js",
+    "./assets/threshold-dial-CLOXjtU8.js",
+    "./destination.html",
+    "./history.html",
+    "./icons/apple-touch-icon-152.png",
+    "./icons/apple-touch-icon-167.png",
+    "./icons/apple-touch-icon-180.png",
+    "./icons/favicon-32.png",
+    "./icons/favicon.ico",
+    "./icons/icon-192.png",
+    "./icons/icon-512.png",
+    "./icons/icon-maskable-512.png",
+    "./icons/icon-monochrome-512.png",
+    "./index.html",
+    "./manifest.webmanifest",
+    "./methodology.html",
+    "./plan.html"
+  ]
+}

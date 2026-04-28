@@ -1,0 +1,252 @@
+# Pipeline script changes — apply manually after PR merge
+
+The cycling-weather-site repo cannot include changes to the daily refresh
+scripts because they live in a separate workspace tree
+(`/home/node/.openclaw/workspace/scripts/`). Apply this diff there once this
+PR is merged, then a single cron run will regenerate `data.json` with the
+new schema (see milestone M2 in the workflow plan).
+
+Affected file:
+  /home/node/.openclaw/workspace/scripts/cycling_weather_data_build.py
+
+Change summary:
+  - Add SCHEMA_VERSION = 1 (top-level `version` key in data.json)
+  - Add hero block (top destination, lead window, go_count, editorial copy)
+  - Add changelog block (rank deltas + qualifier flips vs previous snapshot)
+  - Add narratives block (empty placeholder for matured-forecast retrospectives)
+  - Add `slug` to every results entry (kebab-cased name) for routing
+  - Honour SITE_DIR env override so orchestrator worktrees can regenerate
+    data.json without touching the master worktree
+
+Site loader (`src/lib/data.ts`) tolerates the absence of every new field, so
+the cron may apply this diff and run before, during, or after the PR merge
+without breaking either side of the deploy window.
+
+To apply:
+
+  cd /home/node/.openclaw/workspace
+  patch -p0 < /path/to/this/pipeline-script-changes.diff
+  # (or open scripts/cycling_weather_data_build.py and merge by hand)
+
+Verify with:
+
+  python3 scripts/cycling_weather_data_build.py
+  python3 -c "import json; d=json.load(open('cycling-weather-site/data.json')); assert d['version']==1 and 'hero' in d and 'changelog' in d; print('ok')"
+
+---
+
+--- /tmp/cycling_weather_data_build.py.orig	2026-04-27 20:58:47.782785983 +0000
++++ /home/node/.openclaw/workspace/scripts/cycling_weather_data_build.py	2026-04-27 20:59:34.925947988 +0000
+@@ -5,16 +5,28 @@
+ 
+ import json
+ import os
++import re
+ import sys
+ from datetime import datetime, timezone
+-from typing import Dict, List
++from typing import Dict, List, Optional
+ 
+ WORKSPACE = "/home/node/.openclaw/workspace"
+ FORECASTS_DIR = f"{WORKSPACE}/data/cycling/forecasts"
+ ACTUALS_DIR = f"{WORKSPACE}/data/cycling/actuals"
+-SITE_DIR = f"{WORKSPACE}/cycling-weather-site"
++# Override with SITE_DIR env var (used by orchestrator worktrees so they can
++# regenerate data.json into a non-master copy of the site).
++SITE_DIR = os.environ.get("SITE_DIR", f"{WORKSPACE}/cycling-weather-site")
+ OUT_PATH = f"{SITE_DIR}/data.json"
+ 
++# Bumped whenever the data.json schema gains/loses fields. The site loader
++# tolerates missing fields when reading older versions.
++SCHEMA_VERSION = 1
++
++
++def slugify(name: str) -> str:
++    s = re.sub(r"[^a-z0-9]+", "-", (name or "").lower()).strip("-")
++    return s or "destination"
++
+ 
+ def load_dir(path: str) -> List[dict]:
+     out = []
+@@ -98,16 +110,171 @@
+     return out
+ 
+ 
++def _ranked(results: List[dict]) -> List[dict]:
++    """Return results sorted by score desc — the canonical homepage ranking."""
++    return sorted(
++        [r for r in results if r and r.get("name")],
++        key=lambda r: (r.get("score") or 0),
++        reverse=True,
++    )
++
++
++def _editorial(latest: dict, top: dict, go_count: int) -> str:
++    """One-to-two sentence hero copy describing today's overall verdict.
++
++    Pure template — no LLM. Falls back gracefully when fields are missing."""
++    name = top.get("name") or "the leader"
++    best_run = top.get("best_run") or 0
++    median = top.get("median_temp")
++    median_s = f"{median:.0f}°C" if isinstance(median, (int, float)) else "—"
++    if go_count >= 3:
++        return (
++            f"{go_count} destinations are flirting with a clean 7-day window — "
++            f"{name} leads at {median_s}."
++        )
++    if go_count == 1:
++        return (
++            f"{name} is the only destination clearing the bar this fortnight — "
++            f"a {best_run}-day clean run, median {median_s}."
++        )
++    if best_run >= 4:
++        return (
++            f"No clean 7-day window anywhere — {name} comes closest with "
++            f"{best_run} contiguous days at {median_s}."
++        )
++    return (
++        f"Nowhere is properly rideable yet. {name} tops the table at {median_s}, "
++        "but no destination strings 7 clean days together."
++    )
++
++
++def build_hero(latest: Optional[dict]) -> Optional[dict]:
++    """Hero block: top destination + lead window + GO count + editorial copy."""
++    if not latest:
++        return None
++    results = _ranked(latest.get("results") or [])
++    if not results:
++        return None
++    top = results[0]
++    go_count = sum(1 for r in results if r.get("qualifier"))
++    if go_count >= 3:
++        verdict = "go"
++    elif go_count >= 1:
++        verdict = "edge"
++    else:
++        verdict = "no-go"
++    return {
++        "verdict": verdict,
++        "top_slug": slugify(top.get("name") or ""),
++        "top_name": top.get("name"),
++        "top_region": top.get("region"),
++        "top_score": top.get("score"),
++        "top_median_temp": top.get("median_temp"),
++        "top_best_run": top.get("best_run"),
++        "lead_window_start": top.get("best_start"),
++        "lead_window_end": top.get("best_end"),
++        "go_count": go_count,
++        "total_count": len(results),
++        "editorial": _editorial(latest, top, go_count),
++        "outlook": latest.get("outlook"),
++        "forecast_date": latest.get("forecast_date"),
++    }
++
++
++def build_changelog(forecasts: List[dict]) -> List[dict]:
++    """Per-destination changes from the previous snapshot to the latest one.
++
++    Each entry: { name, slug, region, rank_now, rank_prev, rank_delta,
++    qualifier_now, qualifier_prev, qualifier_flip }. With <2 snapshots,
++    deltas are null and qualifier_flip is false."""
++    if not forecasts:
++        return []
++    latest = forecasts[-1]
++    prev = forecasts[-2] if len(forecasts) >= 2 else None
++    latest_ranked = _ranked(latest.get("results") or [])
++    rank_by_name_now: Dict[str, int] = {
++        (r.get("name") or ""): i + 1 for i, r in enumerate(latest_ranked)
++    }
++    rank_by_name_prev: Dict[str, int] = {}
++    qualifier_prev_by_name: Dict[str, bool] = {}
++    if prev:
++        prev_ranked = _ranked(prev.get("results") or [])
++        rank_by_name_prev = {
++            (r.get("name") or ""): i + 1 for i, r in enumerate(prev_ranked)
++        }
++        qualifier_prev_by_name = {
++            (r.get("name") or ""): bool(r.get("qualifier"))
++            for r in prev_ranked
++        }
++    out = []
++    for r in latest_ranked:
++        name = r.get("name") or ""
++        rank_now = rank_by_name_now.get(name)
++        rank_prev = rank_by_name_prev.get(name) if prev else None
++        rank_delta = (rank_prev - rank_now) if (rank_prev is not None and rank_now is not None) else None
++        qualifier_now = bool(r.get("qualifier"))
++        qualifier_prev = qualifier_prev_by_name.get(name) if prev else None
++        qualifier_flip = (
++            qualifier_prev is not None and qualifier_prev != qualifier_now
++        )
++        out.append({
++            "name": name,
++            "slug": slugify(name),
++            "region": r.get("region"),
++            "rank_now": rank_now,
++            "rank_prev": rank_prev,
++            "rank_delta": rank_delta,
++            "qualifier_now": qualifier_now,
++            "qualifier_prev": qualifier_prev,
++            "qualifier_flip": qualifier_flip,
++        })
++    return out
++
++
++def build_narratives(calibration: List[dict]) -> List[dict]:
++    """Retrospective stories for matured forecasts.
++
++    Empty until the calibration table accumulates rows; the site renders
++    nothing for an empty list. Real narrative generation lives in M9 once we
++    have a meaningful sample size."""
++    if not calibration:
++        return []
++    return []
++
++
++def _attach_slugs(latest: Optional[dict]) -> Optional[dict]:
++    """Return a copy of `latest` with a `slug` field on each result row.
++
++    Slug is derived from the destination name; stable across runs."""
++    if not latest:
++        return latest
++    results = latest.get("results") or []
++    new_results = []
++    for r in results:
++        rr = dict(r)
++        rr["slug"] = slugify(rr.get("name") or "")
++        new_results.append(rr)
++    out = dict(latest)
++    out["results"] = new_results
++    return out
++
++
+ def main() -> int:
+     forecasts = load_dir(FORECASTS_DIR)
+     actuals = load_dir(ACTUALS_DIR)
+     latest = latest_snapshot(forecasts)
++    latest_with_slugs = _attach_slugs(latest)
++    calibration = build_calibration(forecasts, actuals)
+     payload = {
++        "version": SCHEMA_VERSION,
+         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+-        "latest": latest,
++        "latest": latest_with_slugs,
++        "hero": build_hero(latest_with_slugs),
++        "changelog": build_changelog(forecasts),
++        "narratives": build_narratives(calibration),
+         "forecasts_count": len(forecasts),
+         "actuals_count": len(actuals),
+-        "calibration": build_calibration(forecasts, actuals),
++        "calibration": calibration,
+         "actuals_timeline": build_actuals_timeline(actuals),
+         "snapshots": [
+             {
+@@ -117,6 +284,7 @@
+                 "results": [
+                     {
+                         "name": r.get("name"),
++                        "slug": slugify(r.get("name") or ""),
+                         "region": r.get("region"),
+                         "median_temp": r.get("median_temp"),
+                         "best_run": r.get("best_run"),
