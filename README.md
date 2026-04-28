@@ -103,6 +103,11 @@ package.json, tsconfig.json, vite.config.ts, biome.json
 - Do not commit `node_modules/`. Do commit built artefacts at the repo root.
 - `data.json` schema can evolve, but loaders must default missing fields gracefully — there is
   a ~24h window where new code will load yesterday's `data.json`.
+- `data.json` schema v2 (M4) adds `hourly` arrays to each `daily[]` entry — 15 ride-hour
+  entries (06:00–20:00) per day with `{time, temp, precip, precip_prob, wind, code}`. The
+  loader treats missing `hourly` as `[]` so v1 data renders without sparklines. The cron
+  pipeline (`euro_cycling_weather.py`) now fetches hourly data from Open-Meteo; the build
+  script (`cycling_weather_data_build.py`) passes it through.
 - d3 v7 ships as ESM sub-packages, bundled by Vite — no CDN.
 - Stale-data banner (homepage): when `data.json.generated_at` is more than 36 hours old,
   the homepage shows a `role="status"` banner above the hero so users aren't quietly

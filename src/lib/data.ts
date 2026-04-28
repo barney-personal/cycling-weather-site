@@ -11,6 +11,7 @@ import type {
   DailyForecast,
   DestinationResult,
   HeroBlock,
+  HourlyEntry,
   LatestSnapshot,
   NarrativeEntry,
   SiteData,
@@ -52,6 +53,17 @@ function asNullableBool(v: unknown): boolean | null {
   return null;
 }
 
+function normaliseHourlyEntry(h: any): HourlyEntry {
+  return {
+    time: asString(h?.time),
+    temp: asNumber(h?.temp),
+    precip: asNumber(h?.precip),
+    precip_prob: asNumber(h?.precip_prob),
+    wind: asNumber(h?.wind),
+    code: asNumber(h?.code),
+  };
+}
+
 function normaliseDaily(d: any): DailyForecast {
   return {
     date: asString(d?.date),
@@ -61,6 +73,7 @@ function normaliseDaily(d: any): DailyForecast {
     wind_max: asNumber(d?.wind_max),
     weather_code: asNumber(d?.weather_code),
     qualify: asBool(d?.qualify),
+    hourly: Array.isArray(d?.hourly) ? d.hourly.map(normaliseHourlyEntry) : [],
   };
 }
 
