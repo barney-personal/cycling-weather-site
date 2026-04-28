@@ -67,6 +67,29 @@ test("normaliseSiteData accepts the latest schema (v3 with climatology + hourly)
     assert.ok(sample.median_temp_max === null || typeof sample.median_temp_max === "number");
     assert.equal(typeof sample.sample_size, "number");
   }
+
+  // v4: model_spread block (optional, but expected on the live data.json).
+  if (out.version >= 4) {
+    assert.ok(out.model_spread, "model_spread block present at v4");
+    assert.ok(Array.isArray(out.model_spread!.models));
+    assert.ok(out.model_spread!.models.length >= 1, "≥1 model named");
+    assert.ok(
+      out.model_spread!.destinations.length >= 22,
+      `≥22 destinations in model_spread (got ${out.model_spread!.destinations.length})`,
+    );
+    const sample = out.model_spread!.destinations[0]!;
+    assert.equal(typeof sample.name, "string");
+    assert.ok(Array.isArray(sample.days), "days array present");
+    if (sample.days.length > 0) {
+      const d0 = sample.days[0]!;
+      assert.equal(typeof d0.date, "string");
+      assert.ok(
+        d0.temp_spread_c === null || typeof d0.temp_spread_c === "number",
+        "temp_spread_c is number|null",
+      );
+      assert.equal(typeof d0.models_count, "number");
+    }
+  }
 });
 
 test("normaliseSiteData tolerates legacy pre-M2 schema (no version/hero/changelog)", () => {
@@ -107,6 +130,8 @@ test("normaliseSiteData tolerates legacy pre-M2 schema (no version/hero/changelo
 
   // v1 has no climatology block — must surface as null (caller renders nothing).
   assert.equal(out.climatology, null, "climatology is null on legacy v1 schema");
+  // v1 has no model_spread block either — must surface as null.
+  assert.equal(out.model_spread, null, "model_spread is null on legacy v1 schema");
 });
 
 test("normaliseSiteData survives malformed input without throwing", () => {
@@ -120,6 +145,7 @@ test("normaliseSiteData survives malformed input without throwing", () => {
   assert.deepEqual(out.actuals_timeline, []);
   assert.deepEqual(out.snapshots, []);
   assert.equal(out.climatology, null);
+  assert.equal(out.model_spread, null);
 });
 
 test("slugify handles unicode + punctuation", () => {

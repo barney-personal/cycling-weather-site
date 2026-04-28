@@ -164,6 +164,30 @@ export interface ClimatologyBlock {
   destinations: ClimatologyEntry[];
 }
 
+export interface ModelSpreadDay {
+  date: string;
+  temp_min: number | null;
+  temp_max: number | null;
+  temp_spread_c: number | null;
+  prob_min: number | null;
+  prob_max: number | null;
+  precip_prob_spread_pct: number | null;
+  models_count: number;
+}
+
+export interface ModelSpreadEntry {
+  name: string;
+  days: ModelSpreadDay[];
+}
+
+export interface ModelSpreadBlock {
+  generated_at: string;
+  anchor_date: string;
+  models: string[];
+  forecast_days: number;
+  destinations: ModelSpreadEntry[];
+}
+
 export interface SiteData {
   version: number;
   generated_at: string;
@@ -177,4 +201,5 @@ export interface SiteData {
   actuals_timeline: ActualsTimelineRow[];
   snapshots: SnapshotLite[];
   climatology: ClimatologyBlock | null;
+  model_spread: ModelSpreadBlock | null;
 }
