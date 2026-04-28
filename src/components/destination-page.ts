@@ -32,6 +32,11 @@ import {
   formatClimatologyContext,
   renderClimatologyLine,
 } from "./climatology-line";
+import {
+  findModelSpreadEntry,
+  formatConfidenceContext,
+  renderConfidenceChip,
+} from "./confidence-chip";
 
 export interface MountDestinationOptions {
   mount: HTMLElement;
@@ -425,6 +430,10 @@ export function mountDestinationPage(opts: MountDestinationOptions): void {
     `Climatology comparison for ${result.name}`,
   );
 
+  const spreadEntry = findModelSpreadEntry(data.model_spread, result.name);
+  const confidenceContext = formatConfidenceContext(spreadEntry, data.model_spread);
+  const confidenceChip = renderConfidenceChip(confidenceContext);
+
   const region = result.region
     ? `<span class="dest-region">${escapeHtml(result.region)}</span>`
     : "";
@@ -452,6 +461,7 @@ export function mountDestinationPage(opts: MountDestinationOptions): void {
         <div class="hero-header">
           <span class="hero-verdict-pill verdict-${verdict}">${verdictLabel}</span>
           <p class="hero-eyebrow">14-day outlook</p>
+          ${confidenceChip}
         </div>
         <h1 id="dest-title" class="hero-destination">
           <span class="dest-title-name">${escapeHtml(result.name)}</span>

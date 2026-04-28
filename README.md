@@ -108,6 +108,20 @@ package.json, tsconfig.json, vite.config.ts, biome.json
   loader treats missing `hourly` as `[]` so v1 data renders without sparklines. The cron
   pipeline (`euro_cycling_weather.py`) now fetches hourly data from Open-Meteo; the build
   script (`cycling_weather_data_build.py`) passes it through.
+- `data.json` schema v3 (M5) adds a top-level `climatology` block — a per-destination
+  same-week 5-year rollup (median + P10/P90 temp, median precip) used to render the
+  "is this week unusual?" context line on the hero and destination pages. The cron-side
+  fetcher is `cycling_weather_climatology.py` (separate from the build aggregator so the
+  build stays network-free). Loader returns `null` on missing/malformed; renderer is
+  silent when null.
+- `data.json` schema v4 (M7) adds a top-level `model_spread` block — per-destination
+  per-day envelope `{temp_min/max/spread_c, prob_min/max/spread_pct, models_count}`
+  across three independent global forecast models (ECMWF, GFS, ICON). The cron-side
+  fetcher is `cycling_weather_model_spread.py` (separate script, daily TTL, ~22 HTTP
+  calls per cron cycle). The destination-page confidence chip fires when any of the
+  next 7 days has temp_spread ≥ 3°C OR precip-prob spread ≥ 25% — empirically ~13.6%
+  of (destination, day) pairs trip this on a typical week. Loader returns `null` on
+  missing/malformed; chip is silent when the lead window is confident.
 - d3 v7 ships as ESM sub-packages, bundled by Vite — no CDN.
 - Stale-data banner (homepage): when `data.json.generated_at` is more than 36 hours old,
   the homepage shows a `role="status"` banner above the hero so users aren't quietly

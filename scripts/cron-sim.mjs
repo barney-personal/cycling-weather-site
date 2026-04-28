@@ -70,6 +70,12 @@ if (failures === 0) {
   const json = JSON.parse(await readFile(dataPath, "utf8"));
   if (typeof json.version !== "number") fail("regenerated data.json missing version");
   if (json.version < 2) fail(`regenerated data.json version is ${json.version}, expected >= 2`);
+  if (json.version < 4) {
+    // After M7 the cron-side build emits v4. If cron-sim ever sees a regen
+    // below v4 it means the build script regressed — fail loudly so we catch
+    // it next CI run rather than next deploy.
+    fail(`regenerated data.json version is ${json.version}, expected >= 4 post-M7`);
+  }
   if (!json.latest) fail("regenerated data.json missing top-level 'latest'");
   if (!Array.isArray(json.changelog)) fail("regenerated data.json missing 'changelog' array");
   if (!json.hero) fail("regenerated data.json missing 'hero' block");
@@ -119,6 +125,39 @@ if (failures === 0) {
       }
     } else {
       ok("v3 schema OK (climatology block absent — cache not yet populated)");
+    }
+
+    // v4: verify model_spread block passes through when present (optional;
+    // absent if cycling_weather_model_spread.py hasn't yet populated the cache).
+    if (json.model_spread) {
+      if (!Array.isArray(json.model_spread.models) || json.model_spread.models.length === 0) {
+        fail("model_spread missing models array");
+      }
+      if (!Array.isArray(json.model_spread.destinations)) {
+        fail("model_spread missing destinations array");
+      } else if (json.model_spread.destinations.length === 0) {
+        fail("model_spread destinations array is empty");
+      } else {
+        const sample = json.model_spread.destinations[0];
+        if (typeof sample.name !== "string") fail("model_spread entry missing name");
+        if (!Array.isArray(sample.days)) fail("model_spread entry missing days array");
+        if (sample.days.length > 0) {
+          const d0 = sample.days[0];
+          if (typeof d0.date !== "string") fail("model_spread day missing date");
+          if (
+            d0.temp_spread_c !== null &&
+            typeof d0.temp_spread_c !== "number"
+          ) {
+            fail("model_spread day has malformed temp_spread_c");
+          }
+          if (typeof d0.models_count !== "number") {
+            fail("model_spread day missing models_count");
+          }
+        }
+        ok(`v4 model_spread block present (${json.model_spread.destinations.length} destinations, ${json.model_spread.models.length} models)`);
+      }
+    } else {
+      ok("v4 schema OK (model_spread block absent — cache not yet populated)");
     }
   }
   const afterBytes = (await readFile(dataPath)).length;

@@ -15,6 +15,9 @@ import type {
   HeroBlock,
   HourlyEntry,
   LatestSnapshot,
+  ModelSpreadBlock,
+  ModelSpreadDay,
+  ModelSpreadEntry,
   NarrativeEntry,
   SiteData,
   SnapshotLite,
@@ -249,6 +252,46 @@ function normaliseClimatology(c: unknown): ClimatologyBlock | null {
   };
 }
 
+function normaliseModelSpreadDay(d: any): ModelSpreadDay {
+  return {
+    date: asString(d?.date),
+    temp_min: asNullableNumber(d?.temp_min),
+    temp_max: asNullableNumber(d?.temp_max),
+    temp_spread_c: asNullableNumber(d?.temp_spread_c),
+    prob_min: asNullableNumber(d?.prob_min),
+    prob_max: asNullableNumber(d?.prob_max),
+    precip_prob_spread_pct: asNullableNumber(d?.precip_prob_spread_pct),
+    models_count: asNumber(d?.models_count),
+  };
+}
+
+function normaliseModelSpreadEntry(e: any): ModelSpreadEntry {
+  return {
+    name: asString(e?.name),
+    days: Array.isArray(e?.days) ? e.days.map(normaliseModelSpreadDay) : [],
+  };
+}
+
+// Schema v4 introduced a top-level `model_spread` block; v1/v2/v3 snapshots
+// don't emit it, in which case we return null and the site renders no
+// confidence chip.
+function normaliseModelSpread(m: unknown): ModelSpreadBlock | null {
+  if (!m || typeof m !== "object") return null;
+  const o = m as any;
+  const dests = Array.isArray(o.destinations) ? o.destinations.map(normaliseModelSpreadEntry) : [];
+  if (dests.length === 0) return null;
+  const models = Array.isArray(o.models)
+    ? o.models.filter((x: unknown) => typeof x === "string")
+    : [];
+  return {
+    generated_at: asString(o.generated_at),
+    anchor_date: asString(o.anchor_date),
+    models,
+    forecast_days: asNumber(o.forecast_days),
+    destinations: dests,
+  };
+}
+
 export function normaliseSiteData(raw: unknown): SiteData {
   const r = (raw && typeof raw === "object" ? (raw as any) : {}) as Record<string, unknown>;
   const latest = normaliseLatest(r.latest);
@@ -266,6 +309,7 @@ export function normaliseSiteData(raw: unknown): SiteData {
     actuals_timeline: Array.isArray(r.actuals_timeline) ? (r.actuals_timeline as any) : [],
     snapshots: normaliseSnapshots(r.snapshots),
     climatology: normaliseClimatology(r.climatology),
+    model_spread: normaliseModelSpread(r.model_spread),
   };
 }
 

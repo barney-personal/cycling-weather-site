@@ -648,6 +648,43 @@ header.site {
   background: color-mix(in srgb, var(--accent-soft) 18%, transparent);
 }
 
+/* ---------- forecast-confidence chip (M7) ---------------------------- */
+.confidence-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-pill);
+  border: 1px solid color-mix(in srgb, var(--edge) 45%, transparent);
+  background: color-mix(in srgb, var(--edge-soft) 35%, transparent);
+  font-family: var(--font-sans);
+  font-size: var(--fs-1);
+  font-weight: 600;
+  color: color-mix(in srgb, var(--edge) 80%, var(--text-1));
+  letter-spacing: 0.02em;
+  cursor: help;
+  white-space: nowrap;
+  line-height: 1.1;
+}
+.confidence-icon {
+  font-size: 1em;
+  line-height: 1;
+}
+.confidence-text {
+  line-height: 1;
+}
+[data-theme="dark"] .confidence-chip {
+  background: color-mix(in srgb, var(--edge-soft) 22%, transparent);
+  color: color-mix(in srgb, var(--edge) 92%, var(--text-1));
+  border-color: color-mix(in srgb, var(--edge) 55%, transparent);
+}
+@media (prefers-contrast: more) {
+  .confidence-chip {
+    border-width: 2px;
+    color: var(--edge);
+  }
+}
+
 .hero-empty .hero-empty-msg {
   font-family: var(--font-serif);
   font-size: var(--fs-4);
