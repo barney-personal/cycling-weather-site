@@ -1,1 +1,0 @@
-import{m as t,r as o,l as n,a as r}from"./data-BEoqOe8L.js";t({mount:"#site-header",active:"methodology"});o();n().then(e=>{r("#footer-freshness",e)}).catch(()=>{const e=document.getElementById("footer-freshness");e&&(e.textContent="data.json offline — try again when reconnected.")});
