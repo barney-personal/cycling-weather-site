@@ -47,7 +47,11 @@ The visual baseline matrix covers each of the five entry pages at:
   **prefers-contrast: more** (`-hcontrast.png`),
 - one stale-banner state at 1280 — `index-1280-stale.png`, captured via the
   `?stale=1` debug query param so the banner snapshots deterministically
-  regardless of `data.json.generated_at`.
+  regardless of `data.json.generated_at`,
+- two calendar-view states — `index-1280-calendar.png` (full grid) and
+  `index-320-calendar.png` (sticky-column horizontal-scroll on small phones),
+  captured via `?view=calendar` so the lazy-loaded calendar chunk is in scope
+  for visual regression.
 
 Comparison uses a 5% deflated-byte budget which absorbs daily timestamp
 drift in hero copy + sub-pixel font shifts within the same chromium
@@ -128,6 +132,18 @@ package.json, tsconfig.json, vite.config.ts, biome.json
   shown out-of-date forecasts. Force-trigger it with `?stale=1` (used by the visual snapshot
   suite). See `src/components/stale-banner.ts`; threshold + parsing rules covered by
   `tests/stale-banner.spec.ts`.
+- Calendar view (M9): the homepage stack-ranking section ships two layouts behind a tablist
+  toggle in `.ranking-toolbar`. Default is the existing **table** (cards on mobile, table on
+  ≥1024px). The **calendar** view renders a grid where rows = destinations (in qualifier rank)
+  and columns = the next 14 days, with the leftmost destination column sticky for horizontal
+  scroll on narrow viewports. Cells reuse the strip-cell encoding (temp gradient + rain dots
+  + wind hatch + qualifier outline) so the visual vocabulary is identical to the table strip.
+  Toggle state persists in the URL (`?view=calendar`); reload round-trips. The calendar bytes
+  ship in a separate `calendar-*.js` chunk loaded via `await import("./components/calendar")`,
+  so the homepage initial-paint graph is unaffected when the user stays on the table view.
+  Keyboard: when focus is inside the grid, ArrowLeft/Right move within a row, ArrowUp/Down
+  move within a column, Home/End jump to the row's first/last day, Ctrl+Home/Ctrl+End jump
+  to the top-left/bottom-right cell.
 - Personal calibration profile (M6): the threshold dial exposes a "Calibrate from a profile"
   CTA that opens a 5-question modal (heat preference, rain tolerance, max wind, sky, stringency).
   Answers map deterministically to a `DialState` via `src/lib/profile.ts` (pure function,
