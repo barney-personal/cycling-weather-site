@@ -128,6 +128,15 @@ package.json, tsconfig.json, vite.config.ts, biome.json
   shown out-of-date forecasts. Force-trigger it with `?stale=1` (used by the visual snapshot
   suite). See `src/components/stale-banner.ts`; threshold + parsing rules covered by
   `tests/stale-banner.spec.ts`.
+- Personal calibration profile (M6): the threshold dial exposes a "Calibrate from a profile"
+  CTA that opens a 5-question modal (heat preference, rain tolerance, max wind, sky, stringency).
+  Answers map deterministically to a `DialState` via `src/lib/profile.ts` (pure function,
+  covered by `tests/profile.spec.ts`). The picker dispatches a `cwprofile:apply` window event
+  carrying the resolved state; the threshold dial subscribes and runs its existing `commit()`
+  pipeline so storage + URL + the standard `cwthresholds:change` event all update without
+  duplicate plumbing. Profile is persisted under `cw:profile:v1` (versioned key — schema bumps
+  ignore unknown shapes safely). "Reset" clears the storage key and applies the canonical
+  cycling-comfort defaults.
 - Build-artefact hygiene: every `assets/*.{js,css}` file in the repo MUST be reachable from
   the live import graph (entry HTMLs at HEAD → `<script>`/`<link>` refs → recursive
   dynamic-import refs inside the chunks themselves) or from `assets/sw-precache.json`. When

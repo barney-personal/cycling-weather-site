@@ -1397,6 +1397,271 @@ html.threshold-dial-open {
   }
 }
 
+/* ---------- threshold-dial profile-CTA row --------------------------- */
+.threshold-dial-cta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-2);
+  background: var(--accent-soft);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--border));
+  flex-wrap: wrap;
+}
+.threshold-dial-cta-label {
+  font-size: var(--fs-1);
+  color: var(--text-2);
+  font-weight: 500;
+}
+.threshold-dial-cta-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  min-height: 36px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  color: var(--accent-2);
+  font-family: var(--font-sans);
+  font-size: var(--fs-1);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.threshold-dial-cta-button:hover {
+  background: var(--accent);
+  color: var(--text-on-accent);
+}
+.threshold-dial-cta-arrow {
+  font-family: var(--font-mono);
+  font-weight: 400;
+}
+
+/* ---------- profile picker modal ------------------------------------- */
+.profile-picker {
+  position: fixed;
+  inset: 0;
+  z-index: 210;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: none;
+}
+.profile-picker[hidden] {
+  display: none;
+}
+.profile-picker-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 19, 13, 0.36);
+  pointer-events: auto;
+  opacity: 0;
+  transition: opacity var(--transition-mid);
+}
+[data-theme="dark"] .profile-picker-backdrop {
+  background: rgba(0, 0, 0, 0.55);
+}
+.profile-picker.is-open .profile-picker-backdrop {
+  opacity: 1;
+}
+.profile-picker-panel {
+  position: relative;
+  pointer-events: auto;
+  width: min(640px, 100%);
+  background: var(--surface-elevated);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-top-left-radius: var(--radius-4);
+  border-top-right-radius: var(--radius-4);
+  padding: var(--space-5) var(--space-5) calc(var(--space-5) + env(safe-area-inset-bottom, 0px));
+  box-shadow: var(--shadow-2);
+  transform: translateY(20px);
+  opacity: 0;
+  transition: transform var(--transition-mid), opacity var(--transition-mid);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-height: 92dvh;
+  overflow-y: auto;
+}
+.profile-picker.is-open .profile-picker-panel {
+  transform: translateY(0);
+  opacity: 1;
+}
+@media (min-width: 768px) {
+  .profile-picker {
+    align-items: center;
+  }
+  .profile-picker-panel {
+    border-radius: var(--radius-3);
+    border-bottom: 1px solid var(--border);
+    transform: translateY(8px) scale(0.99);
+  }
+  .profile-picker.is-open .profile-picker-panel {
+    transform: translateY(0) scale(1);
+  }
+}
+.profile-picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.profile-picker-title {
+  font-family: var(--font-serif);
+  font-size: var(--fs-5);
+  letter-spacing: -0.01em;
+  margin: 0;
+  color: var(--text);
+}
+.profile-picker-close {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  border: 1px solid var(--border);
+  font-size: 1.4em;
+  line-height: 1;
+  color: var(--text-2);
+  cursor: pointer;
+}
+.profile-picker-close:hover {
+  background: var(--surface-3);
+  color: var(--text);
+}
+.profile-picker-help {
+  margin: 0;
+  font-size: var(--fs-1);
+  color: var(--text-3);
+}
+.profile-picker-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.profile-question {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.profile-question-legend {
+  font-family: var(--font-sans);
+  font-size: var(--fs-2);
+  font-weight: 600;
+  color: var(--text);
+  padding: 0;
+}
+.profile-question-hint {
+  margin: 0;
+  font-size: var(--fs-0);
+  color: var(--text-3);
+}
+.profile-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.profile-option {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  font-size: var(--fs-1);
+  background: var(--surface-2);
+  min-height: 40px;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+.profile-option:hover {
+  border-color: var(--border-strong);
+}
+.profile-option input[type="radio"] {
+  accent-color: var(--accent);
+  margin: 0;
+}
+.profile-option:has(input[type="radio"]:checked) {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.profile-option-label {
+  font-weight: 600;
+  color: var(--text);
+}
+.profile-option-detail {
+  font-family: var(--font-mono);
+  font-size: var(--fs-0);
+  color: var(--text-3);
+  letter-spacing: 0.02em;
+}
+.profile-option:has(input[type="radio"]:checked) .profile-option-label {
+  color: var(--accent-2);
+}
+.profile-picker-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.profile-picker-reset,
+.profile-picker-apply {
+  min-height: 44px;
+  padding: var(--space-2) var(--space-5);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-sans);
+  font-size: var(--fs-2);
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+}
+.profile-picker-reset:hover {
+  border-color: var(--border-strong);
+}
+.profile-picker-apply {
+  background: var(--accent);
+  color: var(--text-on-accent);
+  border-color: var(--accent);
+  font-weight: 600;
+}
+.profile-picker-apply:hover {
+  background: var(--accent-2);
+  border-color: var(--accent-2);
+}
+html.profile-picker-open {
+  overflow: hidden;
+  touch-action: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .profile-picker-backdrop,
+  .profile-picker-panel {
+    transition: none !important;
+  }
+}
+@media (prefers-contrast: more) {
+  .threshold-dial-cta {
+    border-width: 2px;
+  }
+  .threshold-dial-cta-button {
+    border-width: 2px;
+  }
+  .profile-option {
+    border-width: 2px;
+  }
+  .profile-option:has(input[type="radio"]:checked) {
+    border-color: var(--edge);
+  }
+}
+
 /* ---------- badges --------------------------------------------------- */
 .qualifier-badge {
   background: var(--good);
