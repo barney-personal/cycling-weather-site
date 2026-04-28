@@ -54,32 +54,48 @@
   <section class="ranking-section" aria-labelledby="ranking-title">
     <div class="ranking-toolbar">
       <h2 id="ranking-title" class="section-title">Stack-ranked destinations · 14-day outlook</h2>
-      <button type="button" id="threshold-trigger" class="threshold-trigger" aria-haspopup="dialog">
-        <span class="threshold-trigger-icon" aria-hidden="true">⚙</span>
-        <span class="threshold-trigger-label">Thresholds</span>
-        <span class="threshold-trigger-summary">Defaults</span>
-      </button>
+      <div class="ranking-toolbar-controls">
+        <div class="view-toggle" role="tablist" aria-label="Layout">
+          <button type="button" class="view-toggle-btn" id="view-toggle-table" data-view="table" role="tab" aria-selected="true" aria-controls="rank-list-region">
+            <span class="view-toggle-icon" aria-hidden="true">▤</span>
+            <span class="view-toggle-label">Table</span>
+          </button>
+          <button type="button" class="view-toggle-btn" id="view-toggle-calendar" data-view="calendar" role="tab" aria-selected="false" aria-controls="calendar-mount">
+            <span class="view-toggle-icon" aria-hidden="true">▦</span>
+            <span class="view-toggle-label">Calendar</span>
+          </button>
+        </div>
+        <button type="button" id="threshold-trigger" class="threshold-trigger" aria-haspopup="dialog">
+          <span class="threshold-trigger-icon" aria-hidden="true">⚙</span>
+          <span class="threshold-trigger-label">Thresholds</span>
+          <span class="threshold-trigger-summary">Defaults</span>
+        </button>
+      </div>
     </div>
     <div class="filters" id="filters" role="tablist" aria-label="Filter destinations"></div>
 
     <p id="rank-summary" class="visually-hidden" aria-live="polite"></p>
 
-    <ul id="rank-cards" class="rank-cards" aria-label="Destinations ranked"></ul>
+    <div id="rank-list-region" class="rank-list-region" role="tabpanel" aria-labelledby="view-toggle-table">
+      <ul id="rank-cards" class="rank-cards" aria-label="Destinations ranked"></ul>
 
-    <table class="rank-table" aria-describedby="rank-summary">
-      <thead>
-        <tr>
-          <th class="rank">#</th>
-          <th>Destination</th>
-          <th>Median high</th>
-          <th>14-day forecast</th>
-          <th>Best run</th>
-          <th>Dry days</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody id="rank-body"></tbody>
-    </table>
+      <table class="rank-table" aria-describedby="rank-summary">
+        <thead>
+          <tr>
+            <th class="rank">#</th>
+            <th>Destination</th>
+            <th>Median high</th>
+            <th>14-day forecast</th>
+            <th>Best run</th>
+            <th>Dry days</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="rank-body"></tbody>
+      </table>
+    </div>
+
+    <div id="calendar-mount" class="calendar-mount" role="tabpanel" aria-labelledby="view-toggle-calendar" hidden></div>
 
     <div class="legend">
       <span><span class="legend-swatch is-qualify"></span>Clean ride day</span>

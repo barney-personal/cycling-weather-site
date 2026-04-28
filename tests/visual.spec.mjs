@@ -201,3 +201,28 @@ test("visual: index @ 1280px (?stale=1)", async () => {
   await compareOrUpdate(buf, "index-1280-stale");
   await ctx.close();
 });
+
+// ---- Calendar view (M9) ------------------------------------------------
+// `?view=calendar` boots the page with the calendar grid instead of the
+// table/cards. Capture at 1280 (full grid visible) and 320 (sticky-column
+// horizontal-scroll path) so future regressions on either width fail loud.
+for (const width of [1280, 320]) {
+  test(`visual: index @ ${width}px (?view=calendar)`, async () => {
+    const ctx = await browser.newContext({
+      viewport: { width, height: 900 },
+      deviceScaleFactor: 1,
+      reducedMotion: "reduce",
+      colorScheme: "light",
+    });
+    const page = await loadPage(ctx, {
+      name: "index-calendar",
+      path: "/index.html?view=calendar",
+      waitFor: "[data-dest-glyph]",
+    });
+    // Wait for the lazy-loaded calendar chunk to mount.
+    await page.waitForSelector(".cal-grid tbody tr", { timeout: 5_000, state: "attached" });
+    const buf = await page.screenshot({ type: "png", fullPage: true });
+    await compareOrUpdate(buf, `index-${width}-calendar`);
+    await ctx.close();
+  });
+}

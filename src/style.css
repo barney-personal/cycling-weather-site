@@ -800,6 +800,52 @@ header.site {
 .threshold-trigger[data-dirty="1"] .threshold-trigger-summary {
   color: var(--accent-2);
 }
+.ranking-toolbar-controls {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* ---------- view toggle (table ↔ calendar) --------------------------- */
+.view-toggle {
+  display: inline-flex;
+  align-items: stretch;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 2px;
+  gap: 2px;
+}
+.view-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 36px;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: var(--fs-2);
+  color: var(--text-2);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.view-toggle-btn:hover {
+  color: var(--text);
+}
+.view-toggle-btn.is-active,
+.view-toggle-btn[aria-selected="true"] {
+  background: var(--accent);
+  color: var(--text-on-accent);
+}
+.view-toggle-icon {
+  font-family: var(--font-mono);
+  font-size: var(--fs-2);
+  line-height: 1;
+}
 
 /* ---------- ranking cards (mobile-first) ----------------------------- */
 .rank-cards {
@@ -1193,6 +1239,213 @@ header.site {
   .strip-cell:hover {
     transform: none;
   }
+}
+
+/* ---------- calendar view (M9) ---------------------------------------
+ * Rows = destinations (ranked), columns = the next 14 days. Reuses the
+ * strip-cell encoding from src/lib/strip.ts; extends with a sticky
+ * leftmost destination column so the row label survives horizontal
+ * scroll on narrow viewports.
+ */
+.calendar-mount[hidden] {
+  display: none;
+}
+.cal-scroll {
+  position: relative;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-3);
+  background: var(--surface-2);
+  box-shadow: var(--shadow-1);
+  /* Tame mobile-Safari scroll inertia on horizontal-only scroll. */
+  -webkit-overflow-scrolling: touch;
+}
+.cal-scroll:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.cal-grid {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  font-size: var(--fs-1);
+  font-family: var(--font-sans);
+}
+.cal-grid th,
+.cal-grid td {
+  padding: 0;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--border);
+}
+.cal-grid thead th {
+  background: var(--surface-2);
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: var(--fs-1);
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid var(--border);
+  text-transform: uppercase;
+  padding: var(--space-2) var(--space-1);
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.cal-grid tbody tr:last-child th,
+.cal-grid tbody tr:last-child td {
+  border-bottom: 0;
+}
+.cal-head-corner {
+  position: sticky;
+  left: 0;
+  background: var(--surface-2);
+  z-index: 3 !important;
+  min-width: 168px;
+  width: 168px;
+  border-right: 1px solid var(--border);
+}
+.cal-head-day-cell {
+  min-width: 36px;
+  padding: var(--space-2) 2px !important;
+}
+.cal-head-day-cell .cal-head-weekday {
+  display: block;
+  font-weight: 500;
+}
+.cal-head-day-cell .cal-head-day {
+  display: block;
+  color: var(--text-2);
+  font-weight: 600;
+  font-size: var(--fs-2);
+  margin-top: 2px;
+}
+.cal-row-head {
+  position: sticky;
+  left: 0;
+  background: var(--surface-2);
+  z-index: 1;
+  border-right: 1px solid var(--border);
+  text-align: left;
+  padding: 0 !important;
+  min-width: 168px;
+  width: 168px;
+}
+.cal-row[data-qualifier="1"] .cal-row-head {
+  background: color-mix(in srgb, var(--good-soft) 40%, var(--surface-2));
+}
+.cal-row-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  color: inherit;
+  text-decoration: none;
+  min-height: 44px;
+}
+.cal-row-link:hover {
+  background: var(--surface-3);
+  color: var(--text);
+  text-decoration: none;
+}
+.cal-row-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+.cal-row-rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: var(--fs-1);
+  background: var(--surface-3);
+  color: var(--text-2);
+  flex: 0 0 auto;
+}
+.cal-row[data-qualifier="1"] .cal-row-rank {
+  background: var(--good-soft);
+  color: var(--good-soft-fg);
+}
+.cal-row-name {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: var(--fs-2);
+  color: var(--text);
+  line-height: var(--lh-tight);
+  letter-spacing: -0.005em;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cal-row-region {
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-3);
+  flex: 0 0 auto;
+  display: none;
+}
+@media (min-width: 768px) {
+  .cal-row-region {
+    display: inline;
+  }
+}
+.cal-cell-wrap {
+  padding: 2px !important;
+  text-align: center;
+  width: 36px;
+}
+.cal-cell {
+  display: inline-block;
+  width: 100%;
+  height: 28px;
+  padding: 0;
+  margin: 0;
+  border-radius: var(--radius-1);
+  cursor: pointer;
+  font: inherit;
+}
+.cal-cell:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  z-index: 2;
+}
+.cal-cell-empty {
+  background: var(--surface-3);
+}
+.cal-empty {
+  padding: var(--space-6) var(--space-5);
+  text-align: center;
+}
+.cal-empty-title {
+  font-family: var(--font-serif);
+  font-size: var(--fs-4);
+  font-weight: 500;
+  color: var(--text);
+  margin: 0 0 var(--space-2);
+}
+.cal-empty-msg {
+  margin: 0;
+  color: var(--text-2);
+  font-size: var(--fs-2);
+}
+.cal-empty-fallback {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: var(--accent);
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
 }
 
 /* ---------- threshold dial ------------------------------------------- */
