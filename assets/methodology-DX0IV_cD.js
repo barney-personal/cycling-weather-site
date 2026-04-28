@@ -1,1 +1,0 @@
-import{m as t,l as o,a as s}from"./data-vp_J0-em.js";t({mount:"#site-header",active:"methodology"});o().then(e=>{s("#footer-freshness",e)}).catch(()=>{const e=document.getElementById("footer-freshness");e&&(e.textContent="Data freshness unavailable.")});
