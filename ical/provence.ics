@@ -1,0 +1,27 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Cycling Weather//Plan v1//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+NAME:Cycling — Provence
+X-WR-CALNAME:Cycling — Provence
+DESCRIPTION:Cycling-clean windows for Provence (cycling-weather\, refreshed
+  daily).
+X-WR-CALDESC:Cycling-clean windows for Provence (cycling-weather\, refreshe
+ d daily).
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+LAST-MODIFIED:20260428T110828Z
+BEGIN:VEVENT
+UID:cw-provence-20260429@cycling-weather-site
+DTSTAMP:20260428T110828Z
+DTSTART;VALUE=DATE:20260429
+DTEND;VALUE=DATE:20260430
+SUMMARY:Cycle Provence — 1-day window
+DESCRIPTION:1 clean day for cycling\n23°C median\nWindow: 29 Apr\nForecast
+  for Provence (cycling-weather)
+URL:https://barney-personal.github.io/cycling-weather-site/destination.html
+ ?slug=provence
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

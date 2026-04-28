@@ -1,0 +1,15 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Cycling Weather//Plan v1//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+NAME:Cycling — Girona
+X-WR-CALNAME:Cycling — Girona
+DESCRIPTION:Cycling-clean windows for Girona. No qualifying window in the n
+ ext 14 days.
+X-WR-CALDESC:Cycling-clean windows for Girona. No qualifying window in the 
+ next 14 days.
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+LAST-MODIFIED:20260428T110828Z
+END:VCALENDAR

@@ -1,0 +1,27 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Cycling Weather//Plan v1//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+NAME:Cycling — Los Angeles
+X-WR-CALNAME:Cycling — Los Angeles
+DESCRIPTION:Cycling-clean windows for Los Angeles (cycling-weather\, refres
+ hed daily).
+X-WR-CALDESC:Cycling-clean windows for Los Angeles (cycling-weather\, refre
+ shed daily).
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+LAST-MODIFIED:20260428T110828Z
+BEGIN:VEVENT
+UID:cw-los-angeles-20260428@cycling-weather-site
+DTSTAMP:20260428T110828Z
+DTSTART;VALUE=DATE:20260428
+DTEND;VALUE=DATE:20260509
+SUMMARY:Cycle Los Angeles — 11-day window
+DESCRIPTION:11 clean days for cycling\n23°C median\nWindow: 28 Apr–8 May
+ \nForecast for Los Angeles (cycling-weather)
+URL:https://barney-personal.github.io/cycling-weather-site/destination.html
+ ?slug=los-angeles
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

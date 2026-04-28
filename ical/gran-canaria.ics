@@ -1,0 +1,27 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Cycling Weather//Plan v1//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+NAME:Cycling — Gran Canaria
+X-WR-CALNAME:Cycling — Gran Canaria
+DESCRIPTION:Cycling-clean windows for Gran Canaria (cycling-weather\, refre
+ shed daily).
+X-WR-CALDESC:Cycling-clean windows for Gran Canaria (cycling-weather\, refr
+ eshed daily).
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+LAST-MODIFIED:20260428T110828Z
+BEGIN:VEVENT
+UID:cw-gran-canaria-20260430@cycling-weather-site
+DTSTAMP:20260428T110828Z
+DTSTART;VALUE=DATE:20260430
+DTEND;VALUE=DATE:20260506
+SUMMARY:Cycle Gran Canaria — 6-day window
+DESCRIPTION:6 clean days for cycling\n20°C median\nWindow: 30 Apr–5 May\
+ nForecast for Gran Canaria (cycling-weather)
+URL:https://barney-personal.github.io/cycling-weather-site/destination.html
+ ?slug=gran-canaria
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR
