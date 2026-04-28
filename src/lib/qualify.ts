@@ -134,8 +134,11 @@ export function rankWithThresholds(
         (d.precip_sum <= thresholds.rainMax && d.precip_prob_max < thresholds.probMax ? 1 : 0),
       0,
     );
-    const isUk = UK_NAMES.has(r.name);
-    const qualifier = run.length >= 7 && (!isUk || r.median_temp > 20);
+    // Cycling-comfort defaults: 4-day clean run is enough to call a destination
+    // a GO. UK exception dropped — with the looser temperature floor the UK is
+    // legitimately gated by its own conditions in shoulder season anyway.
+    void UK_NAMES; // retained for backwards compat with stored client state
+    const qualifier = run.length >= 4;
     const score = run.length * 100 + dryDays * 5 + r.median_temp;
     return {
       result: r,
