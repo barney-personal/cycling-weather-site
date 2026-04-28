@@ -93,9 +93,9 @@ function normaliseLatest(l: any): LatestSnapshot | null {
     forecast_date: asString(l.forecast_date),
     forecast_days: asNumber(l.forecast_days, results[0]?.daily.length ?? 14),
     qualify_thresholds: l.qualify_thresholds ?? {
-      temp_max_gt: 25,
-      precip_sum_eq: 0,
-      precip_prob_lt: 10,
+      temp_max_gt: 18,
+      precip_sum_eq: 2,
+      precip_prob_lt: 30,
       weather_code_in: [0, 1, 2, 3],
       wind_max_lt: 30,
     },

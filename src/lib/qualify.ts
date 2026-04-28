@@ -29,11 +29,13 @@ export interface Thresholds {
   codeIn: number[];
 }
 
-// Mirrors Python defaults bit-for-bit.
+// Mirrors Python defaults bit-for-bit. Cycling-comfort calibration, not
+// pro-tour stringency — most Atlantic/Med shoulder-season weather is great
+// to ride but never hits 25°C. Dial up to 25/0/10 for the old "Tour" preset.
 export const DEFAULT_THRESHOLDS: Readonly<Thresholds> = Object.freeze({
-  tempMin: 25,
-  rainMax: 0,
-  probMax: 10,
+  tempMin: 18,
+  rainMax: 2,
+  probMax: 30,
   windMax: 30,
   codeIn: [0, 1, 2, 3],
 });
