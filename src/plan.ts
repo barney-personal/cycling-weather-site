@@ -679,6 +679,14 @@ void loadSiteData()
     populateNotifyDestinations(results);
     bindNotifyForm();
 
+    void import("./components/ical-subscribe").then(({ mountIcalSubscribe }) => {
+      mountIcalSubscribe({
+        mount: "#plan-ical-mount",
+        href: "./ical/all-go.ics",
+        variant: "all-go",
+      });
+    });
+
     renderTripLengthChips(state, (n) => {
       state = {
         ...state,

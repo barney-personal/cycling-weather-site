@@ -1,0 +1,15 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Cycling Weather//Plan v1//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+NAME:Cycling — Peak District
+X-WR-CALNAME:Cycling — Peak District
+DESCRIPTION:Cycling-clean windows for Peak District. No qualifying window i
+ n the next 14 days.
+X-WR-CALDESC:Cycling-clean windows for Peak District. No qualifying window 
+ in the next 14 days.
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+LAST-MODIFIED:20260428T110828Z
+END:VCALENDAR

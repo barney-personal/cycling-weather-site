@@ -509,7 +509,23 @@ export function mountDestinationPage(opts: MountDestinationOptions): void {
         <h2 id="dest-faq-title" class="section-title">Quick answers</h2>
         ${renderFaq(result, meta, forecastDate, run.length, qualifier)}
       </section>
+
+      <section class="dest-section dest-section-ical" aria-labelledby="dest-ical-title">
+        <h2 id="dest-ical-title" class="section-title">Calendar subscription</h2>
+        <div id="dest-ical-mount" class="dest-ical-mount"></div>
+      </section>
     </article>`;
+
+  const icalMount = mount.querySelector<HTMLElement>("#dest-ical-mount");
+  if (icalMount) {
+    void import("./ical-subscribe").then(({ mountIcalSubscribe }) => {
+      mountIcalSubscribe({
+        mount: icalMount,
+        href: `./ical/${result.slug}.ics`,
+        label: result.name,
+      });
+    });
+  }
 
   // Lazy-load the polar chart so the homepage bundle doesn't pay for it.
   const polarMount = mount.querySelector<HTMLElement>("#dest-polar-mount");

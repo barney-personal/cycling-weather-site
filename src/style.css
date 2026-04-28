@@ -3883,3 +3883,167 @@ footer {
     animation: none !important;
   }
 }
+
+/* ---------- iCal subscription block (M11) ----------------------------- */
+.plan-ical-section {
+  margin-top: var(--space-7);
+}
+.plan-ical-mount {
+  margin-bottom: var(--space-3);
+}
+.plan-ical-hint {
+  margin: 0;
+  font-size: var(--fs-1);
+  color: var(--text-3);
+}
+.plan-ical-hint a {
+  color: var(--accent);
+  text-decoration: underline;
+}
+.plan-ical-hint a:hover,
+.plan-ical-hint a:focus-visible {
+  color: var(--accent-2);
+}
+.plan-ical-hint code {
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+  padding: 2px var(--space-1);
+  border-radius: var(--radius-1);
+  background: var(--surface-3);
+  color: var(--text-2);
+}
+.dest-section-ical {
+  margin-top: var(--space-7);
+}
+.dest-ical-mount {
+  margin-top: var(--space-3);
+}
+
+.ical-subscribe {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-3);
+  background: var(--surface-2);
+  box-shadow: var(--shadow-1);
+}
+.ical-subscribe-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.ical-subscribe-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-pill);
+  background: var(--accent-soft);
+  color: var(--accent);
+  flex: 0 0 auto;
+}
+.ical-subscribe-icon svg {
+  display: block;
+}
+.ical-subscribe-title {
+  font-family: var(--font-serif);
+  font-size: var(--fs-4);
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+.ical-subscribe-body {
+  margin: 0;
+  font-size: var(--fs-2);
+  color: var(--text-2);
+  line-height: 1.55;
+}
+.ical-subscribe-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.ical-subscribe-btn,
+.ical-subscribe-copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-sans);
+  font-size: var(--fs-2);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: background var(--transition-fast), border-color var(--transition-fast), color
+    var(--transition-fast);
+}
+.ical-subscribe-btn {
+  background: var(--accent);
+  color: var(--text-on-accent);
+  border-color: var(--accent);
+}
+.ical-subscribe-btn:hover,
+.ical-subscribe-btn:focus-visible {
+  background: var(--accent-2);
+  border-color: var(--accent-2);
+}
+.ical-subscribe-copy {
+  background: var(--surface-2);
+  color: var(--text);
+  border-color: var(--border);
+}
+.ical-subscribe-copy:hover,
+.ical-subscribe-copy:focus-visible {
+  border-color: var(--border-strong);
+  background: var(--surface-3);
+}
+.ical-subscribe-url {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+  color: var(--text-2);
+  background: var(--surface-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-2);
+  word-break: break-all;
+  border: 1px solid var(--border);
+}
+.ical-subscribe-status {
+  margin: 0;
+  min-height: 1.2em;
+  font-size: var(--fs-1);
+  color: var(--text-3);
+  line-height: 1.2;
+}
+.ical-subscribe-status[data-tone="ok"] {
+  color: var(--good);
+}
+.ical-subscribe-status[data-tone="warn"] {
+  color: var(--edge);
+}
+[data-theme="dark"] .ical-subscribe-icon {
+  background: color-mix(in srgb, var(--accent-soft) 80%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .ical-subscribe-btn,
+  .ical-subscribe-copy {
+    transition: none;
+  }
+}
+@media (prefers-contrast: more) {
+  .ical-subscribe {
+    border-width: 2px;
+  }
+  .ical-subscribe-btn,
+  .ical-subscribe-copy {
+    border-width: 2px;
+  }
+}

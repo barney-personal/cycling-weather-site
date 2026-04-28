@@ -1,0 +1,27 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Cycling Weather//Plan v1//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+NAME:Cycling — Sicily
+X-WR-CALNAME:Cycling — Sicily
+DESCRIPTION:Cycling-clean windows for Sicily (cycling-weather\, refreshed d
+ aily).
+X-WR-CALDESC:Cycling-clean windows for Sicily (cycling-weather\, refreshed 
+ daily).
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+LAST-MODIFIED:20260428T110828Z
+BEGIN:VEVENT
+UID:cw-sicily-20260428@cycling-weather-site
+DTSTAMP:20260428T110828Z
+DTSTART;VALUE=DATE:20260428
+DTEND;VALUE=DATE:20260501
+SUMMARY:Cycle Sicily — 3-day window
+DESCRIPTION:3 clean days for cycling\n21°C median\nWindow: 28 Apr–30 Apr
+ \nForecast for Sicily (cycling-weather)
+URL:https://barney-personal.github.io/cycling-weather-site/destination.html
+ ?slug=sicily
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

@@ -1,0 +1,27 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Cycling Weather//Plan v1//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+NAME:Cycling — Palo Alto
+X-WR-CALNAME:Cycling — Palo Alto
+DESCRIPTION:Cycling-clean windows for Palo Alto (cycling-weather\, refreshe
+ d daily).
+X-WR-CALDESC:Cycling-clean windows for Palo Alto (cycling-weather\, refresh
+ ed daily).
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+LAST-MODIFIED:20260428T110828Z
+BEGIN:VEVENT
+UID:cw-palo-alto-20260428@cycling-weather-site
+DTSTAMP:20260428T110828Z
+DTSTART;VALUE=DATE:20260428
+DTEND;VALUE=DATE:20260509
+SUMMARY:Cycle Palo Alto — 11-day window
+DESCRIPTION:11 clean days for cycling\n22°C median\nWindow: 28 Apr–8 May
+ \nForecast for Palo Alto (cycling-weather)
+URL:https://barney-personal.github.io/cycling-weather-site/destination.html
+ ?slug=palo-alto
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

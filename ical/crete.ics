@@ -1,0 +1,27 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Cycling Weather//Plan v1//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+NAME:Cycling — Crete
+X-WR-CALNAME:Cycling — Crete
+DESCRIPTION:Cycling-clean windows for Crete (cycling-weather\, refreshed da
+ ily).
+X-WR-CALDESC:Cycling-clean windows for Crete (cycling-weather\, refreshed d
+ aily).
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+LAST-MODIFIED:20260428T110828Z
+BEGIN:VEVENT
+UID:cw-crete-20260507@cycling-weather-site
+DTSTAMP:20260428T110828Z
+DTSTART;VALUE=DATE:20260507
+DTEND;VALUE=DATE:20260512
+SUMMARY:Cycle Crete — 5-day window
+DESCRIPTION:5 clean days for cycling\n22°C median\nWindow: 7 May–11 May\
+ nForecast for Crete (cycling-weather)
+URL:https://barney-personal.github.io/cycling-weather-site/destination.html
+ ?slug=crete
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

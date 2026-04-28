@@ -1,0 +1,27 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Cycling Weather//Plan v1//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+NAME:Cycling — Nice
+X-WR-CALNAME:Cycling — Nice
+DESCRIPTION:Cycling-clean windows for Nice (cycling-weather\, refreshed dai
+ ly).
+X-WR-CALDESC:Cycling-clean windows for Nice (cycling-weather\, refreshed da
+ ily).
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+LAST-MODIFIED:20260428T110828Z
+BEGIN:VEVENT
+UID:cw-nice-20260428@cycling-weather-site
+DTSTAMP:20260428T110828Z
+DTSTART;VALUE=DATE:20260428
+DTEND;VALUE=DATE:20260430
+SUMMARY:Cycle Nice — 2-day window
+DESCRIPTION:2 clean days for cycling\n21°C median\nWindow: 28 Apr–29 Apr
+ \nForecast for Nice (cycling-weather)
+URL:https://barney-personal.github.io/cycling-weather-site/destination.html
+ ?slug=nice
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

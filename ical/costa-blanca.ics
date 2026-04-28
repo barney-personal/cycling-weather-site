@@ -1,0 +1,27 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Cycling Weather//Plan v1//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+NAME:Cycling — Costa Blanca
+X-WR-CALNAME:Cycling — Costa Blanca
+DESCRIPTION:Cycling-clean windows for Costa Blanca (cycling-weather\, refre
+ shed daily).
+X-WR-CALDESC:Cycling-clean windows for Costa Blanca (cycling-weather\, refr
+ eshed daily).
+REFRESH-INTERVAL;VALUE=DURATION:PT12H
+X-PUBLISHED-TTL:PT12H
+LAST-MODIFIED:20260428T110828Z
+BEGIN:VEVENT
+UID:cw-costa-blanca-20260503@cycling-weather-site
+DTSTAMP:20260428T110828Z
+DTSTART;VALUE=DATE:20260503
+DTEND;VALUE=DATE:20260506
+SUMMARY:Cycle Costa Blanca — 3-day window
+DESCRIPTION:3 clean days for cycling\n25°C median\nWindow: 3 May–5 May\n
+ Forecast for Costa Blanca (cycling-weather)
+URL:https://barney-personal.github.io/cycling-weather-site/destination.html
+ ?slug=costa-blanca
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

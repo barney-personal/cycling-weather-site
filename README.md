@@ -163,9 +163,26 @@ package.json, tsconfig.json, vite.config.ts, biome.json
   duplicate plumbing. Profile is persisted under `cw:profile:v1` (versioned key — schema bumps
   ignore unknown shapes safely). "Reset" clears the storage key and applies the canonical
   cycling-comfort defaults.
+- iCal subscription (M11): each destination has a static `.ics` calendar feed at
+  `./ical/{slug}.ics`, plus an aggregate `./ical/all-go.ics` covering every qualifying
+  window across all destinations. Files are emitted by `scripts/generate-ical.mjs`
+  (chained into `npm run build`) and validated against RFC 5545 by `tests/ical.spec.ts`
+  via the upstream `ical.js` parser (CRLF endings, ≤75-octet line folding, escaped TEXT
+  values, `VALUE=DATE` all-day events with exclusive `DTEND`, stable per-day UIDs of the
+  form `cw-{slug}-{YYYYMMDD}@cycling-weather-site`, plus `REFRESH-INTERVAL` /
+  `X-PUBLISHED-TTL` = `PT12H`). The plan and destination pages mount a small
+  subscribe block (`mountIcalSubscribe`, lazy-loaded) with an `Add to Calendar` deep
+  link (`webcal://...`) and a `Copy URL` button (clipboard API + textarea fallback).
+  **Cron pipeline TODO**: the daily refresh script
+  (`scripts/cycling_weather_site_refresh.sh` outside this repo) should run
+  `node scripts/generate-ical.mjs` after `cycling_weather_data_build.py` so subscribers
+  see fresh windows daily without a redeploy. Until that's wired, the `.ics` files
+  refresh only on rebuild.
 - Build-artefact hygiene: every `assets/*.{js,css}` file in the repo MUST be reachable from
   the live import graph (entry HTMLs at HEAD → `<script>`/`<link>` refs → recursive
-  dynamic-import refs inside the chunks themselves) or from `assets/sw-precache.json`. When
+  dynamic-import refs inside the chunks themselves) or from `assets/sw-precache.json`.
+  Generated `ical/*.ics` files are also static-site artefacts and ship with the commit
+  (the cron does NOT run `npm run build`, so they must be present at HEAD). When
   a rebuild produces new content-hashed bundles, `git rm` every superseded bundle in the
   same commit. Two verification loops gate this:
   ```bash
