@@ -49,8 +49,26 @@ header.site {
   color: var(--text);
 }
 .site-brand-mark {
-  font-size: 1.1em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* Optical balance against the serif wordmark — slightly under cap-height. */
+  width: 1.35em;
+  height: 1.35em;
+  /* Mark inherits text colour by default but takes the accent token so the
+     brand has a hint of identity colour without dropping below 4.5:1
+     contrast against `--surface-2` in either theme (verified against the
+     accent ramp in src/styles/tokens.css). */
+  color: var(--accent);
   line-height: 1;
+}
+.site-brand-mark svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.site-brand:hover .site-brand-mark {
+  color: var(--accent-2);
 }
 .site-brand-name {
   font-feature-settings: "ss01" on;
