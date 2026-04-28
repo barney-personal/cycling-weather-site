@@ -34,6 +34,15 @@ const HAMBURGER_OPEN_ICON =
 const HAMBURGER_CLOSE_ICON =
   '<svg viewBox="0 0 16 16" aria-hidden="true" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>';
 
+// In-DOM brand mark — a simplified, single-colour rendition of
+// src/assets/brand/icon.svg (sun + wheel + crossed spokes). Uses
+// `currentColor` everywhere so it inherits from `.site-brand`'s `color`
+// token and tracks both themes with no extra plumbing. Sized via CSS on
+// `.site-brand-mark svg`. The richer multi-colour stamp (with cream rays
+// + green dashed ring) lives in the PWA icon set, not the inline header.
+const BRAND_MARK_SVG =
+  '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><g stroke-width="1.5"><line x1="12" y1="2" x2="12" y2="4"/><line x1="17.5" y1="3.6" x2="16.4" y2="5.6"/><line x1="6.5" y1="3.6" x2="7.6" y2="5.6"/></g><circle cx="12" cy="14.5" r="6.6" stroke-width="1.7"/><circle cx="12" cy="14.5" r="1.15" fill="currentColor" stroke="none"/><g stroke-width="1.1"><line x1="7.4" y1="9.9" x2="16.6" y2="19.1"/><line x1="16.6" y1="9.9" x2="7.4" y2="19.1"/></g></svg>';
+
 export interface MountHeaderOptions {
   mount: string | HTMLElement;
   active: ActiveSection;
@@ -66,7 +75,7 @@ export function mountHeader(options: MountHeaderOptions): () => void {
     <header class="site" data-nav-open="false">
       <div class="site-row">
         <a class="site-brand" href="./index.html" aria-label="Cycling Weather — home">
-          <span class="site-brand-mark" aria-hidden="true">🚴</span>
+          <span class="site-brand-mark" aria-hidden="true">${BRAND_MARK_SVG}</span>
           <span class="site-brand-name">Cycling Weather</span>
         </a>
         <div class="site-actions">
