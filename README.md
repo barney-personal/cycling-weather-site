@@ -114,6 +114,23 @@ package.json, tsconfig.json, vite.config.ts, biome.json
   shown out-of-date forecasts. Force-trigger it with `?stale=1` (used by the visual snapshot
   suite). See `src/components/stale-banner.ts`; threshold + parsing rules covered by
   `tests/stale-banner.spec.ts`.
+- Build-artefact hygiene: every `assets/*.{js,css}` file in the repo MUST be reachable from
+  the live import graph (entry HTMLs at HEAD → `<script>`/`<link>` refs → recursive
+  dynamic-import refs inside the chunks themselves) or from `assets/sw-precache.json`. When
+  a rebuild produces new content-hashed bundles, `git rm` every superseded bundle in the
+  same commit. Two verification loops gate this:
+  ```bash
+  # M14 loop: every <script>/<link> ref in HEAD HTML is a tracked file
+  for page in index destination history methodology plan; do
+    for f in $(git show HEAD:$page.html | grep -oE 'assets/[A-Za-z0-9_-]+\.(js|css)'); do
+      git ls-files --error-unmatch "$f" >/dev/null 2>&1 || echo "UNTRACKED: $f"
+    done
+  done
+  # M15 loop: total chunk count stays low — bundle-budget script enumerates assets/*.js
+  npm run test:perf
+  ```
+  The `lighthouse-check.mjs` "All chunks total" gate sums every `assets/*.js` on disk
+  regardless of whether it's referenced; orphaned bundles eat the 250 KB total-JS budget.
 
 ## PWA layer
 
