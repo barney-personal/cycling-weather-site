@@ -12,6 +12,18 @@ body {
   color: var(--text);
 }
 
+/* CLS prevention: before JS hydrates the hero, push all content below it out
+   of the viewport so the hero replacement doesn't count as a layout shift.
+   mountHero sets data-loaded="1" which drops the min-height. */
+#hero-mount:not([data-loaded]) {
+  min-height: calc(100svh - 64px);
+}
+@supports not (min-height: 100svh) {
+  #hero-mount:not([data-loaded]) {
+    min-height: calc(100vh - 64px);
+  }
+}
+
 /* ---------- header (M4 — refactored into src/components/header.ts) ---- */
 .site-header-mount {
   display: block;

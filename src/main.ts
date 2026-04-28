@@ -197,7 +197,8 @@ void loadSiteData()
     const footer = document.getElementById("footer-freshness");
     if (footer) footer.textContent = "data.json offline — try again when reconnected.";
     const heroMount = document.getElementById("hero-mount");
-    if (heroMount && !heroMount.firstChild) {
+    if (heroMount) {
+      heroMount.dataset.loaded = "1";
       heroMount.innerHTML = `
         <section class="hero hero-page-header" aria-label="Offline">
           <p class="hero-eyebrow">Offline</p>

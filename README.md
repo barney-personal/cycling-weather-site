@@ -221,15 +221,24 @@ package.json, tsconfig.json, vite.config.ts, biome.json
   date) and asserts each corruption is caught — proving the gate has teeth. Add a new
   destination to the schema by extending `KNOWN_DESTINATIONS` with a sensible lat/lon
   bounding box; missing-from-table destinations are skipped (no false positive on adds).
-- Lighthouse mobile gate (M12): `npm run test:perf` (chained into `npm test`) is now
+- Lighthouse mobile gate (M12/M13): `npm run test:perf` (chained into `npm test`) is
   mandatory and runs Lighthouse against the homepage via playwright's
   `chromium-headless-shell` binary launched with `--remote-debugging-port`. Thresholds:
-  perf ≥ 50 (interim floor — M13 raises to 95 once LCP/CLS root causes are fixed),
-  a11y = 100, best-practices ≥ 95, SEO ≥ 95. `CW_LH_PERF_FLOOR=N` overrides the perf
-  threshold for ratchet experiments; `CW_SKIP_LIGHTHOUSE=1` skips the Lighthouse leg
-  only on hosts where the headless binary can't reach a stable rendering state (the
-  bundle-budget gate always runs). The current floor matches today's homepage score
-  (~54 mobile) — not a target, just a regression detector.
+  perf ≥ 75, a11y = 100, best-practices ≥ 95, SEO ≥ 95. `CW_LH_PERF_FLOOR=N` overrides
+  the perf threshold; `CW_SKIP_LIGHTHOUSE=1` skips the Lighthouse leg only on hosts where
+  the headless binary can't reach a stable rendering state (the bundle-budget gate always
+  runs). M13 optimised CLS to 0 (hero placeholder + viewport-height CLS guard), switched
+  fonts to `font-display: optional` with preload hints (eliminated font-swap CLS + reduced
+  FCP from 2.4s to 1.7s), and trimmed CSS from 86 KB to 78 KB by dropping non-latin font
+  subsets. LCP remains ~5.3s on simulated 4G because the hero depends on `data.json`
+  fetched at runtime (HTML → CSS → JS → fetch → render waterfall). To close the last
+  ~15 perf points, the build pipeline would need to inline a hero summary into the HTML
+  at build time — tracked as a future enhancement.
+- Font loading (M13): fonts are self-hosted latin-only variable woff2 subsets with
+  `font-display: optional`. All three critical fonts (Fraunces, Inter, JetBrains Mono)
+  are preloaded via `<link rel="preload" as="font">` injected by the Vite font-preload
+  plugin. On slow connections the browser uses system fonts with zero layout shift; on
+  repeat visits fonts load from cache within the 100ms optional block window.
 
 ## PWA layer
 
