@@ -8,14 +8,31 @@ import { mountHeader } from "./components/header";
 import { mountHero } from "./components/hero";
 import { mountRanking } from "./components/ranking";
 import { registerServiceWorker } from "./components/register-sw";
+import { mountStaleBanner } from "./components/stale-banner";
 import { type DialChangeDetail, mountThresholdDial } from "./components/threshold-dial";
 import { loadSiteData } from "./lib/data";
+
+// `?stale=1` is a debug switch used by the visual snapshot suite — it forces
+// the stale banner to render even when the data is fresh, so the screenshot
+// is deterministic regardless of when it runs. Read once at module scope.
+const FORCE_STALE = (() => {
+  try {
+    return new URLSearchParams(window.location.search).get("stale") === "1";
+  } catch {
+    return false;
+  }
+})();
 
 mountHeader({ mount: "#site-header", active: "forward" });
 registerServiceWorker();
 
 void loadSiteData()
   .then((data) => {
+    mountStaleBanner({
+      mount: "#stale-banner-mount",
+      generatedAt: data.generated_at,
+      force: FORCE_STALE,
+    });
     mountHero({ mount: "#hero-mount", data });
     mountFooterFreshness("#footer-freshness", data);
 

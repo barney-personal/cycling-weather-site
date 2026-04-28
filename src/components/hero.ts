@@ -1,10 +1,13 @@
 // Homepage hero — big verdict, top-pick destination, editorial copy, lead
-// window, and a "what changed since yesterday" chip row pulled from the
-// changelog block. Falls back gracefully when the data.json predates M2
-// (no `hero`, no `changelog`); the loader's `deriveHero` reconstructs a
-// minimal hero from `latest`, and changelog is `[]`.
+// window, "what changed since yesterday" chip row, and (M3) a top-3 GO
+// leaderboard row beneath the verdict block. Falls back gracefully when the
+// data.json predates M2 (no `hero`, no `changelog`); the loader's
+// `deriveHero` reconstructs a minimal hero from `latest`, and changelog is
+// `[]`.
 
-import type { ChangelogEntry, HeroBlock, SiteData } from "../lib/types";
+import { DEFAULT_THRESHOLDS, dayMatches, rankWithThresholds } from "../lib/qualify";
+import { rainBucket, tempColour, windBucket } from "../lib/strip";
+import type { ChangelogEntry, DestinationResult, HeroBlock, SiteData } from "../lib/types";
 
 const VERDICT_LABEL: Record<HeroBlock["verdict"], string> = {
   go: "GO",
@@ -17,6 +20,13 @@ const VERDICT_DESCRIPTION: Record<HeroBlock["verdict"], string> = {
   edge: "Marginal — a window may emerge",
   "no-go": "No clean window in the next 14 days",
 };
+
+// Mini-strip horizon — the next week reads at a glance without competing
+// with the 14-day cells in the ranking table below.
+const MINI_STRIP_DAYS = 7;
+
+// How many GO destinations to surface in the leaderboard row.
+const TOP_GO_LIMIT = 3;
 
 function escapeHtml(s: string): string {
   return s.replace(/[&<>"']/g, (c) => {
@@ -92,6 +102,74 @@ function renderChangelogChip(entry: ChangelogEntry): string {
   return `<li class="changelog-chip ${cls}"><span class="changelog-name">${name}</span><span class="changelog-text">${icon}${magnitude}</span></li>`;
 }
 
+// Render the next-7-day mini-strip for one destination. Reuses the
+// `.strip-cell` token vocabulary (rain dot density, wind hatching, qualifier
+// outline) from the homepage ranking — the cells are sized smaller via a
+// `.top-go-strip` wrapper. Hero rendering currently fixes thresholds at
+// `DEFAULT_THRESHOLDS`; if we later wire the dial to re-render the hero,
+// this becomes the single point that needs to read live thresholds.
+function renderMiniStrip(daily: DestinationResult["daily"]): string {
+  return daily
+    .slice(0, MINI_STRIP_DAYS)
+    .map((d) => {
+      const fill = tempColour(d.temp_max);
+      const rain = rainBucket(d.precip_sum, d.precip_prob_max);
+      const wind = windBucket(d.wind_max);
+      const qualifies = dayMatches(d, DEFAULT_THRESHOLDS);
+      const cls = ["strip-cell", `rain-${rain}`, `wind-${wind}`, qualifies ? "is-qualify" : ""]
+        .filter(Boolean)
+        .join(" ");
+      return `<span class="${cls}" style="--cell-fill:${fill}" aria-hidden="true"></span>`;
+    })
+    .join("");
+}
+
+function destinationHref(slug: string): string {
+  return `./destination.html?slug=${encodeURIComponent(slug)}`;
+}
+
+// Build the top-3 GO leaderboard from `latest.results`. Re-uses the same
+// scoring (rankWithThresholds at DEFAULT_THRESHOLDS) as the ranking
+// table beneath, so the order matches what the user sees when they scroll
+// down. Returns `[]` when no destination qualifies — caller decides whether
+// to render anything.
+function selectTopGo(results: DestinationResult[]): DestinationResult[] {
+  const ranked = rankWithThresholds(results, DEFAULT_THRESHOLDS);
+  return ranked
+    .filter((r) => r.qualifier)
+    .slice(0, TOP_GO_LIMIT)
+    .map((r) => r.result);
+}
+
+function renderTopGoRow(results: DestinationResult[]): string {
+  const top = selectTopGo(results);
+  if (top.length === 0) return "";
+  const items = top
+    .map((r) => {
+      const region = r.region ? `<span class="top-go-region">${escapeHtml(r.region)}</span>` : "";
+      const tempLabel = `${r.median_temp.toFixed(1)}° median high`;
+      const aria = `${r.name}${r.region ? `, ${r.region}` : ""} — GO, ${tempLabel}, ${r.best_run} clean-day run; open destination page.`;
+      return `<li class="top-go-card">
+        <a class="top-go-link" href="${destinationHref(r.slug)}" aria-label="${escapeHtml(aria)}">
+          <span class="top-go-header">
+            <span class="top-go-pill verdict-go" aria-hidden="true">GO</span>
+            <span class="top-go-temp" aria-hidden="true">${r.median_temp.toFixed(1)}°</span>
+          </span>
+          <span class="top-go-title">
+            <span class="top-go-name">${escapeHtml(r.name)}</span>
+            ${region}
+          </span>
+          <span class="top-go-strip" aria-hidden="true">${renderMiniStrip(r.daily)}</span>
+        </a>
+      </li>`;
+    })
+    .join("");
+  return `<div class="top-go-row" aria-label="Top GO destinations">
+      <p class="top-go-eyebrow">Top ${top.length} GO ${top.length === 1 ? "destination" : "destinations"}</p>
+      <ul class="top-go-list">${items}</ul>
+    </div>`;
+}
+
 function renderEmpty(target: HTMLElement, message: string): void {
   target.innerHTML = `
     <section class="hero hero-empty" aria-live="polite">
@@ -146,6 +224,8 @@ export function mountHero(options: MountHeroOptions): void {
          </div>`
       : "";
 
+  const topGoBlock = renderTopGoRow(latest.results);
+
   const generated = hero.forecast_date || latest.forecast_date;
   const generatedHuman = generated ? shortDate(generated) : "";
   const metaLine = `Forecast ${escapeHtml(generated || "—")}${
@@ -165,6 +245,7 @@ export function mountHero(options: MountHeroOptions): void {
       <p class="hero-editorial">${escapeHtml(editorial)}</p>
       <p class="hero-window">${escapeHtml(leadWindowLine(hero))}</p>
       <div class="hero-stats">${tempLine}${runLine}${goCountLine}</div>
+      ${topGoBlock}
       ${chipsBlock}
       <p class="hero-meta">${metaLine}</p>
     </section>
