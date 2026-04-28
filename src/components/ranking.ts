@@ -197,13 +197,16 @@ function renderCard(row: RowView): string {
 // doesn't read as a hard NO-GO when the destination is genuinely close.
 function renderTableStatus(row: RowView): string {
   if (row.qualifier) return '<span class="qualifier-badge">GO</span>';
+  const hint = row.result.blocker
+    ? ` <span class="blocker">· ${escapeHtml(row.result.blocker)}</span>`
+    : "";
   if (row.bestRun >= EDGE_RUN_MIN) {
-    const hint = row.result.blocker
-      ? ` <span class="blocker">· ${escapeHtml(row.result.blocker)}</span>`
-      : "";
     return `<span class="status-pill verdict-edge">EDGE · ${row.bestRun}d</span>${hint}`;
   }
-  return `<span class="blocker">${escapeHtml(row.result.blocker ?? "")}</span>`;
+  // NO-GO as a peer pill (was bare blocker text before — broke the visual
+  // parallel with GO/EDGE and made the column read like a tooltip rather than
+  // a status state).
+  return `<span class="status-pill verdict-no-go">NO-GO</span>${hint}`;
 }
 
 function renderTableRow(row: RowView): string {

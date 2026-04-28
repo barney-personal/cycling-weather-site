@@ -381,7 +381,7 @@ function renderResults(input: RenderInputs): void {
   if (summary) {
     const days = diffDays(input.state.start, input.state.end) + 1;
     if (cleanCount > 0) {
-      summary.textContent = `${cleanCount} destination${cleanCount === 1 ? "" : "s"} clean every day · ${goCount} with a 7-day window inside ${days} days.`;
+      summary.textContent = `${cleanCount} destination${cleanCount === 1 ? "" : "s"} clean every day · ${goCount} qualify on the trip-window dial inside ${days} days.`;
     } else {
       summary.textContent = `${ranked.length} destination${
         ranked.length === 1 ? "" : "s"
