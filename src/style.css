@@ -2474,3 +2474,257 @@ footer {
     justify-self: start;
   }
 }
+
+/* ---------- world map (M12 — homepage only) -------------------------- */
+/*
+ * Lazy-loaded by main.ts after the section intersects the viewport. The
+ * topology + d3-geo bundle ships in its own chunk; this CSS lives in the
+ * shared bundle so the map skeleton is styled the moment the section
+ * enters the viewport (no FOUC when the chunk arrives).
+ */
+.world-map-section {
+  margin-bottom: var(--space-7);
+  min-height: 80px;
+}
+.world-map-section[aria-busy="true"]:empty {
+  background: var(--surface-2);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-3);
+  padding: var(--space-6);
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+  color: var(--text-3);
+  letter-spacing: 0.06em;
+}
+.world-map-section[aria-busy="true"]:empty::before {
+  content: "Loading world view…";
+}
+.world-map {
+  margin: 0;
+  padding: 0;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-3);
+  box-shadow: var(--shadow-1);
+  overflow: hidden;
+}
+.world-map-caption {
+  padding: var(--space-5) var(--space-5) var(--space-3);
+}
+.world-map-title {
+  margin: 0 0 var(--space-1);
+}
+.world-map-subtitle {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+  color: var(--text-3);
+  letter-spacing: 0.04em;
+}
+.world-map-frame {
+  position: relative;
+  background: var(--surface);
+  padding: 0 var(--space-3) var(--space-3);
+}
+.world-map-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 480px;
+  user-select: none;
+}
+.world-map-bg {
+  fill: transparent;
+}
+.world-map-land {
+  fill: var(--surface-3);
+  stroke: var(--border);
+  stroke-width: 0.5;
+}
+[data-theme="dark"] .world-map-land {
+  fill: var(--surface-3);
+  stroke: var(--border);
+}
+.world-glyph {
+  cursor: pointer;
+}
+.world-glyph-halo {
+  fill: var(--surface-2);
+  fill-opacity: 0.7;
+  stroke: var(--border);
+  stroke-width: 0.4;
+}
+.world-glyph-dot {
+  stroke: var(--surface-2);
+  stroke-width: 1.2;
+  transition: transform var(--transition-fast), filter var(--transition-fast);
+  transform-origin: center;
+  transform-box: fill-box;
+}
+.world-glyph-go .world-glyph-dot {
+  fill: var(--good);
+}
+.world-glyph-edge .world-glyph-dot {
+  fill: var(--edge);
+}
+.world-glyph-no-go .world-glyph-dot {
+  fill: var(--no-go);
+}
+.world-glyph-go .world-glyph-halo {
+  fill: var(--good-soft);
+  fill-opacity: 0.85;
+  stroke: color-mix(in srgb, var(--good) 35%, var(--border));
+}
+.world-glyph-edge .world-glyph-halo {
+  fill: var(--edge-soft);
+  fill-opacity: 0.65;
+  stroke: color-mix(in srgb, var(--edge) 35%, var(--border));
+}
+.world-glyph-dot:hover,
+.world-glyph-dot:focus-visible {
+  outline: none;
+  transform: scale(1.4);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
+}
+.world-glyph-dot:focus-visible {
+  stroke: var(--focus-ring);
+  stroke-width: 2.4;
+}
+@media (prefers-reduced-motion: reduce) {
+  .world-glyph-dot,
+  .world-glyph-dot:hover,
+  .world-glyph-dot:focus-visible {
+    transform: none;
+    transition: none;
+  }
+}
+.world-map-tooltip {
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-2);
+  box-shadow: var(--shadow-2);
+  padding: var(--space-3) var(--space-4);
+  font-family: var(--font-sans);
+  color: var(--text);
+  z-index: 5;
+  max-width: min(360px, 90vw);
+}
+.world-map-tooltip[hidden] {
+  display: none;
+}
+.world-map-tooltip--popover {
+  position: absolute;
+  transform: translate(-50%, calc(-100% - 14px));
+  pointer-events: auto;
+}
+.world-map-tooltip--sheet {
+  position: sticky;
+  bottom: env(safe-area-inset-bottom, 0px);
+  margin: var(--space-3) auto 0;
+  width: 100%;
+  max-width: none;
+}
+.world-tip-name {
+  margin: 0 0 var(--space-1);
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: var(--fs-3);
+  color: var(--text);
+}
+.world-tip-region {
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+  color: var(--text-3);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-left: var(--space-2);
+}
+.world-tip-line {
+  margin: 0 0 var(--space-1);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-2);
+}
+.world-tip-pill {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: var(--fs-1);
+  letter-spacing: 0.1em;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+}
+.world-tip-stat {
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+  color: var(--text-2);
+}
+.world-tip-link {
+  margin: 0;
+  font-size: var(--fs-2);
+}
+.world-tip-link a {
+  color: var(--accent);
+  font-weight: 500;
+}
+.world-map-legend {
+  margin: 0;
+  padding: var(--space-3) var(--space-5) var(--space-4);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+  color: var(--text-3);
+  letter-spacing: 0.06em;
+  border-top: 1px dashed var(--border);
+}
+.world-legend-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: var(--space-1);
+  vertical-align: -1px;
+}
+.world-legend-go {
+  background: var(--good);
+}
+.world-legend-edge {
+  background: var(--edge);
+}
+.world-legend-nogo {
+  background: var(--no-go);
+}
+.world-map-empty {
+  margin: 0;
+  padding: var(--space-5);
+  text-align: center;
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+}
+
+/* M12 reduced-motion sweep — codify zero transition/animation on the
+ * micro-interaction surfaces called out in the cycle-12 plan. The shared
+ * tokens already collapse var(--transition-*) to 0ms; these explicit
+ * overrides defend against future hard-coded durations and assert the
+ * computed-style contract the M13 Playwright suite will enforce. */
+@media (prefers-reduced-motion: reduce) {
+  .rank-card,
+  .strip-cell,
+  .changelog-chip,
+  .theme-toggle,
+  .site-hamburger,
+  .site-nav-link,
+  .threshold-trigger,
+  .plan-card,
+  .plan-card-link {
+    transition: none !important;
+    animation: none !important;
+  }
+}

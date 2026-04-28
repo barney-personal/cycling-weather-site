@@ -38,6 +38,43 @@ void loadSiteData()
       const detail = (ev as CustomEvent<DialChangeDetail>).detail;
       ranking.setThresholds(detail.thresholds);
     });
+
+    // World map — lazy-loaded after the mount intersects the viewport so
+    // d3-geo, topojson-client, and the land-110m topology never count
+    // against the homepage's initial-paint bundle. Falls back to an
+    // immediate import if IntersectionObserver isn't available.
+    const mapMount = document.getElementById("world-map-mount");
+    if (mapMount) {
+      const loadMap = (): void => {
+        void import("./components/world-map")
+          .then(({ mountWorldMap }) => {
+            mountWorldMap({ mount: mapMount, results: latest.results });
+            mapMount.removeAttribute("aria-busy");
+          })
+          .catch((err) => {
+            console.warn("world-map: import failed", err);
+            mapMount.innerHTML = '<p class="world-map-empty">Map unavailable offline.</p>';
+            mapMount.removeAttribute("aria-busy");
+          });
+      };
+      if (typeof IntersectionObserver === "undefined") {
+        loadMap();
+      } else {
+        const io = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (entry.isIntersecting) {
+                io.disconnect();
+                loadMap();
+                break;
+              }
+            }
+          },
+          { rootMargin: "200px 0px" },
+        );
+        io.observe(mapMount);
+      }
+    }
   })
   .catch((err: unknown) => {
     console.warn("homepage: data.json fetch failed", err);

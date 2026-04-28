@@ -64,6 +64,7 @@ const pages = [
     expect: [
       'id="hero-mount"',
       'id="rank-body"',
+      'id="world-map-mount"',
       'rel="manifest"',
       'rel="apple-touch-icon"',
       'property="og:image"',
@@ -147,6 +148,31 @@ for (const page of pages) {
     const cssUrl = `${base}/${cssMatch[1].replace(/^\.?\/?/, "")}`;
     const cres = await fetch(cssUrl);
     if (cres.status !== 200) fail(`CSS ${cssUrl} returned ${cres.status}`);
+  }
+}
+
+// World-map chunk contract (M12) — the world-map module is dynamically
+// imported by main.ts only after the homepage map mount intersects the
+// viewport. Therefore:
+//   1. A world-map chunk MUST be present in assets/ (Vite emits it as a
+//      separately-named file because of the dynamic import).
+//   2. The homepage HTML must NOT preload or directly reference that chunk
+//      via <script src> or <link rel="modulepreload">. If it did, the
+//      chunk would ship in the initial paint waterfall, defeating the
+//      whole point of the lazy load.
+console.log("CHECK world-map lazy chunk shape");
+{
+  const indexHtml = await (await fetch(`${base}/index.html`)).text();
+  const fs = await import("node:fs/promises");
+  const assetFiles = await fs.readdir(`${repoRoot}/assets`);
+  const worldChunk = assetFiles.find((f) => /^world-map-[A-Za-z0-9_-]+\.js$/.test(f));
+  if (!worldChunk) {
+    fail("no world-map-*.js chunk found in assets/");
+  } else {
+    console.log(`  world-map chunk: ${worldChunk}`);
+    if (indexHtml.includes(worldChunk)) {
+      fail(`world-map chunk ${worldChunk} is referenced in index.html (must be lazy-only)`);
+    }
   }
 }
 
