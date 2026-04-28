@@ -12,7 +12,7 @@
 // the M6.1 lesson). The `bounds-inspect` headless probe in
 // scripts/probe-world-map.mjs verifies this on every render.
 
-import { geoNaturalEarth1, geoPath } from "d3-geo";
+import { geoEqualEarth, geoPath } from "d3-geo";
 import { feature } from "topojson-client";
 import type { GeometryCollection, Topology } from "topojson-specification";
 
@@ -111,7 +111,11 @@ export function mountWorldMap(options: MountWorldMapOptions): void {
 
   const land = feature(TOPOLOGY, TOPOLOGY.objects.land);
 
-  const projection = geoNaturalEarth1()
+  // M8: switched from Natural Earth1 to Equal Earth — equal-area projection
+  // perceptually fairer for cluster density across the Med, Atlantic, UK,
+  // North America, and Australia (cycling capitals span those regions).
+  // Bonus: less polar distortion so Antarctic mass doesn't visually dominate.
+  const projection = geoEqualEarth()
     .fitSize([VIEWBOX_W - 16, VIEWBOX_H - 16], land)
     .translate([VIEWBOX_W / 2, VIEWBOX_H / 2 + 4]);
 
@@ -168,6 +172,7 @@ export function mountWorldMap(options: MountWorldMapOptions): void {
                   data-verdict="${verdictTok}"
                   data-temp="${g.dest.median_temp.toFixed(1)}"
                   data-best-run="${g.dest.best_run}"
+                  data-rank="${g.dest.rank}"
                   data-slug="${escapeHtml(g.dest.slug)}"></circle>
         </g>`;
     })
@@ -206,12 +211,19 @@ export function mountWorldMap(options: MountWorldMapOptions): void {
     const verdict = (target.getAttribute("data-verdict") ?? "edge") as "go" | "edge" | "no-go";
     const temp = target.getAttribute("data-temp") ?? "";
     const bestRun = target.getAttribute("data-best-run") ?? "";
+    const rank = target.getAttribute("data-rank") ?? "";
     const slug = target.getAttribute("data-slug") ?? "";
 
+    // M8: tooltip is a richer mini destination card — verdict pill, rank
+    // chip, median temp, best-run, and a deep link to the full page.
     tooltip.innerHTML = `
       <p class="world-tip-name">${escapeHtml(name)}${region ? ` <span class="world-tip-region">${escapeHtml(region)}</span>` : ""}</p>
-      <p class="world-tip-line"><span class="world-tip-pill verdict-${verdict}">${verdictLabel(verdict)}</span><span class="world-tip-stat">${escapeHtml(temp)}°C median · best run ${escapeHtml(bestRun)}d</span></p>
-      <p class="world-tip-link"><a href="./destination.html?slug=${encodeURIComponent(slug)}">Destination detail →</a></p>
+      <p class="world-tip-line"><span class="world-tip-pill verdict-${verdict}">${verdictLabel(verdict)}</span>${rank ? `<span class="world-tip-rank">#${escapeHtml(rank)}</span>` : ""}</p>
+      <dl class="world-tip-stats">
+        <div class="world-tip-stat-pair"><dt>Median high</dt><dd>${escapeHtml(temp)}°C</dd></div>
+        <div class="world-tip-stat-pair"><dt>Best run</dt><dd>${escapeHtml(bestRun)} day${bestRun === "1" ? "" : "s"}</dd></div>
+      </dl>
+      <p class="world-tip-link"><a href="./destination.html?slug=${encodeURIComponent(slug)}">Open destination →</a></p>
     `;
 
     // Position: bottom-sheet on small viewports, popover near glyph on desktop.
@@ -255,6 +267,7 @@ export function mountWorldMap(options: MountWorldMapOptions): void {
         }
       } else if (key === "Escape") {
         hideTooltip();
+        (dot as SVGElement & { blur?: () => void }).blur?.();
       }
     });
     dot.addEventListener("click", () => {
@@ -264,4 +277,15 @@ export function mountWorldMap(options: MountWorldMapOptions): void {
       }
     });
   }
+
+  // M8: page-level Escape dismisses the tooltip even when focus has moved
+  // beyond the glyph (e.g. mouse hover left the tooltip mid-frame and
+  // keyboard now drives the page). Listener is scoped to the mount, not
+  // window, so it co-exists cleanly with the dial / picker dialogs.
+  document.addEventListener("keydown", (ev) => {
+    if ((ev as KeyboardEvent).key !== "Escape") return;
+    if (tooltip && !tooltip.hasAttribute("hidden")) {
+      hideTooltip();
+    }
+  });
 }
