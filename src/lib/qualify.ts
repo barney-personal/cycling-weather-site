@@ -40,6 +40,15 @@ export const DEFAULT_THRESHOLDS: Readonly<Thresholds> = Object.freeze({
   codeIn: [0, 1, 2, 3],
 });
 
+/** Minimum clean run length for a destination to qualify as GO.
+ *  Mirrors the Python `qualifier = run >= 4` rule. Exported so the status
+ *  pill (GO / EDGE / NO-GO) stays in sync with the qualifier band. */
+export const QUALIFIER_RUN_MIN = 4;
+
+/** Minimum clean run length for a destination to be considered EDGE
+ *  (close to qualifying). Below this, the destination is NO-GO. */
+export const EDGE_RUN_MIN = 2;
+
 // Sun preference levels:
 //   "any":   no code restriction
 //   "sun":   sunny + mostly sunny only (codes 0,1)
@@ -138,7 +147,7 @@ export function rankWithThresholds(
     // a GO. UK exception dropped — with the looser temperature floor the UK is
     // legitimately gated by its own conditions in shoulder season anyway.
     void UK_NAMES; // retained for backwards compat with stored client state
-    const qualifier = run.length >= 4;
+    const qualifier = run.length >= QUALIFIER_RUN_MIN;
     const score = run.length * 100 + dryDays * 5 + r.median_temp;
     return {
       result: r,

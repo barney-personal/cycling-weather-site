@@ -18,7 +18,7 @@
  *     empty state when the page can't load data.json).
  */
 
-const VERSION = "2026-04-28T07-04-21-598Z";
+const VERSION = "2026-04-28T07-07-21-225Z";
 const SHELL_CACHE = `cw-shell-${VERSION}`;
 const PRECACHE_MANIFEST = "./assets/sw-precache.json";
 

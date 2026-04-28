@@ -12,6 +12,7 @@
 
 import {
   DEFAULT_THRESHOLDS,
+  EDGE_RUN_MIN,
   type RankedDestination,
   type Thresholds,
   rankWithThresholds,
@@ -137,9 +138,16 @@ function renderStrip(row: RowView): string {
     .join("");
 }
 
+// Status band ladders against the qualifier threshold rather than a hard-coded
+// 5/7-day rule. With cycling-comfort defaults (qualifier = best_run >= 4):
+//   bestRun >= 4              → GO
+//   bestRun in [EDGE_RUN_MIN, 3] → EDGE · Xd  (close to qualifying)
+//   bestRun <  EDGE_RUN_MIN   → NO-GO
+// If the user dials thresholds tighter via the homepage dial, qualifier flips
+// off naturally and the EDGE band absorbs near-misses.
 function renderStatus(row: RowView): string {
   if (row.qualifier) return `<span class="status-pill verdict-go">GO</span>`;
-  if (row.bestRun >= 5)
+  if (row.bestRun >= EDGE_RUN_MIN)
     return `<span class="status-pill verdict-edge">EDGE · ${row.bestRun}d</span>`;
   return `<span class="status-pill verdict-no-go">NO-GO</span>`;
 }
@@ -184,6 +192,20 @@ function renderCard(row: RowView): string {
   </li>`;
 }
 
+// Desktop table status column — same band as the mobile pill so the two views
+// stay consistent. EDGE shows the partial run length + blocker hint so it
+// doesn't read as a hard NO-GO when the destination is genuinely close.
+function renderTableStatus(row: RowView): string {
+  if (row.qualifier) return '<span class="qualifier-badge">GO</span>';
+  if (row.bestRun >= EDGE_RUN_MIN) {
+    const hint = row.result.blocker
+      ? ` <span class="blocker">· ${escapeHtml(row.result.blocker)}</span>`
+      : "";
+    return `<span class="status-pill verdict-edge">EDGE · ${row.bestRun}d</span>${hint}`;
+  }
+  return `<span class="blocker">${escapeHtml(row.result.blocker ?? "")}</span>`;
+}
+
 function renderTableRow(row: RowView): string {
   const region = row.result.region
     ? `<span class="region">${escapeHtml(row.result.region)}</span>`
@@ -195,7 +217,7 @@ function renderTableRow(row: RowView): string {
     <td><div class="strip">${renderStrip(row)}</div></td>
     <td class="cell-num">${row.bestRun}${row.bestStart ? ` · ${escapeHtml(shortDate(row.bestStart))}` : ""}</td>
     <td class="cell-num">${row.dryDays}</td>
-    <td>${row.qualifier ? '<span class="qualifier-badge">GO</span>' : `<span class="blocker">${escapeHtml(row.result.blocker ?? "")}</span>`}</td>
+    <td>${renderTableStatus(row)}</td>
   </tr>`;
 }
 
