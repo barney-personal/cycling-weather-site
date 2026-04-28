@@ -4,29 +4,47 @@
 // either an SVG or a .chart-empty placeholder; heatmap rect bounds inside
 // the SVG bbox).
 //
+// Cross-browser: loops over `selectedBrowsers()` (chromium-only by
+// default, all three under `CW_BROWSERS=all`). SVG bbox math is identical
+// across engines so these invariants are good cross-browser fodder.
+//
 // Run via `node --test --no-warnings`. Requires a prior `npm run build`.
 
 import { strict as assert } from "node:assert";
 import { after, before, test } from "node:test";
-import { chromium } from "playwright";
 
+import { selectedBrowsers } from "./_lib/browsers.mjs";
 import { startTestServer } from "./_lib/server.mjs";
 
+const BROWSERS = selectedBrowsers();
+
 let server;
-let browser;
+const browsers = new Map();
 
 before(async () => {
   server = await startTestServer();
-  browser = await chromium.launch({ headless: true });
+  for (const b of BROWSERS) {
+    browsers.set(b.name, await b.launcher.launch({ headless: true }));
+  }
 });
 
 after(async () => {
-  await browser?.close();
+  for (const b of browsers.values()) await b?.close();
   await server?.close();
 });
 
+// Helper: register a test once per selected browser. The test body is
+// passed the launched browser instance — write tests as `vtest("name",
+// async (browser) => { ... })` instead of relying on a module-scope
+// `browser` const.
+function vtest(name, fn) {
+  for (const b of BROWSERS) {
+    test(`${name} [${b.name}]`, async () => fn(browsers.get(b.name)));
+  }
+}
+
 // ---- M6.1: polar wedge bounds within .polar-svg --------------------------
-test("destination: polar wedges (.polar-temp/.polar-rain/.polar-wind/.polar-halo/.polar-hit) lie within .polar-svg bbox", async () => {
+vtest("destination: polar wedges (.polar-temp/.polar-rain/.polar-wind/.polar-halo/.polar-hit) lie within .polar-svg bbox", async (browser) => {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   const p = await ctx.newPage();
   await p.goto(`${server.base}/destination.html?slug=cyprus`, { waitUntil: "networkidle" });
@@ -69,7 +87,7 @@ test("destination: polar wedges (.polar-temp/.polar-rain/.polar-wind/.polar-halo
 });
 
 // ---- M9+M10: every history chart mount renders SVG or .chart-empty -------
-test("history: every chart mount contains either an <svg> or a .chart-empty placeholder", async () => {
+vtest("history: every chart mount contains either an <svg> or a .chart-empty placeholder", async (browser) => {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   const p = await ctx.newPage();
   await p.goto(`${server.base}/history.html`, { waitUntil: "networkidle" });
@@ -100,7 +118,7 @@ test("history: every chart mount contains either an <svg> or a .chart-empty plac
   await ctx.close();
 });
 
-test("history: heatmap rect bounds lie inside #actuals-heatmap SVG bbox", async () => {
+vtest("history: heatmap rect bounds lie inside #actuals-heatmap SVG bbox", async (browser) => {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   const p = await ctx.newPage();
   await p.goto(`${server.base}/history.html`, { waitUntil: "networkidle" });
@@ -127,7 +145,7 @@ test("history: heatmap rect bounds lie inside #actuals-heatmap SVG bbox", async 
   await ctx.close();
 });
 
-test("history: .hm-qualify stroke uses --surface-elevated token (or computed equivalent, never #000)", async () => {
+vtest("history: .hm-qualify stroke uses --surface-elevated token (or computed equivalent, never #000)", async (browser) => {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   const p = await ctx.newPage();
   await p.goto(`${server.base}/history.html`, { waitUntil: "networkidle" });
@@ -156,7 +174,7 @@ test("history: .hm-qualify stroke uses --surface-elevated token (or computed equ
 
 // ---- M9+M10: footer-freshness ------------------------------------------
 for (const path of ["/index.html", "/history.html", "/methodology.html", "/destination.html?slug=cyprus", "/plan.html"]) {
-  test(`footer-freshness contains 'data.json built' on ${path}`, async () => {
+  vtest(`footer-freshness contains 'data.json built' on ${path}`, async (browser) => {
     const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
     const p = await ctx.newPage();
     await p.goto(`${server.base}${path}`, { waitUntil: "networkidle" });
@@ -171,7 +189,7 @@ for (const path of ["/index.html", "/history.html", "/methodology.html", "/desti
 }
 
 // ---- M12: world-map invariants ------------------------------------------
-test("index: every world-map glyph has bbox inside .world-map-svg, role=button, tabindex=0, aria-label", async () => {
+vtest("index: every world-map glyph has bbox inside .world-map-svg, role=button, tabindex=0, aria-label", async (browser) => {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   const p = await ctx.newPage();
   await p.goto(`${server.base}/index.html`, { waitUntil: "networkidle" });
@@ -209,7 +227,7 @@ test("index: every world-map glyph has bbox inside .world-map-svg, role=button, 
   await ctx.close();
 });
 
-test("index: hovering a world-map glyph surfaces #world-map-tooltip", async () => {
+vtest("index: hovering a world-map glyph surfaces #world-map-tooltip", async (browser) => {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   const p = await ctx.newPage();
   await p.goto(`${server.base}/index.html`, { waitUntil: "networkidle" });
@@ -229,7 +247,7 @@ test("index: hovering a world-map glyph surfaces #world-map-tooltip", async () =
   await ctx.close();
 });
 
-test("reduced-motion: rank-card / strip-cell / theme-toggle / world-glyph-dot have transitionDuration 0s", async () => {
+vtest("reduced-motion: rank-card / strip-cell / theme-toggle / world-glyph-dot have transitionDuration 0s", async (browser) => {
   const ctx = await browser.newContext({
     viewport: { width: 1280, height: 900 },
     reducedMotion: "reduce",
@@ -271,7 +289,7 @@ test("reduced-motion: rank-card / strip-cell / theme-toggle / world-glyph-dot ha
 
 // ---- world-map glyphs in-bounds at 360 / 768 / 1280 ---------------------
 for (const w of [360, 768, 1280]) {
-  test(`world-map glyphs all inside SVG bbox at ${w}px width`, async () => {
+  vtest(`world-map glyphs all inside SVG bbox at ${w}px width`, async (browser) => {
     const ctx = await browser.newContext({ viewport: { width: w, height: 900 } });
     const p = await ctx.newPage();
     await p.goto(`${server.base}/index.html`, { waitUntil: "networkidle" });
@@ -294,7 +312,7 @@ for (const w of [360, 768, 1280]) {
 }
 
 // ---- index: hero CTA scrolls to ranking row ------------------------------
-test("index: hero pick CTA targets a real ranking row by slug", async () => {
+vtest("index: hero pick CTA targets a real ranking row by slug", async (browser) => {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   const p = await ctx.newPage();
   await p.goto(`${server.base}/index.html`, { waitUntil: "networkidle" });

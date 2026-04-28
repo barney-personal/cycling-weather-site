@@ -39,6 +39,14 @@ The Playwright e2e tests (`smoke.spec.mjs`, `viz.spec.mjs`, `a11y.spec.mjs`,
 in `tests/visual/` were captured at this revision; refresh them with
 `CW_UPDATE_VISUAL=1 npm run test:visual` after deliberate UI changes.
 
+**Cross-browser matrix** (M12): set `CW_BROWSERS=all` to run smoke, viz and
+a11y across chromium **and** firefox **and** webkit (visual baselines are
+chromium-only by design — byte-identity across engines is impossible). The
+default is chromium-only for fast local iteration. `CW_BROWSERS` also
+accepts a comma-separated subset like `chromium,webkit`. Webkit + firefox
+need OS deps that the dev container doesn't ship by default — install on
+the build host with `npx playwright install --with-deps webkit firefox`.
+
 The visual baseline matrix covers each of the five entry pages at:
 
 - portrait widths **320 / 360 / 768 / 1280 / 1440 / 1920**,
@@ -204,6 +212,24 @@ package.json, tsconfig.json, vite.config.ts, biome.json
   non-existent token — under the CSS spec the property silently becomes
   invalid-at-computed-value-time and inherits the parent value, so visual baselines often
   miss it. Run after `npm run build`; expects fresh bundles in `assets/`.
+- Cron-output validation (M12): `scripts/cron-validate.mjs` exports a pure
+  `validateCronOutput(json)` consumed by both `scripts/cron-sim.mjs` (live cron run) and
+  `tests/cron-validate.spec.ts` (paired unit test). The unit test loads the live
+  `data.json`, asserts it validates clean, then deliberately corrupts it in well-known
+  ways (Tenerife reposed in the Sahara, lat/lon swap, malformed hourly entry, missing
+  climatology destinations, missing model-spread models array, missing model-spread day
+  date) and asserts each corruption is caught — proving the gate has teeth. Add a new
+  destination to the schema by extending `KNOWN_DESTINATIONS` with a sensible lat/lon
+  bounding box; missing-from-table destinations are skipped (no false positive on adds).
+- Lighthouse mobile gate (M12): `npm run test:perf` (chained into `npm test`) is now
+  mandatory and runs Lighthouse against the homepage via playwright's
+  `chromium-headless-shell` binary launched with `--remote-debugging-port`. Thresholds:
+  perf ≥ 50 (interim floor — M13 raises to 95 once LCP/CLS root causes are fixed),
+  a11y = 100, best-practices ≥ 95, SEO ≥ 95. `CW_LH_PERF_FLOOR=N` overrides the perf
+  threshold for ratchet experiments; `CW_SKIP_LIGHTHOUSE=1` skips the Lighthouse leg
+  only on hosts where the headless binary can't reach a stable rendering state (the
+  bundle-budget gate always runs). The current floor matches today's homepage score
+  (~54 mobile) — not a target, just a regression detector.
 
 ## PWA layer
 
