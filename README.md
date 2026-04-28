@@ -44,7 +44,10 @@ The visual baseline matrix covers each of the five entry pages at:
 - portrait widths **320 / 360 / 768 / 1280 / 1440 / 1920**,
 - a mobile-landscape viewport **812 × 375** (typical iPhone landscape),
 - two desktop variants at 1280 — **reduced-motion** (`-rmotion.png`) and
-  **prefers-contrast: more** (`-hcontrast.png`).
+  **prefers-contrast: more** (`-hcontrast.png`),
+- one stale-banner state at 1280 — `index-1280-stale.png`, captured via the
+  `?stale=1` debug query param so the banner snapshots deterministically
+  regardless of `data.json.generated_at`.
 
 Comparison uses a 5% deflated-byte budget which absorbs daily timestamp
 drift in hero copy + sub-pixel font shifts within the same chromium
@@ -101,6 +104,11 @@ package.json, tsconfig.json, vite.config.ts, biome.json
 - `data.json` schema can evolve, but loaders must default missing fields gracefully — there is
   a ~24h window where new code will load yesterday's `data.json`.
 - d3 v7 ships as ESM sub-packages, bundled by Vite — no CDN.
+- Stale-data banner (homepage): when `data.json.generated_at` is more than 36 hours old,
+  the homepage shows a `role="status"` banner above the hero so users aren't quietly
+  shown out-of-date forecasts. Force-trigger it with `?stale=1` (used by the visual snapshot
+  suite). See `src/components/stale-banner.ts`; threshold + parsing rules covered by
+  `tests/stale-banner.spec.ts`.
 
 ## PWA layer
 

@@ -17,6 +17,7 @@ import {
   type Thresholds,
   rankWithThresholds,
 } from "../lib/qualify";
+import { rainBucket, tempColour, windBucket } from "../lib/strip";
 import type { DestinationResult } from "../lib/types";
 
 export type FilterMode = "all" | "qualifiers" | string;
@@ -70,29 +71,6 @@ function shortDate(iso: string | null): string {
     day: "numeric",
     timeZone: "UTC",
   });
-}
-
-// Map a 0-35°C reading onto a CSS-variable-driven gradient stop. Anything
-// below 10°C is clamped (cool blues), anything above 30°C clamped (warm
-// reds). Returned as a hsl() so it adapts naturally to dark mode without
-// looking neon — saturation is held back deliberately.
-function tempColour(t: number): string {
-  const clamped = Math.min(35, Math.max(5, t));
-  // 5°C → 220° (deep blue), 35°C → 18° (warm orange).
-  const hue = 220 - ((clamped - 5) / 30) * 202;
-  return `hsl(${hue.toFixed(0)}, 55%, 56%)`;
-}
-
-function rainBucket(precip: number, prob: number): "clean" | "light" | "wet" {
-  if (precip > 1 || prob >= 60) return "wet";
-  if (precip > 0 || prob >= 25) return "light";
-  return "clean";
-}
-
-function windBucket(wind: number): "calm" | "breezy" | "blustery" {
-  if (wind >= 30) return "blustery";
-  if (wind >= 18) return "breezy";
-  return "calm";
 }
 
 function destinationLink(slug: string): string {

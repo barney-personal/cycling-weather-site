@@ -178,3 +178,26 @@ for (const p of PAGES) {
     });
   }
 }
+
+// ---- Stale-data banner state (M3) --------------------------------------
+// `?stale=1` forces the stale banner regardless of `data.json.generated_at`,
+// giving us a deterministic snapshot of that mode without time-travelling
+// the test fixture.
+test("visual: index @ 1280px (?stale=1)", async () => {
+  const ctx = await browser.newContext({
+    viewport: { width: 1280, height: 900 },
+    deviceScaleFactor: 1,
+    reducedMotion: "reduce",
+    colorScheme: "light",
+  });
+  const page = await loadPage(ctx, {
+    name: "index-stale",
+    path: "/index.html?stale=1",
+    waitFor: "[data-dest-glyph]",
+  });
+  // Wait for the banner DOM to render (mount script is non-blocking).
+  await page.waitForSelector(".stale-banner", { timeout: 5_000, state: "attached" });
+  const buf = await page.screenshot({ type: "png", fullPage: true });
+  await compareOrUpdate(buf, "index-1280-stale");
+  await ctx.close();
+});
