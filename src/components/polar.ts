@@ -88,10 +88,14 @@ export function mountPolar(options: MountPolarOptions): void {
   const size = 320;
   const cx = size / 2;
   const cy = size / 2;
-  const outer = size / 2 - 12;
+  // M8: increased outer-margin from 12 → 22 to leave room for day labels
+  // sitting just outside windOuter without overrunning the viewBox at 320
+  // viewport. Previously (lr = windOuter + 14, outer = size/2 - 12) the
+  // top/bottom labels rendered at y = -10 / 330, outside the 0..320 box.
+  const outer = size / 2 - 22;
 
-  const ring = (outer - 70) / 3;
-  const tempInner = 70;
+  const ring = (outer - 64) / 3;
+  const tempInner = 64;
   const tempOuter = tempInner + ring;
   const rainInner = tempOuter + 4;
   const rainOuter = rainInner + ring;
@@ -150,11 +154,13 @@ export function mountPolar(options: MountPolarOptions): void {
     );
   });
 
-  // Day labels at outer tips
+  // Day labels at outer tips. M8: lr reduced (windOuter + 10) and font-size
+  // bumped in CSS (.polar-label) — labels now sit cleanly inside viewBox at
+  // 320px viewport while remaining legible at 360-420px max width.
   const labels = days
     .map((d, i) => {
       const ang = i * wedgeAngle - Math.PI / 2;
-      const lr = windOuter + 14;
+      const lr = windOuter + 10;
       const x = Math.cos(ang) * lr;
       const y = Math.sin(ang) * lr;
       const showFull = i === 0 || i === days.length - 1 || i % 2 === 0;
@@ -195,6 +201,35 @@ export function mountPolar(options: MountPolarOptions): void {
     ? `Polar 14-day forecast for ${label}. Three concentric rings: inner temperature, middle precipitation probability, outer wind speed.`
     : "Polar 14-day forecast. Three concentric rings: inner temperature, middle precipitation probability, outer wind speed.";
 
+  // M8: visually-hidden tabular fallback — screen-reader users get the same
+  // 14 days of data as a navigable <table> with proper <th scope> headers.
+  // The SVG is decorative-but-described; the table is the source of truth
+  // for AT users. Captioned + headered so screen readers announce columns.
+  const tableRows = days
+    .map((d, i) => {
+      const dateStr = shortDate(d.date);
+      const dayStr = shortDay(d.date);
+      const qual = qualifies[i] ? "Yes" : "No";
+      return `<tr><th scope="row">${escapeHtml(dayStr)} ${escapeHtml(dateStr)}</th><td>${d.temp_max.toFixed(0)}°C</td><td>${d.precip_sum.toFixed(1)} mm</td><td>${Math.round(d.precip_prob_max)}%</td><td>${d.wind_max.toFixed(0)} km/h</td><td>${qual}</td></tr>`;
+    })
+    .join("");
+
+  const altTable = `
+    <table class="polar-alt-table visually-hidden">
+      <caption>${escapeHtml(label ? `${label}: 14-day forecast values` : "14-day forecast values")}</caption>
+      <thead>
+        <tr>
+          <th scope="col">Day</th>
+          <th scope="col">High temp</th>
+          <th scope="col">Rain total</th>
+          <th scope="col">Rain probability</th>
+          <th scope="col">Max wind</th>
+          <th scope="col">Qualifies</th>
+        </tr>
+      </thead>
+      <tbody>${tableRows}</tbody>
+    </table>`;
+
   mount.innerHTML = `
     <figure class="polar" role="figure" aria-label="${desc.replace(/"/g, "&quot;")}">
       <svg viewBox="0 0 ${size} ${size}" class="polar-svg" preserveAspectRatio="xMidYMid meet">
@@ -206,10 +241,21 @@ export function mountPolar(options: MountPolarOptions): void {
           ${hoverHandles}
         </g>
       </svg>
+      ${altTable}
       <figcaption class="polar-caption">
         Inner ring: temperature · Middle: rain probability · Outer: wind speed.
         Green halo marks days that meet your thresholds.
       </figcaption>
     </figure>
   `;
+}
+
+function escapeHtml(s: string): string {
+  return s.replace(/[&<>"']/g, (c) => {
+    if (c === "&") return "&amp;";
+    if (c === "<") return "&lt;";
+    if (c === ">") return "&gt;";
+    if (c === '"') return "&quot;";
+    return "&#39;";
+  });
 }

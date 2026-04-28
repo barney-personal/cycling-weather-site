@@ -2345,17 +2345,18 @@ footer {
 }
 .polar-label {
   font-family: var(--font-mono);
-  font-size: 9px;
-  fill: var(--text-3);
+  font-size: 11px;
+  fill: var(--text-2);
   letter-spacing: 0.04em;
+  font-weight: 500;
 }
 .polar-ring-label {
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 10px;
   fill: var(--text-3);
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  font-weight: 500;
+  font-weight: 600;
 }
 .polar-centre-eyebrow {
   font-family: var(--font-mono);
@@ -2375,15 +2376,19 @@ footer {
   stroke: transparent;
   cursor: pointer;
 }
+/* M8: hover/focus highlight uses a token-based overlay so it's visible in
+ * BOTH themes (the previous rgba(255,255,255,0.06) was invisible against
+ * the light-mode white surface). color-mix gives a soft accent wash. */
 .polar-hit:hover,
 .polar-hit:focus-visible {
-  fill: rgba(255, 255, 255, 0.06);
+  fill: color-mix(in srgb, var(--accent) 10%, transparent);
   stroke: var(--accent);
   stroke-width: 1.5;
+  outline: none;
 }
 [data-theme="dark"] .polar-hit:hover,
 [data-theme="dark"] .polar-hit:focus-visible {
-  fill: rgba(255, 255, 255, 0.04);
+  fill: color-mix(in srgb, var(--accent) 14%, transparent);
 }
 .polar-caption {
   font-family: var(--font-mono);
@@ -3191,7 +3196,7 @@ footer {
   margin-left: var(--space-2);
 }
 .world-tip-line {
-  margin: 0 0 var(--space-1);
+  margin: 0 0 var(--space-2);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -3208,10 +3213,40 @@ footer {
   padding: 2px var(--space-2);
   border-radius: var(--radius-pill);
 }
-.world-tip-stat {
+.world-tip-rank {
   font-family: var(--font-mono);
   font-size: var(--fs-1);
+  font-weight: 600;
+  letter-spacing: 0.06em;
   color: var(--text-2);
+  background: var(--surface-3);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+}
+.world-tip-stats {
+  margin: 0 0 var(--space-2);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-1) var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-1);
+}
+.world-tip-stat-pair {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.world-tip-stats dt {
+  color: var(--text-3);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+.world-tip-stats dd {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--fs-2);
+  font-weight: 600;
 }
 .world-tip-link {
   margin: 0;
