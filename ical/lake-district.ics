@@ -11,15 +11,15 @@ X-WR-CALDESC:Cycling-clean windows for Lake District (cycling-weather\, ref
  reshed daily).
 REFRESH-INTERVAL;VALUE=DURATION:PT12H
 X-PUBLISHED-TTL:PT12H
-LAST-MODIFIED:20260428T110828Z
+LAST-MODIFIED:20260429T044719Z
 BEGIN:VEVENT
 UID:cw-lake-district-20260430@cycling-weather-site
-DTSTAMP:20260428T110828Z
+DTSTAMP:20260429T044719Z
 DTSTART;VALUE=DATE:20260430
-DTEND;VALUE=DATE:20260502
-SUMMARY:Cycle Lake District — 2-day window
-DESCRIPTION:2 clean days for cycling\n19°C median\nWindow: 30 Apr–1 May\
- nForecast for Lake District (cycling-weather)
+DTEND;VALUE=DATE:20260501
+SUMMARY:Cycle Lake District — 1-day window
+DESCRIPTION:1 clean day for cycling\n19°C median\nWindow: 30 Apr\nForecast
+  for Lake District (cycling-weather)
 URL:https://barney-personal.github.io/cycling-weather-site/destination.html
  ?slug=lake-district
 TRANSP:TRANSPARENT

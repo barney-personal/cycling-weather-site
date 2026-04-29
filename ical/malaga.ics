@@ -11,15 +11,15 @@ X-WR-CALDESC:Cycling-clean windows for Malaga (cycling-weather\, refreshed
  daily).
 REFRESH-INTERVAL;VALUE=DURATION:PT12H
 X-PUBLISHED-TTL:PT12H
-LAST-MODIFIED:20260428T110828Z
+LAST-MODIFIED:20260429T044719Z
 BEGIN:VEVENT
-UID:cw-malaga-20260430@cycling-weather-site
-DTSTAMP:20260428T110828Z
-DTSTART;VALUE=DATE:20260430
-DTEND;VALUE=DATE:20260503
-SUMMARY:Cycle Malaga — 3-day window
-DESCRIPTION:3 clean days for cycling\n23°C median\nWindow: 30 Apr–2 May\
- nForecast for Malaga (cycling-weather)
+UID:cw-malaga-20260503@cycling-weather-site
+DTSTAMP:20260429T044719Z
+DTSTART;VALUE=DATE:20260503
+DTEND;VALUE=DATE:20260507
+SUMMARY:Cycle Malaga — 4-day window
+DESCRIPTION:4 clean days for cycling\n26°C median\nWindow: 3 May–6 May\n
+ Forecast for Malaga (cycling-weather)
 URL:https://barney-personal.github.io/cycling-weather-site/destination.html
  ?slug=malaga
 TRANSP:TRANSPARENT

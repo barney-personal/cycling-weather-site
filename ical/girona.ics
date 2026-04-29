@@ -5,11 +5,23 @@ CALSCALE:GREGORIAN
 METHOD:PUBLISH
 NAME:Cycling — Girona
 X-WR-CALNAME:Cycling — Girona
-DESCRIPTION:Cycling-clean windows for Girona. No qualifying window in the n
- ext 14 days.
-X-WR-CALDESC:Cycling-clean windows for Girona. No qualifying window in the 
- next 14 days.
+DESCRIPTION:Cycling-clean windows for Girona (cycling-weather\, refreshed d
+ aily).
+X-WR-CALDESC:Cycling-clean windows for Girona (cycling-weather\, refreshed 
+ daily).
 REFRESH-INTERVAL;VALUE=DURATION:PT12H
 X-PUBLISHED-TTL:PT12H
-LAST-MODIFIED:20260428T110828Z
+LAST-MODIFIED:20260429T044719Z
+BEGIN:VEVENT
+UID:cw-girona-20260512@cycling-weather-site
+DTSTAMP:20260429T044719Z
+DTSTART;VALUE=DATE:20260512
+DTEND;VALUE=DATE:20260513
+SUMMARY:Cycle Girona — 1-day window
+DESCRIPTION:1 clean day for cycling\n27°C median\nWindow: 12 May\nForecast
+  for Girona (cycling-weather)
+URL:https://barney-personal.github.io/cycling-weather-site/destination.html
+ ?slug=girona
+TRANSP:TRANSPARENT
+END:VEVENT
 END:VCALENDAR

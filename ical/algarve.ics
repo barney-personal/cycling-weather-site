@@ -11,15 +11,15 @@ X-WR-CALDESC:Cycling-clean windows for Algarve (cycling-weather\, refreshed
   daily).
 REFRESH-INTERVAL;VALUE=DURATION:PT12H
 X-PUBLISHED-TTL:PT12H
-LAST-MODIFIED:20260428T110828Z
+LAST-MODIFIED:20260429T044719Z
 BEGIN:VEVENT
-UID:cw-algarve-20260428@cycling-weather-site
-DTSTAMP:20260428T110828Z
-DTSTART;VALUE=DATE:20260428
-DTEND;VALUE=DATE:20260503
-SUMMARY:Cycle Algarve — 5-day window
-DESCRIPTION:5 clean days for cycling\n19°C median\nWindow: 28 Apr–2 May\
- nForecast for Algarve (cycling-weather)
+UID:cw-algarve-20260429@cycling-weather-site
+DTSTAMP:20260429T044719Z
+DTSTART;VALUE=DATE:20260429
+DTEND;VALUE=DATE:20260510
+SUMMARY:Cycle Algarve — 11-day window
+DESCRIPTION:11 clean days for cycling\n20°C median\nWindow: 29 Apr–9 May
+ \nForecast for Algarve (cycling-weather)
 URL:https://barney-personal.github.io/cycling-weather-site/destination.html
  ?slug=algarve
 TRANSP:TRANSPARENT

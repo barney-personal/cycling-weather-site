@@ -11,14 +11,14 @@ X-WR-CALDESC:Cycling-clean windows for Sardinia (cycling-weather\, refreshe
  d daily).
 REFRESH-INTERVAL;VALUE=DURATION:PT12H
 X-PUBLISHED-TTL:PT12H
-LAST-MODIFIED:20260428T110828Z
+LAST-MODIFIED:20260429T044719Z
 BEGIN:VEVENT
-UID:cw-sardinia-20260428@cycling-weather-site
-DTSTAMP:20260428T110828Z
-DTSTART;VALUE=DATE:20260428
-DTEND;VALUE=DATE:20260503
+UID:cw-sardinia-20260429@cycling-weather-site
+DTSTAMP:20260429T044719Z
+DTSTART;VALUE=DATE:20260429
+DTEND;VALUE=DATE:20260504
 SUMMARY:Cycle Sardinia — 5-day window
-DESCRIPTION:5 clean days for cycling\n22°C median\nWindow: 28 Apr–2 May\
+DESCRIPTION:5 clean days for cycling\n23°C median\nWindow: 29 Apr–3 May\
  nForecast for Sardinia (cycling-weather)
 URL:https://barney-personal.github.io/cycling-weather-site/destination.html
  ?slug=sardinia

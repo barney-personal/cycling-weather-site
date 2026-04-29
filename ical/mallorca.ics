@@ -11,15 +11,15 @@ X-WR-CALDESC:Cycling-clean windows for Mallorca (cycling-weather\, refreshe
  d daily).
 REFRESH-INTERVAL;VALUE=DURATION:PT12H
 X-PUBLISHED-TTL:PT12H
-LAST-MODIFIED:20260428T110828Z
+LAST-MODIFIED:20260429T044719Z
 BEGIN:VEVENT
-UID:cw-mallorca-20260430@cycling-weather-site
-DTSTAMP:20260428T110828Z
-DTSTART;VALUE=DATE:20260430
-DTEND;VALUE=DATE:20260503
+UID:cw-mallorca-20260510@cycling-weather-site
+DTSTAMP:20260429T044719Z
+DTSTART;VALUE=DATE:20260510
+DTEND;VALUE=DATE:20260513
 SUMMARY:Cycle Mallorca — 3-day window
-DESCRIPTION:3 clean days for cycling\n21°C median\nWindow: 30 Apr–2 May\
- nForecast for Mallorca (cycling-weather)
+DESCRIPTION:3 clean days for cycling\n24°C median\nWindow: 10 May–12 May
+ \nForecast for Mallorca (cycling-weather)
 URL:https://barney-personal.github.io/cycling-weather-site/destination.html
  ?slug=mallorca
 TRANSP:TRANSPARENT

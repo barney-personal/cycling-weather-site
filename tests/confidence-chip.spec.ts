@@ -227,7 +227,7 @@ test("renderConfidenceChip — emits role=note + aria-label + escaped content", 
   assert.match(html, /ICON/);
 });
 
-test("renderConfidenceChip — single split day uses singular 'day'", () => {
+test("renderConfidenceChip — pluralizes by scoredDays (the noun being modified), not splitDays", () => {
   const ctx: ConfidenceContext = {
     isSplit: true,
     splitDays: 1,
@@ -238,7 +238,21 @@ test("renderConfidenceChip — single split day uses singular 'day'", () => {
     models: ["ecmwf_ifs04"],
   };
   const html = renderConfidenceChip(ctx);
-  assert.match(html, /1 of next 7 day(?!s)/);
+  assert.match(html, /1 of next 7 days/);
+});
+
+test("renderConfidenceChip — single scored day uses singular 'day'", () => {
+  const ctx: ConfidenceContext = {
+    isSplit: true,
+    splitDays: 1,
+    scoredDays: 1,
+    maxTempSpread: 3.5,
+    maxProbSpread: 10,
+    leadDays: 1,
+    models: ["ecmwf_ifs04"],
+  };
+  const html = renderConfidenceChip(ctx);
+  assert.match(html, /1 of next 1 day(?!s)/);
 });
 
 test("renderConfidenceChip — escapes hostile model strings", () => {
