@@ -11,101 +11,149 @@ X-WR-CALDESC:Every cycling-clean window across all tracked destinations (cy
  cling-weather\, refreshed daily).
 REFRESH-INTERVAL;VALUE=DURATION:PT12H
 X-PUBLISHED-TTL:PT12H
-LAST-MODIFIED:20260428T110828Z
+LAST-MODIFIED:20260429T044719Z
 BEGIN:VEVENT
 UID:cw-go-los-angeles-20260428@cycling-weather-site
-DTSTAMP:20260428T110828Z
+DTSTAMP:20260429T044719Z
 DTSTART;VALUE=DATE:20260428
-DTEND;VALUE=DATE:20260509
-SUMMARY:Cycle Los Angeles — 11-day window
-DESCRIPTION:11 clean days for cycling\n23°C median\nWindow: 28 Apr–8 May
- \nForecast for Los Angeles (cycling-weather)
+DTEND;VALUE=DATE:20260512
+SUMMARY:Cycle Los Angeles — 14-day window
+DESCRIPTION:14 clean days for cycling\n23°C median\nWindow: 28 Apr–11 Ma
+ y\nForecast for Los Angeles (cycling-weather)
 URL:https://barney-personal.github.io/cycling-weather-site/destination.html
  ?slug=los-angeles
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
-UID:cw-go-palo-alto-20260428@cycling-weather-site
-DTSTAMP:20260428T110828Z
-DTSTART;VALUE=DATE:20260428
-DTEND;VALUE=DATE:20260509
-SUMMARY:Cycle Palo Alto — 11-day window
-DESCRIPTION:11 clean days for cycling\n22°C median\nWindow: 28 Apr–8 May
- \nForecast for Palo Alto (cycling-weather)
-URL:https://barney-personal.github.io/cycling-weather-site/destination.html
- ?slug=palo-alto
-TRANSP:TRANSPARENT
-END:VEVENT
-BEGIN:VEVENT
-UID:cw-go-tenerife-20260504@cycling-weather-site
-DTSTAMP:20260428T110828Z
-DTSTART;VALUE=DATE:20260504
-DTEND;VALUE=DATE:20260512
-SUMMARY:Cycle Tenerife — 8-day window
-DESCRIPTION:8 clean days for cycling\n20°C median\nWindow: 4 May–11 May\
- nForecast for Tenerife (cycling-weather)
-URL:https://barney-personal.github.io/cycling-weather-site/destination.html
- ?slug=tenerife
-TRANSP:TRANSPARENT
-END:VEVENT
-BEGIN:VEVENT
-UID:cw-go-gran-canaria-20260430@cycling-weather-site
-DTSTAMP:20260428T110828Z
-DTSTART;VALUE=DATE:20260430
-DTEND;VALUE=DATE:20260506
-SUMMARY:Cycle Gran Canaria — 6-day window
-DESCRIPTION:6 clean days for cycling\n20°C median\nWindow: 30 Apr–5 May\
- nForecast for Gran Canaria (cycling-weather)
-URL:https://barney-personal.github.io/cycling-weather-site/destination.html
- ?slug=gran-canaria
-TRANSP:TRANSPARENT
-END:VEVENT
-BEGIN:VEVENT
-UID:cw-go-crete-20260507@cycling-weather-site
-DTSTAMP:20260428T110828Z
-DTSTART;VALUE=DATE:20260507
-DTEND;VALUE=DATE:20260512
-SUMMARY:Cycle Crete — 5-day window
-DESCRIPTION:5 clean days for cycling\n22°C median\nWindow: 7 May–11 May\
- nForecast for Crete (cycling-weather)
-URL:https://barney-personal.github.io/cycling-weather-site/destination.html
- ?slug=crete
-TRANSP:TRANSPARENT
-END:VEVENT
-BEGIN:VEVENT
-UID:cw-go-algarve-20260428@cycling-weather-site
-DTSTAMP:20260428T110828Z
-DTSTART;VALUE=DATE:20260428
-DTEND;VALUE=DATE:20260503
-SUMMARY:Cycle Algarve — 5-day window
-DESCRIPTION:5 clean days for cycling\n19°C median\nWindow: 28 Apr–2 May\
- nForecast for Algarve (cycling-weather)
+UID:cw-go-algarve-20260429@cycling-weather-site
+DTSTAMP:20260429T044719Z
+DTSTART;VALUE=DATE:20260429
+DTEND;VALUE=DATE:20260510
+SUMMARY:Cycle Algarve — 11-day window
+DESCRIPTION:11 clean days for cycling\n20°C median\nWindow: 29 Apr–9 May
+ \nForecast for Algarve (cycling-weather)
 URL:https://barney-personal.github.io/cycling-weather-site/destination.html
  ?slug=algarve
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
-UID:cw-go-cyprus-20260507@cycling-weather-site
-DTSTAMP:20260428T110828Z
-DTSTART;VALUE=DATE:20260507
-DTEND;VALUE=DATE:20260512
-SUMMARY:Cycle Cyprus — 5-day window
-DESCRIPTION:5 clean days for cycling\n28°C median\nWindow: 7 May–11 May\
+UID:cw-go-palo-alto-20260428@cycling-weather-site
+DTSTAMP:20260429T044719Z
+DTSTART;VALUE=DATE:20260428
+DTEND;VALUE=DATE:20260506
+SUMMARY:Cycle Palo Alto — 8-day window
+DESCRIPTION:8 clean days for cycling\n22°C median\nWindow: 28 Apr–5 May\
+ nForecast for Palo Alto (cycling-weather)
+URL:https://barney-personal.github.io/cycling-weather-site/destination.html
+ ?slug=palo-alto
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:cw-go-cyprus-20260505@cycling-weather-site
+DTSTAMP:20260429T044719Z
+DTSTART;VALUE=DATE:20260505
+DTEND;VALUE=DATE:20260513
+SUMMARY:Cycle Cyprus — 8-day window
+DESCRIPTION:8 clean days for cycling\n26°C median\nWindow: 5 May–12 May\
  nForecast for Cyprus (cycling-weather)
 URL:https://barney-personal.github.io/cycling-weather-site/destination.html
  ?slug=cyprus
 TRANSP:TRANSPARENT
 END:VEVENT
 BEGIN:VEVENT
-UID:cw-go-sardinia-20260428@cycling-weather-site
-DTSTAMP:20260428T110828Z
-DTSTART;VALUE=DATE:20260428
-DTEND;VALUE=DATE:20260503
+UID:cw-go-sicily-20260502@cycling-weather-site
+DTSTAMP:20260429T044719Z
+DTSTART;VALUE=DATE:20260502
+DTEND;VALUE=DATE:20260508
+SUMMARY:Cycle Sicily — 6-day window
+DESCRIPTION:6 clean days for cycling\n23°C median\nWindow: 2 May–7 May\n
+ Forecast for Sicily (cycling-weather)
+URL:https://barney-personal.github.io/cycling-weather-site/destination.html
+ ?slug=sicily
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:cw-go-nice-20260429@cycling-weather-site
+DTSTAMP:20260429T044719Z
+DTSTART;VALUE=DATE:20260429
+DTEND;VALUE=DATE:20260505
+SUMMARY:Cycle Nice — 6-day window
+DESCRIPTION:6 clean days for cycling\n20°C median\nWindow: 29 Apr–4 May\
+ nForecast for Nice (cycling-weather)
+URL:https://barney-personal.github.io/cycling-weather-site/destination.html
+ ?slug=nice
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:cw-go-sardinia-20260429@cycling-weather-site
+DTSTAMP:20260429T044719Z
+DTSTART;VALUE=DATE:20260429
+DTEND;VALUE=DATE:20260504
 SUMMARY:Cycle Sardinia — 5-day window
-DESCRIPTION:5 clean days for cycling\n22°C median\nWindow: 28 Apr–2 May\
+DESCRIPTION:5 clean days for cycling\n23°C median\nWindow: 29 Apr–3 May\
  nForecast for Sardinia (cycling-weather)
 URL:https://barney-personal.github.io/cycling-weather-site/destination.html
  ?slug=sardinia
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:cw-go-gran-canaria-20260501@cycling-weather-site
+DTSTAMP:20260429T044719Z
+DTSTART;VALUE=DATE:20260501
+DTEND;VALUE=DATE:20260506
+SUMMARY:Cycle Gran Canaria — 5-day window
+DESCRIPTION:5 clean days for cycling\n20°C median\nWindow: 1 May–5 May\n
+ Forecast for Gran Canaria (cycling-weather)
+URL:https://barney-personal.github.io/cycling-weather-site/destination.html
+ ?slug=gran-canaria
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:cw-go-crete-20260509@cycling-weather-site
+DTSTAMP:20260429T044719Z
+DTSTART;VALUE=DATE:20260509
+DTEND;VALUE=DATE:20260513
+SUMMARY:Cycle Crete — 4-day window
+DESCRIPTION:4 clean days for cycling\n24°C median\nWindow: 9 May–12 May\
+ nForecast for Crete (cycling-weather)
+URL:https://barney-personal.github.io/cycling-weather-site/destination.html
+ ?slug=crete
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:cw-go-malaga-20260503@cycling-weather-site
+DTSTAMP:20260429T044719Z
+DTSTART;VALUE=DATE:20260503
+DTEND;VALUE=DATE:20260507
+SUMMARY:Cycle Malaga — 4-day window
+DESCRIPTION:4 clean days for cycling\n26°C median\nWindow: 3 May–6 May\n
+ Forecast for Malaga (cycling-weather)
+URL:https://barney-personal.github.io/cycling-weather-site/destination.html
+ ?slug=malaga
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:cw-go-provence-20260430@cycling-weather-site
+DTSTAMP:20260429T044719Z
+DTSTART;VALUE=DATE:20260430
+DTEND;VALUE=DATE:20260504
+SUMMARY:Cycle Provence — 4-day window
+DESCRIPTION:4 clean days for cycling\n24°C median\nWindow: 30 Apr–3 May\
+ nForecast for Provence (cycling-weather)
+URL:https://barney-personal.github.io/cycling-weather-site/destination.html
+ ?slug=provence
+TRANSP:TRANSPARENT
+END:VEVENT
+BEGIN:VEVENT
+UID:cw-go-lake-garda-20260501@cycling-weather-site
+DTSTAMP:20260429T044719Z
+DTSTART;VALUE=DATE:20260501
+DTEND;VALUE=DATE:20260505
+SUMMARY:Cycle Lake Garda — 4-day window
+DESCRIPTION:4 clean days for cycling\n23°C median\nWindow: 1 May–4 May\n
+ Forecast for Lake Garda (cycling-weather)
+URL:https://barney-personal.github.io/cycling-weather-site/destination.html
+ ?slug=lake-garda
 TRANSP:TRANSPARENT
 END:VEVENT
 END:VCALENDAR

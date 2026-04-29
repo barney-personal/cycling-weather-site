@@ -11,15 +11,15 @@ X-WR-CALDESC:Cycling-clean windows for South Wales (cycling-weather\, refre
  shed daily).
 REFRESH-INTERVAL;VALUE=DURATION:PT12H
 X-PUBLISHED-TTL:PT12H
-LAST-MODIFIED:20260428T110828Z
+LAST-MODIFIED:20260429T044719Z
 BEGIN:VEVENT
 UID:cw-south-wales-20260430@cycling-weather-site
-DTSTAMP:20260428T110828Z
+DTSTAMP:20260429T044719Z
 DTSTART;VALUE=DATE:20260430
-DTEND;VALUE=DATE:20260501
-SUMMARY:Cycle South Wales — 1-day window
-DESCRIPTION:1 clean day for cycling\n20°C median\nWindow: 30 Apr\nForecast
-  for South Wales (cycling-weather)
+DTEND;VALUE=DATE:20260502
+SUMMARY:Cycle South Wales — 2-day window
+DESCRIPTION:2 clean days for cycling\n20°C median\nWindow: 30 Apr–1 May\
+ nForecast for South Wales (cycling-weather)
 URL:https://barney-personal.github.io/cycling-weather-site/destination.html
  ?slug=south-wales
 TRANSP:TRANSPARENT

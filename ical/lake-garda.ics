@@ -11,14 +11,14 @@ X-WR-CALDESC:Cycling-clean windows for Lake Garda (cycling-weather\, refres
  hed daily).
 REFRESH-INTERVAL;VALUE=DURATION:PT12H
 X-PUBLISHED-TTL:PT12H
-LAST-MODIFIED:20260428T110828Z
+LAST-MODIFIED:20260429T044719Z
 BEGIN:VEVENT
 UID:cw-lake-garda-20260501@cycling-weather-site
-DTSTAMP:20260428T110828Z
+DTSTAMP:20260429T044719Z
 DTSTART;VALUE=DATE:20260501
-DTEND;VALUE=DATE:20260504
-SUMMARY:Cycle Lake Garda — 3-day window
-DESCRIPTION:3 clean days for cycling\n23°C median\nWindow: 1 May–3 May\n
+DTEND;VALUE=DATE:20260505
+SUMMARY:Cycle Lake Garda — 4-day window
+DESCRIPTION:4 clean days for cycling\n23°C median\nWindow: 1 May–4 May\n
  Forecast for Lake Garda (cycling-weather)
 URL:https://barney-personal.github.io/cycling-weather-site/destination.html
  ?slug=lake-garda

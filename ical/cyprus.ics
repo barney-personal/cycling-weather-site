@@ -11,14 +11,14 @@ X-WR-CALDESC:Cycling-clean windows for Cyprus (cycling-weather\, refreshed
  daily).
 REFRESH-INTERVAL;VALUE=DURATION:PT12H
 X-PUBLISHED-TTL:PT12H
-LAST-MODIFIED:20260428T110828Z
+LAST-MODIFIED:20260429T044719Z
 BEGIN:VEVENT
-UID:cw-cyprus-20260507@cycling-weather-site
-DTSTAMP:20260428T110828Z
-DTSTART;VALUE=DATE:20260507
-DTEND;VALUE=DATE:20260512
-SUMMARY:Cycle Cyprus — 5-day window
-DESCRIPTION:5 clean days for cycling\n28°C median\nWindow: 7 May–11 May\
+UID:cw-cyprus-20260505@cycling-weather-site
+DTSTAMP:20260429T044719Z
+DTSTART;VALUE=DATE:20260505
+DTEND;VALUE=DATE:20260513
+SUMMARY:Cycle Cyprus — 8-day window
+DESCRIPTION:8 clean days for cycling\n26°C median\nWindow: 5 May–12 May\
  nForecast for Cyprus (cycling-weather)
 URL:https://barney-personal.github.io/cycling-weather-site/destination.html
  ?slug=cyprus

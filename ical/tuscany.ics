@@ -11,14 +11,14 @@ X-WR-CALDESC:Cycling-clean windows for Tuscany (cycling-weather\, refreshed
   daily).
 REFRESH-INTERVAL;VALUE=DURATION:PT12H
 X-PUBLISHED-TTL:PT12H
-LAST-MODIFIED:20260428T110828Z
+LAST-MODIFIED:20260429T044719Z
 BEGIN:VEVENT
 UID:cw-tuscany-20260501@cycling-weather-site
-DTSTAMP:20260428T110828Z
+DTSTAMP:20260429T044719Z
 DTSTART;VALUE=DATE:20260501
 DTEND;VALUE=DATE:20260504
 SUMMARY:Cycle Tuscany — 3-day window
-DESCRIPTION:3 clean days for cycling\n23°C median\nWindow: 1 May–3 May\n
+DESCRIPTION:3 clean days for cycling\n24°C median\nWindow: 1 May–3 May\n
  Forecast for Tuscany (cycling-weather)
 URL:https://barney-personal.github.io/cycling-weather-site/destination.html
  ?slug=tuscany

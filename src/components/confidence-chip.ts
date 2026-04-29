@@ -117,7 +117,7 @@ function modelLabel(id: string): string {
 
 export function renderConfidenceChip(context: ConfidenceContext | null): string {
   if (!context) return "";
-  const dayLabel = context.splitDays === 1 ? "day" : "days";
+  const dayLabel = context.scoredDays === 1 ? "day" : "days";
   const headline = `Split forecast · ${context.splitDays} of next ${context.scoredDays} ${dayLabel}`;
   const labelledModels = context.models.map(modelLabel).join(", ") || "multiple models";
   const tempPart =
